@@ -64,3 +64,9 @@ if (!result.RetryBlocked && retryIds.Length > 0)
 后续阅读：[产品形态](product-shape-and-implementation-plan.md)、[V1 工作项](v1-execution-plan.md)、[文档治理](refactoring/README.md)、[质量基线](refactoring/quality-baseline.md)、[工程职责](project-and-window-responsibilities.md)、[格式矩阵](refactoring/G0003/format-support-matrix.md)、[验收矩阵](refactoring/G0006/acceptance-matrix.md)。
 
 没有自动删除源文件、覆盖已有目录、分卷拼接、压缩修复、密码破解、无限深度或历史恢复。更详细的范围和可信度见格式矩阵与[发布说明](release-notes-v1.md)。
+
+## 后续产品阶段规划
+
+[压缩包工作台路线图](roadmap/README.md)规划 R01–R08：先简化现有解压交互，再增加 ZIP 压缩、批量打包与加密、浏览提取、输出整理、重打包、格式诊断和工作流协作。以上是未来目标，不是当前使用说明中的已实现能力。
+
+生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。产品阶段 R 编号与实施档案 G 编号分别维护，当前建议从 R01 开始。
