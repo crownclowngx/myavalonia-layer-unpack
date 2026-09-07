@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
@@ -18,6 +19,8 @@ public sealed class ViewTests
     [InlineData(true, 1180, 760)]
     [InlineData(false, 1000, 600)]
     [InlineData(true, 800, 600)]
+    [InlineData(false, 640, 520)]
+    [InlineData(true, 640, 520)]
     public async Task 真实View在主题和窗口尺寸下可渲染且操作绑定有效(bool dark, int width, int height)
     {
         using var w = new TestWorkspace();
@@ -33,22 +36,25 @@ public sealed class ViewTests
             await document.StartCommand.ExecuteAsync(null);
             document.SelectedNode = document.Roots[0].Children[1];
             Dispatcher.UIThread.RunJobs();
-            var start = Assert.Single(view.GetVisualDescendants().OfType<Button>(), b => Equals(b.Content, "开始解压"));
+            var start = view.FindControl<Button>("StartButton")!;
             Assert.Same(document.StartCommand, start.Command);
             Assert.True(start.IsEnabled);
-            var depth = Assert.Single(view.GetVisualDescendants().OfType<NumericUpDown>());
+            var depth = view.FindControl<NumericUpDown>("DepthEditor")!;
             Assert.Equal(2, depth.Value);
             depth.Value = 3;
             Assert.Equal(3, document.MaxDepth);
-            var output = Assert.Single(view.GetVisualDescendants().OfType<TextBox>(), t => t.Text == w.Output);
+            var output = view.FindControl<TextBox>("OutputEditor")!;
             Assert.True(output.Focus());
             window.KeyPress(Avalonia.Input.Key.Tab, Avalonia.Input.RawInputModifiers.None, Avalonia.Input.PhysicalKey.Tab, null);
             Assert.NotSame(output, window.FocusManager!.GetFocusedElement());
             Assert.Contains(view.GetVisualDescendants().OfType<TextBlock>(), t => t.Text?.Contains("已发现 3 项", StringComparison.Ordinal) == true);
+            var startOrigin = start.TranslatePoint(default, window)!.Value;
+            Assert.InRange(startOrigin.Y, 0, window.ClientSize.Height - start.Bounds.Height);
+            Assert.InRange(startOrigin.X, 0, window.ClientSize.Width - start.Bounds.Width);
             using var frame = window.CaptureRenderedFrame();
             Assert.NotNull(frame);
             Assert.True(frame.PixelSize.Width >= width);
-            var destination = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../artifacts/ui"));
+            var destination = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../artifacts/ui/G0007"));
             Directory.CreateDirectory(destination);
             frame.Save(Path.Combine(destination, $"document-{(dark ? "dark" : "light")}-{width}x{height}.png"), Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
         }

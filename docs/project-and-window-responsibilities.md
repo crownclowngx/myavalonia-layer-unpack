@@ -14,12 +14,16 @@ V1 的依赖方向是 `Plugin → Headless`、`Standalone → Plugin → Headles
 | `PathPolicy / OutputTransaction` | 校验可写路径；拥有单包临时目录并以不覆盖移动提交 |
 | `InputDiscovery` | 用户输入目录扫描，区别于递归解压中的后代发现 |
 | `UnpackDocument` | 命令、参数快照、结果投影、UI 代次和关闭衔接 |
+| `UnpackDocument.Presentation` | 同一 Document 的呈现分文件；展开状态、递归映射、问题列表和真实产物入口，不复制业务规则 |
+| `OutputDirectorySuggestion` | 纯函数，根据所有输入的直接父目录生成建议，不访问文件、不创建目录、不保存偏好 |
 | `UnpackView` | 编译绑定、文件/目录选择、拖放与用户触发的打开输出 |
 | `StandaloneServices / MainWindow` | 复用插件组合入口；创建预览 Scope，异步初始化，关闭时排空工作 |
 
 S：业务、格式、路径、事务和界面分责。O：新增格式优先扩展适配层，不改变密码和递归调度。L：测试替身也遵守单包端口的预算、取消和输出契约。I：只设会话创建与单包解码两个窄端口，不建设万能上下文。D：会话依赖 `IArchiveExtractor`，Document 依赖 `IUnpackService` 和公开 `IDocumentLifetime`。
 
 仅使用简单的适配器、会话和输出事务。没有动态插件引擎注册中心、通用 Workflow 框架、全局服务定位器或密码单例。源代码注释使用中文解释边界和设计原因。
+
+R01 使用单列滚动内容与固定操作区，Standalone 默认 900×760、最小 640×520。View 处理选择器、焦点和滚动；等待选择器返回后复核 Document 身份与可编辑状态。输出建议不替代 Headless 的路径验证和写入。绑定边界见[G0007 方案](refactoring/G0007/implementation.md)。
 
 ## Scope 与生命周期
 

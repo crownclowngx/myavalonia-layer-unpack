@@ -55,7 +55,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
         _service = service;
         _lifetime = lifetime;
         _hostClosing = lifetime.ClosingToken.Register(() => _closing.Cancel());
-        Inputs.CollectionChanged += (_, _) => NotifyCommands();
+        Inputs.CollectionChanged += (_, _) => { NotifyPresentation(); NotifyCommands(); };
     }
 
     public ValueTask InitializeAsync(DocumentActivation activation, CancellationToken cancellationToken)
@@ -69,24 +69,33 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
         return ValueTask.CompletedTask;
     }
 
-    partial void OnIsBusyChanged(bool value) { OnPropertyChanged(nameof(CanEdit)); NotifyCommands(); }
-    partial void OnOutputDirectoryChanged(string value) => NotifyCommands();
-    partial void OnSelectedNodeChanged(ArchiveNodeViewModel? value) => NotifyCommands();
-    private bool CanStart() => CanEdit && Inputs.Count > 0;
+    partial void OnIsBusyChanged(bool value) { OnPropertyChanged(nameof(CanEdit)); NotifyPresentation(); NotifyCommands(); }
+    partial void OnOutputDirectoryChanged(string value)
+    {
+        if (!_updatingSuggestion) _outputChosen = true;
+        OnPropertyChanged(nameof(OutputHint));
+        NotifyCommands();
+    }
+    partial void OnSelectedNodeChanged(ArchiveNodeViewModel? value) { OnPropertyChanged(nameof(HasSelectedNode)); NotifyCommands(); }
+    private bool CanStart() => CanEdit && Inputs.Count > 0 && !string.IsNullOrWhiteSpace(OutputDirectory);
     private bool CanRetry() => CanEdit && _session is not null && !_session.Snapshot.RetryBlocked && SelectedNode?.CanRetry == true;
-    private bool CanCancel() => IsBusy && !IsClosed;
+    private bool CanCancel() => IsBusy && !IsClosed && !IsCancelling;
 
     private void NotifyCommands()
     {
         StartCommand.NotifyCanExecuteChanged(); CancelCommand.NotifyCanExecuteChanged();
         RetryCommand.NotifyCanExecuteChanged(); ClearCommand.NotifyCanExecuteChanged();
         RemoveSelectedCommand.NotifyCanExecuteChanged();
+        ShowPasswordEntryCommand.NotifyCanExecuteChanged(); PrepareNewBatchCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>文件选择、拖放与目录扫描共用同一入口，关闭后的扫描结果不能再写入界面。</summary>
     public async Task AddPathsAsync(IEnumerable<string> paths)
     {
         if (!CanEdit) return;
+        IsScanning = true;
+        IsCancelling = false;
+        CurrentItemText = "";
         IsBusy = true;
         using var operation = CancellationTokenSource.CreateLinkedTokenSource(_closing.Token);
         _operation = operation;
@@ -100,12 +109,17 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
             if (IsClosed) return;
             Inputs.Clear();
             foreach (var path in found.Files) Inputs.Add(new InputItem(path));
+            UpdateOutputSuggestion();
             Message = found.Warnings.Count == 0 ? $"已添加 {Inputs.Count} 个压缩包。" : string.Join(Environment.NewLine, found.Warnings.Take(5));
         }
         catch (OperationCanceledException) { if (!IsClosed) Message = "已取消输入扫描。"; }
         catch (Exception e) when (e is ArgumentException or IOException or UnauthorizedAccessException)
         { if (!IsClosed) Message = "无法读取输入，请检查路径和访问权限。"; }
-        finally { _operation = null; if (!IsClosed) IsBusy = false; }
+        finally
+        {
+            _operation = null;
+            if (!IsClosed) { IsScanning = false; IsCancelling = false; IsBusy = false; }
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanStart))]
@@ -116,6 +130,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
     private async Task RunOperationAsync(bool retry)
     {
         if (!CanEdit) return;
+        IsCancelling = false;
         IsBusy = true;
         var generation = ++_generation;
         using var operation = CancellationTokenSource.CreateLinkedTokenSource(_closing.Token);
@@ -131,7 +146,10 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
                 var next = _service.CreateSession(request);
                 if (_session is not null) await _session.DisposeAsync();
                 _session = next;
-                Roots.Clear(); _nodeIndex.Clear(); SelectedNode = null; PasswordText = "";
+                _batchOutputDirectory = request.OutputDirectory;
+                Roots.Clear(); Issues.Clear(); _nodeIndex.Clear(); SelectedNode = null; PasswordText = "";
+                ResultOutputPath = null; CurrentItemText = "";
+                NotifyPresentation();
             }
             var session = _session ?? throw new InvalidOperationException("没有当前批次。");
             var selectedId = SelectedNode?.Id;
@@ -176,7 +194,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
             // Progress 回调可能晚于最终结果；推进运行代次后，排队回调不能覆盖终态。
             ++_generation;
             _operation = null;
-            if (!IsClosed) IsBusy = false;
+            if (!IsClosed) { IsCancelling = false; IsBusy = false; }
         }
     }
 
@@ -193,19 +211,27 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
             }
             item.Apply(node);
         }
-        Summary = $"已发现 {result.Nodes.Count} 项 · 已解压 {result.Succeeded} 项 · 失败 {result.Failed} 项 · 发现中断 {result.DiscoveryFailures} 项 · 按深度停止 {result.StoppedByDepth} 项 · 累计 {result.TotalWrittenBytes / 1048576d:F1} MiB";
+        Summary = $"已发现 {result.Nodes.Count} 项 · 已解压 {result.Succeeded} 项";
+        // 默认摘要只突出真实发生的情况，避免普通成功批次被一排零值诊断淹没。
+        if (result.Failed > 0) Summary += $" · 失败 {result.Failed} 项";
+        if (result.DiscoveryFailures > 0) Summary += $" · 发现中断 {result.DiscoveryFailures} 项";
+        if (result.StoppedByDepth > 0) Summary += $" · 按深度停止 {result.StoppedByDepth} 项";
+        if (result.State == BatchState.Cancelled)
+            Summary += $" · 已取消 {result.Nodes.Count(n => n.State == NodeState.Cancelled)} 项 · 未执行 {result.Nodes.Count(n => n.State == NodeState.NotRun)} 项";
         OnPropertyChanged(nameof(CurrentResult));
+        UpdateResultPresentation(result);
         NotifyCommands();
     }
 
     [RelayCommand(CanExecute = nameof(CanCancel))]
-    private void Cancel() { _operation?.Cancel(); Message = "正在取消，等待当前写入和清理退出。"; }
+    private void Cancel() { IsCancelling = true; _operation?.Cancel(); Message = "正在取消，等待当前写入和清理退出。"; }
 
     [RelayCommand(CanExecute = nameof(CanEdit))]
     private void RemoveSelected()
     {
         if (!CanEdit) return;
         foreach (var item in Inputs.Where(i => i.IsSelected).ToArray()) Inputs.Remove(item);
+        UpdateOutputSuggestion();
     }
 
     [RelayCommand(CanExecute = nameof(CanEdit))]
@@ -214,10 +240,15 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
         if (!CanEdit) return;
         if (_session is not null) await _session.DisposeAsync();
         _session = null;
-        Inputs.Clear(); Roots.Clear(); _nodeIndex.Clear(); SelectedNode = null;
+        Inputs.Clear(); Roots.Clear(); Issues.Clear(); _nodeIndex.Clear(); SelectedNode = null;
         PasswordText = ""; OutputDirectory = ""; MaxDepth = 1;
+        _outputChosen = false; _recursiveDepth = 2; _batchOutputDirectory = null;
+        OnPropertyChanged(nameof(RecursiveDepth));
+        ResultOutputPath = null; CurrentItemText = "";
+        InputsExpanded = false; PasswordsExpanded = false; OptionsExpanded = false; ResultsExpanded = false;
         SelectedNameEncoding = NameEncodings[0];
         Message = "当前批次已清空。"; Summary = "尚未开始";
+        OnPropertyChanged(nameof(CurrentResult)); OnPropertyChanged(nameof(OutputHint)); NotifyPresentation();
         NotifyCommands();
     }
 
@@ -259,8 +290,16 @@ public sealed partial class ArchiveNodeViewModel(Guid id) : ObservableObject
     [ObservableProperty] private string _details = "";
     [ObservableProperty] private string? _outputPath;
     [ObservableProperty] private bool _canRetry;
+    [ObservableProperty] private UnpackError? _errorCode;
     public bool HasOutput => OutputPath is not null;
+    public bool NeedsPassword => ErrorCode == UnpackError.PasswordRequiredOrInvalid;
+    public bool RequiresNewBatch => ErrorCode is UnpackError.InvalidNameEncoding or UnpackError.InputChanged
+        or UnpackError.UnsupportedFormat or UnpackError.UnsupportedEncryption or UnpackError.MissingVolume or UnpackError.BudgetExceeded;
     partial void OnOutputPathChanged(string? value) => OnPropertyChanged(nameof(HasOutput));
+    partial void OnErrorCodeChanged(UnpackError? value)
+    {
+        OnPropertyChanged(nameof(NeedsPassword)); OnPropertyChanged(nameof(RequiresNewBatch));
+    }
 
     internal void Apply(ArchiveNodeResult node)
     {
@@ -276,7 +315,8 @@ public sealed partial class ArchiveNodeViewModel(Guid id) : ObservableObject
             NodeState.DepthLimit => "按深度停止",
             _ => "未执行"
         };
-        CanRetry = node.CanRetry;
+        // 可重试性完全服从 Headless；界面仅据错误类型提供补密或新批次的导航入口。
+        CanRetry = node.CanRetry; ErrorCode = node.Error?.Code;
         Details = $"第 {node.Depth} 层 · {node.Format ?? "尚未识别"}\n{Status}\n{node.Error?.Message ?? ""}" +
             (node.Warning is null ? "" : "\n" + node.Warning) +
             (node.CleanupWarnings.Count > 0 ? "\n临时输出清理失败：\n" + string.Join("\n", node.CleanupWarnings) : "");

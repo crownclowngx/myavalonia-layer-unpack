@@ -1,83 +1,134 @@
 <UserControl x:Class="LayerUnpackPlugin.Features.Unpack.UnpackView"
  xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
  xmlns:vm="using:LayerUnpackPlugin.Features.Unpack" x:DataType="vm:UnpackDocument" DragDrop.AllowDrop="True">
- <Grid Margin="20" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="14">
-  <Grid ColumnDefinitions="*,Auto">
-   <StackPanel Spacing="3">
-    <TextBlock Text="层解 · Layer Unpack" FontSize="25" FontWeight="SemiBold" />
-    <TextBlock Text="批量解压 · 按层展开 · 本批次密码共享" Opacity="0.65" />
-   </StackPanel>
-   <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-    <Button Content="开始解压" Command="{Binding StartCommand}" />
-    <Button Content="取消" Command="{Binding CancelCommand}" />
-   </StackPanel>
-  </Grid>
-  <Border Grid.Row="1" BorderBrush="#44888888" BorderThickness="1" CornerRadius="8" Padding="14">
-   <Grid ColumnDefinitions="*,195" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="12">
-    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsEnabled="{Binding CanEdit}">
-     <TextBlock Text="输出目录" VerticalAlignment="Center" />
-     <TextBox Grid.Column="1" Text="{Binding OutputDirectory}" PlaceholderText="选择输出目录" />
-     <Button Grid.Column="2" Content="选择…" Click="PickOutput" />
-    </Grid>
-    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" IsEnabled="{Binding CanEdit}">
-     <TextBlock Text="深度" VerticalAlignment="Center" />
-     <NumericUpDown Width="130" Minimum="1" Maximum="16" Increment="1" FormatString="0" Value="{Binding MaxDepth}" />
-    </StackPanel>
-    <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10" IsEnabled="{Binding CanEdit}">
-     <TextBlock Text="旧 ZIP 文件名编码" VerticalAlignment="Center" />
-     <ComboBox ItemsSource="{x:Static vm:UnpackDocument.NameEncodings}" SelectedItem="{Binding SelectedNameEncoding}" MinWidth="180" />
-     <TextBlock Text="仅影响未标记 Unicode 的名称" Opacity="0.65" VerticalAlignment="Center" />
-    </StackPanel>
-    <Expander Grid.Row="2" Grid.ColumnSpan="2" Header="候选密码 · 一行一个，仅保留在当前批次" IsEnabled="{Binding CanEdit}">
-     <StackPanel Spacing="6">
-      <TextBox Text="{Binding PasswordText}" AcceptsReturn="True" MinHeight="72" MaxHeight="130"
-       PlaceholderText="最多 64 个候选；保留大小写和首尾空格。重试前可在这里补充密码。" />
-      <TextBlock Text="此区域按明文编辑候选；开始后清空输入框，密码池随当前批次释放。" FontSize="12" Opacity="0.65" TextWrapping="Wrap" />
+ <!-- 单列内容独立滚动，底部主要操作不随长路径、问题列表和展开选项滚出窗口。 -->
+ <Grid Margin="20" RowDefinitions="Auto,*,Auto" RowSpacing="14" MaxWidth="940" HorizontalAlignment="Stretch">
+  <StackPanel Spacing="3">
+   <TextBlock Text="解压任务" FontSize="25" FontWeight="SemiBold" />
+   <TextBlock Text="放入压缩包，解出你需要的文件。" Opacity="0.65" />
+  </StackPanel>
+  <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+   <StackPanel Spacing="14">
+    <Border Name="EmptyState" IsVisible="{Binding IsEmpty}" BorderBrush="#44888888" BorderThickness="1" CornerRadius="10" Padding="24">
+     <StackPanel Spacing="12" HorizontalAlignment="Center">
+      <TextBlock Text="拖入压缩包" FontSize="23" FontWeight="SemiBold" HorizontalAlignment="Center" />
+      <TextBlock Text="支持一次添加多个包，也可以扫描文件夹。" Opacity="0.65" TextWrapping="Wrap" TextAlignment="Center" />
+      <WrapPanel HorizontalAlignment="Center" IsEnabled="{Binding CanEdit}">
+       <Button Content="添加压缩包" Classes="accent" Click="PickFiles" Margin="0,0,8,6" />
+       <Button Content="扫描文件夹" Click="PickFolder" Margin="0,0,0,6" />
+      </WrapPanel>
      </StackPanel>
-    </Expander>
-   </Grid>
-  </Border>
-  <Grid Grid.Row="2" ColumnDefinitions="240,*,260" ColumnSpacing="14">
-   <Grid RowDefinitions="Auto,*,Auto" RowSpacing="8">
-    <TextBlock Text="输入压缩包" FontWeight="SemiBold" />
-    <ListBox Grid.Row="1" ItemsSource="{Binding Inputs}" IsEnabled="{Binding CanEdit}">
-     <ListBox.ItemTemplate><DataTemplate x:DataType="vm:InputItem">
-      <CheckBox IsChecked="{Binding IsSelected}" Content="{Binding Name}" ToolTip.Tip="{Binding Path}" />
-     </DataTemplate></ListBox.ItemTemplate>
-    </ListBox>
-    <WrapPanel Grid.Row="2" IsEnabled="{Binding CanEdit}">
-     <Button Content="添加压缩包" Click="PickFiles" Margin="0,0,6,6" />
-     <Button Content="添加文件夹" Click="PickFolder" Margin="0,0,6,6" />
-     <Button Content="移除所选" Command="{Binding RemoveSelectedCommand}" Margin="0,0,6,0" />
-     <Button Content="清空批次" Command="{Binding ClearCommand}" />
-    </WrapPanel>
-   </Grid>
-   <Grid Grid.Column="1" RowDefinitions="Auto,*" RowSpacing="8">
-    <TextBlock Text="处理结果 · 可将文件拖入此页面" FontWeight="SemiBold" />
-    <TreeView Grid.Row="1" ItemsSource="{Binding Roots}" SelectedItem="{Binding SelectedNode}">
-     <TreeView.Styles><Style Selector="TreeViewItem"><Setter Property="IsExpanded" Value="True" /></Style></TreeView.Styles>
-     <TreeView.ItemTemplate><TreeDataTemplate x:DataType="vm:ArchiveNodeViewModel" ItemsSource="{Binding Children}">
-      <StackPanel Orientation="Horizontal" Spacing="10">
-       <TextBlock Text="{Binding Name}" /><TextBlock Text="{Binding Status}" Opacity="0.65" />
+    </Border>
+    <!-- 结果摘要与问题列表不依赖完整结果树展开；失败后仍能直接找到原因和下一步。 -->
+    <StackPanel IsVisible="{Binding HasResults}" Spacing="10">
+     <TextBlock Text="处理结果" FontSize="18" FontWeight="SemiBold" />
+     <TextBlock Name="ResultSummary" Text="{Binding Summary}" TextWrapping="Wrap" />
+     <StackPanel IsVisible="{Binding HasIssues}" Spacing="6">
+      <TextBlock Text="需要查看的项目" FontWeight="SemiBold" />
+      <ScrollViewer MaxHeight="180" HorizontalScrollBarVisibility="Disabled">
+       <ItemsControl Name="IssuesList" ItemsSource="{Binding Issues}">
+        <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:ArchiveNodeViewModel">
+         <Button Tag="{Binding}" Click="InspectNode" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="0,0,0,4">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+           <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Source}" />
+           <TextBlock Grid.Column="1" Text="{Binding Status}" Opacity="0.7" />
+          </Grid>
+         </Button>
+        </DataTemplate></ItemsControl.ItemTemplate>
+       </ItemsControl>
+      </ScrollViewer>
+     </StackPanel>
+     <Border Name="NodeDetails" IsVisible="{Binding HasSelectedNode}" BorderBrush="#44888888" BorderThickness="1" CornerRadius="8" Padding="12">
+      <StackPanel Spacing="8">
+       <TextBlock Text="{Binding SelectedNode.Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+       <TextBlock Text="{Binding SelectedNode.Source}" FontSize="12" Opacity="0.65" TextWrapping="Wrap" />
+       <TextBlock Text="{Binding SelectedNode.Details}" TextWrapping="Wrap" />
+       <TextBlock Text="{Binding SelectedNode.OutputPath}" Opacity="0.65" TextWrapping="Wrap" />
+       <WrapPanel>
+        <Button Content="补充密码" IsVisible="{Binding SelectedNode.NeedsPassword}" IsEnabled="{Binding CanEdit}" Click="RevealPasswords" Margin="0,0,8,6" />
+        <Button Content="重试所选失败项" IsVisible="{Binding SelectedNode.CanRetry}" Command="{Binding RetryCommand}" Margin="0,0,8,6" />
+        <Button Content="调整选项并开始新批次" IsVisible="{Binding SelectedNode.RequiresNewBatch}" Click="RevealOptions" IsEnabled="{Binding CanEdit}" Margin="0,0,8,6" />
+        <Button Content="打开此项目录" IsVisible="{Binding SelectedNode.HasOutput}" Click="OpenOutput" Margin="0,0,0,6" />
+       </WrapPanel>
       </StackPanel>
-     </TreeDataTemplate></TreeView.ItemTemplate>
-    </TreeView>
-   </Grid>
-   <Border Grid.Column="2" BorderBrush="#44888888" BorderThickness="1" CornerRadius="8" Padding="12">
-    <ScrollViewer><StackPanel Spacing="12">
-     <TextBlock Text="当前项详情" FontWeight="SemiBold" />
-     <TextBlock Text="{Binding SelectedNode.Source}" TextWrapping="Wrap" />
-     <TextBlock Text="{Binding SelectedNode.Details}" TextWrapping="Wrap" />
-     <TextBlock Text="{Binding SelectedNode.OutputPath}" TextWrapping="Wrap" Opacity="0.7" />
-     <Button Content="打开输出目录" Click="OpenOutput" IsEnabled="{Binding SelectedNode.HasOutput}" />
-     <Button Content="重试所选失败项" Command="{Binding RetryCommand}" />
-    </StackPanel></ScrollViewer>
-   </Border>
-  </Grid>
-  <StackPanel Grid.Row="3" Spacing="6">
+     </Border>
+     <Expander Name="ResultsExpander" Header="查看完整处理树" IsExpanded="{Binding ResultsExpanded}" HorizontalAlignment="Stretch">
+      <TreeView Name="ResultsTree" ItemsSource="{Binding Roots}" SelectedItem="{Binding SelectedNode}" MaxHeight="230">
+       <TreeView.Styles><Style Selector="TreeViewItem"><Setter Property="IsExpanded" Value="True" /></Style></TreeView.Styles>
+       <TreeView.ItemTemplate><TreeDataTemplate x:DataType="vm:ArchiveNodeViewModel" ItemsSource="{Binding Children}">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+         <TextBlock Text="{Binding Name}" /><TextBlock Text="{Binding Status}" Opacity="0.65" />
+        </StackPanel>
+       </TreeDataTemplate></TreeView.ItemTemplate>
+      </TreeView>
+     </Expander>
+    </StackPanel>
+    <StackPanel IsVisible="{Binding !IsEmpty}" Spacing="12">
+     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+      <TextBlock Text="{Binding InputSummary}" VerticalAlignment="Center" FontWeight="SemiBold" />
+      <WrapPanel Grid.Column="1" IsEnabled="{Binding CanEdit}">
+       <Button Content="添加压缩包" Click="PickFiles" Margin="0,0,6,4" />
+       <Button Content="扫描文件夹" Click="PickFolder" Margin="0,0,0,4" />
+      </WrapPanel>
+     </Grid>
+     <Expander Name="InputsExpander" Header="查看输入清单" IsExpanded="{Binding InputsExpanded}" HorizontalAlignment="Stretch" IsVisible="{Binding HasInputs}">
+      <StackPanel Spacing="8" IsEnabled="{Binding CanEdit}">
+       <ListBox Name="InputList" ItemsSource="{Binding Inputs}" MaxHeight="170">
+        <ListBox.ItemTemplate><DataTemplate x:DataType="vm:InputItem">
+         <CheckBox IsChecked="{Binding IsSelected}" HorizontalAlignment="Stretch" ToolTip.Tip="{Binding Path}">
+          <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+         </CheckBox>
+        </DataTemplate></ListBox.ItemTemplate>
+       </ListBox>
+       <Button Content="移除所选" Command="{Binding RemoveSelectedCommand}" />
+      </StackPanel>
+     </Expander>
+     <StackPanel Spacing="6" IsEnabled="{Binding CanEdit}">
+      <TextBlock Text="输出位置" FontWeight="SemiBold" />
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+       <TextBox Name="OutputEditor" Text="{Binding OutputDirectory}" PlaceholderText="选择解压输出目录" />
+       <Button Grid.Column="1" Content="选择…" Click="PickOutput" />
+      </Grid>
+      <TextBlock Text="{Binding OutputHint}" FontSize="12" Opacity="0.65" TextWrapping="Wrap" />
+     </StackPanel>
+     <StackPanel Spacing="6" IsEnabled="{Binding CanEdit}">
+      <CheckBox Name="RecursiveToggle" Content="继续解压内部压缩包" IsChecked="{Binding IsRecursive}" />
+      <StackPanel Name="DepthOptions" IsVisible="{Binding IsRecursive}" Spacing="6" Margin="24,0,0,0">
+       <StackPanel Orientation="Horizontal" Spacing="10">
+        <TextBlock Text="总层数" VerticalAlignment="Center" />
+        <NumericUpDown Name="DepthEditor" Width="130" Minimum="2" Maximum="16" Increment="1" FormatString="0" Value="{Binding RecursiveDepth}" />
+       </StackPanel>
+       <TextBlock Text="包含最外层，最多 16 层；普通目录不计层，TAR.GZ 等组合包计一层。" FontSize="12" Opacity="0.65" TextWrapping="Wrap" />
+      </StackPanel>
+     </StackPanel>
+     <Expander Name="PasswordsExpander" Header="密码（可选）" IsExpanded="{Binding PasswordsExpanded}" HorizontalAlignment="Stretch" IsEnabled="{Binding CanEdit}">
+      <StackPanel Spacing="6">
+       <TextBox Name="PasswordEditor" Text="{Binding PasswordText}" AcceptsReturn="True" MinHeight="72" MaxHeight="130" PlaceholderText="一行一个候选密码，最多 64 个。" />
+       <TextBlock Text="此处为明文编辑，保留大小写和首尾空格；候选仅在当前批次内共享，开始后清空输入框。" FontSize="12" Opacity="0.65" TextWrapping="Wrap" />
+      </StackPanel>
+     </Expander>
+     <Expander Name="OptionsExpander" Header="更多选项" IsExpanded="{Binding OptionsExpanded}" HorizontalAlignment="Stretch" IsEnabled="{Binding CanEdit}">
+      <StackPanel Spacing="8">
+       <TextBlock Text="旧 ZIP 文件名编码" />
+       <ComboBox ItemsSource="{x:Static vm:UnpackDocument.NameEncodings}" SelectedItem="{Binding SelectedNameEncoding}" MinWidth="220" />
+       <TextBlock Text="只影响未标记 Unicode 的名称。遇到编码问题时调整此项，再开始新批次。" FontSize="12" Opacity="0.65" TextWrapping="Wrap" />
+      </StackPanel>
+     </Expander>
+     <TextBlock IsVisible="{Binding HasResults}" Text="参数修改用于新批次；重试沿用原批次的输出、层数、编码和预算。" FontSize="12" Opacity="0.65" TextWrapping="Wrap" />
+    </StackPanel>
+    <TextBlock Name="TaskMessage" Text="{Binding Message}" Opacity="0.75" TextWrapping="Wrap" />
+   </StackPanel>
+  </ScrollViewer>
+  <StackPanel Grid.Row="2" Spacing="8">
    <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" Height="3" />
-   <TextBlock Text="{Binding Summary}" FontWeight="SemiBold" TextWrapping="Wrap" />
-   <TextBlock Text="{Binding Message}" Opacity="0.75" TextWrapping="Wrap" MaxHeight="100" />
+   <TextBlock Text="{Binding StatusTitle}" FontWeight="SemiBold" />
+   <TextBlock Text="{Binding CurrentItemText}" IsVisible="{Binding IsBusy}" TextTrimming="CharacterEllipsis" />
+   <WrapPanel>
+    <Button Name="OpenResultButton" Content="打开结果" Classes="accent" IsVisible="{Binding CanOpenResult}" Click="OpenBatchOutput" Margin="0,0,8,4" />
+    <Button Name="StartButton" Content="{Binding StartLabel}" Command="{Binding StartCommand}" Classes.accent="{Binding !CanOpenResult}" IsVisible="{Binding !IsBusy}" Margin="0,0,8,4" />
+    <Button Name="CancelButton" Content="取消" Command="{Binding CancelCommand}" IsVisible="{Binding IsBusy}" Margin="0,0,8,4" />
+    <Button Content="清空批次" Command="{Binding ClearCommand}" IsVisible="{Binding !IsEmpty}" Margin="0,0,0,4" />
+   </WrapPanel>
   </StackPanel>
  </Grid>
 </UserControl>

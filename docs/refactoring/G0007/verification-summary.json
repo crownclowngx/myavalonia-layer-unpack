@@ -1,0 +1,75 @@
+{
+  "checkedAt": "2026-09-07T21:47:01.2950961+08:00",
+  "candidate": "R01 / G0007 local working tree - unpublished",
+  "baselineGitCommit": "8ae29493c1508fabf36aafc5effea8d44793006e",
+  "sourceFileCount": 98,
+  "sourceSha256": "c8f405f9d26a5aeb655f2ec5c557016cdd3c858af7bc501c2866301cfb397f40",
+  "sourceHashAlgorithm": "SHA-256 of ordinal-path-sorted UTF-8 lines: lowercase file SHA-256 + two spaces + slash-normalized relative path + LF",
+  "sourceScope": "src, tests, tools (rg default ignore rules); .gitignore; Directory.Build.props; Directory.Packages.props; LayerUnpackPlugin.slnx. Excludes docs, root README, bin, obj and artifacts.",
+  "tests": {
+    "headless": 108,
+    "plugin": 25,
+    "failed": 0,
+    "skipped": 0
+  },
+  "buildWarnings": 0,
+  "checks": [
+    {
+      "name": "locked-restore",
+      "exitCode": 0,
+      "seconds": 1.0275848,
+      "command": "dotnet restore LayerUnpackPlugin.slnx --locked-mode"
+    },
+    {
+      "name": "debug-build",
+      "exitCode": 0,
+      "seconds": 1.8154063,
+      "command": "dotnet build LayerUnpackPlugin.slnx -c Debug -warnaserror --no-restore"
+    },
+    {
+      "name": "debug-assets",
+      "exitCode": 0,
+      "seconds": 0.7788465,
+      "command": "dotnet msbuild src/LayerUnpackPlugin.Plugin/LayerUnpackPlugin.Plugin.csproj -t:ResolveReferences -p:Configuration=Debug -getItem:ManagedPluginAsset,ManagedPluginPrivatePackage,RuntimeCopyLocalItems"
+    },
+    {
+      "name": "headless-tests",
+      "exitCode": 0,
+      "seconds": 14.8173986,
+      "command": "dotnet test tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj -c Debug --no-build --logger trx;LogFileName=headless.trx --results-directory D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "plugin-tests",
+      "exitCode": 0,
+      "seconds": 3.5377763,
+      "command": "dotnet test tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj -c Debug --no-build --logger trx;LogFileName=plugin.trx --results-directory D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "format",
+      "exitCode": 0,
+      "seconds": 5.8973079,
+      "command": "dotnet format LayerUnpackPlugin.slnx --verify-no-changes --no-restore"
+    },
+    {
+      "name": "docs",
+      "exitCode": 0,
+      "seconds": 0.0830481,
+      "command": "./tools/check-docs.ps1"
+    }
+  ],
+  "evidenceDirectory": "artifacts/G0007/local-verification",
+  "uiEvidenceDirectory": "artifacts/ui/G0007",
+  "nativeObserved": [
+    "Debug Standalone launch and empty state",
+    "file picker opening and cancellation",
+    "window maximize",
+    "window close"
+  ],
+  "nativePending": [
+    "successful file and folder selection",
+    "native password retry workflow",
+    "Explorer drag and drop",
+    "125%, 150%, 200% DPI"
+  ],
+  "releaseGatesExecuted": false
+}
