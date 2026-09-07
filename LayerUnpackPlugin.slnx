@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LayerUnpackPlugin.Headless/LayerUnpackPlugin.Headless.csproj" />
+    <Project Path="src/LayerUnpackPlugin.Plugin/LayerUnpackPlugin.Plugin.csproj" />
+    <Project Path="src/LayerUnpackPlugin.Standalone/LayerUnpackPlugin.Standalone.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj" />
+    <Project Path="tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj" />
+  </Folder>
+</Solution>

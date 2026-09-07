@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ManagedPlugin>true</ManagedPlugin>
+    <ManagedPluginId>myavalonia.plugin.layer.unpack</ManagedPluginId>
+    <ManagedPluginDirectoryName>LayerUnpackPlugin</ManagedPluginDirectoryName>
+    <PluginVersion>1.0.0</PluginVersion>
+    <ManagedPluginRuntimeIdentifier>win-x64</ManagedPluginRuntimeIdentifier>
+    <ManagedPluginEntryType>LayerUnpackPlugin.Plugin.LayerUnpackPluginModule</ManagedPluginEntryType>
+    <ManagedPluginSdkMinInclusive>3.3.0</ManagedPluginSdkMinInclusive>
+    <ManagedPluginSdkMaxExclusive>4.0.0</ManagedPluginSdkMaxExclusive>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../LayerUnpackPlugin.Headless/LayerUnpackPlugin.Headless.csproj" />
+    <ManagedPluginPrivatePackage Include="SharpCompress" />
+    <ManagedPluginPrivatePackage Include="SharpZipLib" />
+    <ManagedPluginAsset Include="ThirdPartyNotices/SharpCompress.LICENSE.txt" TargetPath="ThirdPartyNotices/SharpCompress.LICENSE.txt" />
+    <ManagedPluginAsset Include="ThirdPartyNotices/SharpZipLib.LICENSE.txt" TargetPath="ThirdPartyNotices/SharpZipLib.LICENSE.txt" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="MyAvaloniaManagement.Plugin.Build" PrivateAssets="all" />
+    <PackageReference Include="MyAvaloniaManagement.PluginSdk" />
+    <PackageReference Include="MyAvaloniaManagement.PluginSdk.UI" />
+  </ItemGroup>
+
+  <!--
+    Build 1.1.2 只收集显式私有包和 ManagedPluginAsset，不会自动部署项目引用。
+    等引用解析完成再从真实复制路径声明 Headless，避免硬编码 bin 路径、配置或框架。
+    此处只建立资产归属；普通 Debug 构建不触发部署或发布。
+  -->
+  <Target Name="CollectLayerUnpackHeadlessAsset" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <ManagedPluginAsset Include="@(ReferenceCopyLocalPaths)"
+                          Condition="'%(ReferenceCopyLocalPaths.Filename)' == 'LayerUnpackPlugin.Headless' And '%(ReferenceCopyLocalPaths.Extension)' == '.dll'"
+                          TargetPath="LayerUnpackPlugin.Headless.dll" />
+    </ItemGroup>
+  </Target>
+
+</Project>

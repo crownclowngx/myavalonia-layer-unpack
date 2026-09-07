@@ -1,0 +1,103 @@
+{
+  "checkedAt": "2026-09-07T15:41:08.5405213+08:00",
+  "candidate": "V1 local candidate - unpublished",
+  "sourceFileCount": 95,
+  "sourceSha256": "db335f25b956a3bf3904e4add56cec0b9d9cb2c3ba0d17af28bf81e51def5dfa",
+  "sourceHashAlgorithm": "SHA-256 of ordinal-path-sorted UTF-8 lines: lowercase file SHA-256 + two spaces + slash-normalized relative path + LF",
+  "sourceScope": "src, tests, tools (rg default ignore rules); .gitignore; Directory.Build.props; Directory.Packages.props; LayerUnpackPlugin.slnx. Excludes docs, root README, bin, obj and artifacts.",
+  "gitCommit": null,
+  "tests": {
+    "headless": 108,
+    "skipped": 0,
+    "failed": 0,
+    "plugin": 13
+  },
+  "buildWarnings": 0,
+  "checks": [
+    {
+      "name": "locked-restore",
+      "exitCode": 0,
+      "seconds": 0.8966463,
+      "command": "dotnet restore LayerUnpackPlugin.slnx --locked-mode"
+    },
+    {
+      "name": "debug-build",
+      "exitCode": 0,
+      "seconds": 3.1147758,
+      "command": "dotnet build LayerUnpackPlugin.slnx -c Debug -warnaserror --no-restore"
+    },
+    {
+      "name": "debug-assets",
+      "exitCode": 0,
+      "seconds": 0.8416905,
+      "command": "dotnet msbuild src/LayerUnpackPlugin.Plugin/LayerUnpackPlugin.Plugin.csproj -t:ResolveReferences -p:Configuration=Debug -getItem:ManagedPluginAsset,ManagedPluginPrivatePackage,RuntimeCopyLocalItems"
+    },
+    {
+      "name": "headless-tests",
+      "exitCode": 0,
+      "seconds": 9.3676566,
+      "command": "dotnet test tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj -c Debug --no-build --logger trx;LogFileName=headless.trx --results-directory D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "plugin-tests",
+      "exitCode": 0,
+      "seconds": 3.6459313,
+      "command": "dotnet test tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj -c Debug --no-build --logger trx;LogFileName=plugin.trx --results-directory D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "format",
+      "exitCode": 0,
+      "seconds": 6.2687099,
+      "command": "dotnet format LayerUnpackPlugin.slnx --verify-no-changes --no-restore"
+    },
+    {
+      "name": "docs",
+      "exitCode": 0,
+      "seconds": 0.0737053,
+      "command": "./tools/check-docs.ps1"
+    }
+  ],
+  "standalone": {
+    "window": {
+      "processId": 12396,
+      "title": "层解 · Layer Unpack · Standalone",
+      "handlePresent": true,
+      "exitedBeforeClose": false,
+      "startupMilliseconds": 2231.3958
+    },
+    "closeRequested": true,
+    "gracefulExit": true,
+    "exitCode": 0,
+    "checkedAt": "2026-09-07T15:35:01.4811646+08:00"
+  },
+  "performance": {
+    "cancellation": {
+      "expandedBytes": 134217728,
+      "TotalWrittenBytes": 30539776,
+      "cancellationMilliseconds": 4.6253
+    },
+    "depth-16": {
+      "Succeeded": 16,
+      "StoppedByDepth": 1,
+      "TotalWrittenBytes": 81944,
+      "milliseconds": 223.739
+    },
+    "large-file": {
+      "inputBytes": 862908,
+      "TotalWrittenBytes": 67108864,
+      "milliseconds": 241.2942,
+      "allocatedBytes": 611200,
+      "processPeakWorkingSet": 188825600
+    },
+    "many-files": {
+      "files": 2000,
+      "bytes": 2048000,
+      "milliseconds": 2571.9869,
+      "processPeakWorkingSet": 188825600
+    }
+  },
+  "pending": [
+    "G0005-10 native manual interaction and DPI",
+    "G0006-05 through 08 release gates deferred by user"
+  ]
+}

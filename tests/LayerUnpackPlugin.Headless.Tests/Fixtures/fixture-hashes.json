@@ -1,0 +1,162 @@
+[
+  {
+    "file": "7Zip.BZip2.split.001",
+    "bytes": 10240,
+    "sha256": "D3D33730B94022077C33C24B91B19CC99C8662CB926F4616A7EFC7B889259676"
+  },
+  {
+    "file": "7Zip.encryptedFiles.7z",
+    "bytes": 59042,
+    "sha256": "54DADA890893C9ABE8D8B06BC446D66C288FA667CB51DE919C2E3216D3C6DE34"
+  },
+  {
+    "file": "7Zip.LZMA.7z",
+    "bytes": 58984,
+    "sha256": "CA67A51924796568B865CB8FA85B8DF0661BD2D4677E508B620C56032E511295"
+  },
+  {
+    "file": "7Zip.LZMA.Aes.7z",
+    "bytes": 59655,
+    "sha256": "517331153899BE02EC41E03B9095E435701C2AF66AE40DB21081F0D77440B97A"
+  },
+  {
+    "file": "7Zip.LZMA2.Aes.7z",
+    "bytes": 59652,
+    "sha256": "FA05B223E2BF44E404B6D3886DB1B9FD661C0D6AD2856EEE5D9C007A579EA8B4"
+  },
+  {
+    "file": "7Zip.solid.7z",
+    "bytes": 58959,
+    "sha256": "3C336BF14BEF2DC998B548A304C0C07C9C9DA899F90E426A965A5F322E232B53"
+  },
+  {
+    "file": "Generated.single.txt.bz2",
+    "bytes": 83,
+    "sha256": "23B4122AB8F087EB3C57749BE8ED7BDD8F6062322964DD2723E66A8D1A429510"
+  },
+  {
+    "file": "Generated.single.txt.gz",
+    "bytes": 53,
+    "sha256": "56DAF7C78392199EEF420FDAEE5ADDFA56AEA278AC45D2BD34F9BB73349B2B64"
+  },
+  {
+    "file": "Generated.single.txt.xz",
+    "bytes": 92,
+    "sha256": "BE5A933F5EBC5B972B0699A8A6EFCC426C360228300D88D4CBEA5401B77C2964"
+  },
+  {
+    "file": "Generated.utf8.tar",
+    "bytes": 10240,
+    "sha256": "8B47141682DE26CD4604AB70355A71793771EED02F4CEB8AA36237FE78DF908A"
+  },
+  {
+    "file": "Generated.utf8.tar.bz2",
+    "bytes": 255,
+    "sha256": "DCD5EACF74786E99FE894215518DE5EF71897D1673976FE09C5DB229A103C84C"
+  },
+  {
+    "file": "Generated.utf8.tar.gz",
+    "bytes": 239,
+    "sha256": "7B50636F7C1DD42D2FAE46F74EFEF5434177AACA1F1C3673CA4DE6886095D340"
+  },
+  {
+    "file": "Generated.utf8.tar.xz",
+    "bytes": 272,
+    "sha256": "E8A3FE80F40F690CA88A001234A5EFBD92DFAA37E3C3A8627B19905FD37373C5"
+  },
+  {
+    "file": "LICENSE-SharpCompress.txt",
+    "bytes": 1081,
+    "sha256": "B7CA2B6174CEE11AFE41D78B48527E3D7659A4435C25019A4A5E072299A2F8ED"
+  },
+  {
+    "file": "Rar.encrypted_filesAndHeader.rar",
+    "bytes": 60172,
+    "sha256": "3944A0CF36758D042C238DACAE56A4FA494B6F790C4F0DD719D9A47B7C845202"
+  },
+  {
+    "file": "Rar.encrypted_filesOnly.rar",
+    "bytes": 60069,
+    "sha256": "52C0D575E01750AE643C65866B5E06E67773A0AED5EDEA6B2B04E7DE14A784A2"
+  },
+  {
+    "file": "Rar.multi.solid.part01.rar",
+    "bytes": 10240,
+    "sha256": "B6FEC070A075FC244E8D35187B482CD6558A608E3CDA158153B85A59A68903B8"
+  },
+  {
+    "file": "Rar.solid.rar",
+    "bytes": 60001,
+    "sha256": "E7E62F24F22F195D21437BE09667C8956837D99BA48D7270090251A8E32BABC5"
+  },
+  {
+    "file": "Rar4.multi.part01.rar",
+    "bytes": 10000,
+    "sha256": "9401BCEB34A5267DF2C2C69466D899C1D754F63749D00F5313B717123DFC9C45"
+  },
+  {
+    "file": "Rar4.rar",
+    "bytes": 59998,
+    "sha256": "9D9C261E50D3A84AB11A3701C7A736057FC970E59CA365885A41F60270C1875E"
+  },
+  {
+    "file": "Rar5.encrypted_filesAndHeader.rar",
+    "bytes": 60686,
+    "sha256": "63FC4B5576F7482311E950155607E171696588881BDD277C8C099EFD2F98B6E2"
+  },
+  {
+    "file": "Rar5.encrypted_filesOnly.rar",
+    "bytes": 60336,
+    "sha256": "E5FB06AF812633B246430F029A051CC462D00180A0DF455A798644DECCDC7D07"
+  },
+  {
+    "file": "Rar5.multi.part01.rar",
+    "bytes": 10240,
+    "sha256": "AD9B6AC157E77BA2CC6B8BE7EEBA52A2C047A0EF2D06FA6FFA0C1D1CCCE3A651"
+  },
+  {
+    "file": "Rar5.rar",
+    "bytes": 60066,
+    "sha256": "3319DE3E8A91A58D08D8A83F48EBAE7E6B022C542B4A58775BAB64F4063988A9"
+  },
+  {
+    "file": "Rar5.solid.rar",
+    "bytes": 60046,
+    "sha256": "3043D68C5A81F46ADCBB5393632D243944EAD44EB383A677AC82E68AFDDE27CF"
+  },
+  {
+    "file": "Tar.tar.bz2",
+    "bytes": 65369,
+    "sha256": "AFD4F1CCDBB6E8D435D6B6FDF8B9F297107F8959267336FF12B632F4C0E90DE7"
+  },
+  {
+    "file": "Tar.tar.gz",
+    "bytes": 61273,
+    "sha256": "CE260029FC3B57E86D9D1F45F1349124F313BA55CED6DA101BCAC2B9ABD76DF5"
+  },
+  {
+    "file": "Tar.tar.xz",
+    "bytes": 59248,
+    "sha256": "952E14EA5178C43572EAF337CCE7A56F2495CC95C62561421397E3AB2E53FF09"
+  },
+  {
+    "file": "Zip.deflate.pkware.zip",
+    "bytes": 274,
+    "sha256": "BF79DA6D95EAD6D7EB08C691306E89EBFB2A596B06F992305A8D14645EDAC9BA"
+  },
+  {
+    "file": "Zip.deflate.WinzipAES.zip",
+    "bytes": 61208,
+    "sha256": "DEB1D7C7E0F0A6BC78C41EE9FE3F9BF501695F7D01091987A4CE22A9963BE32B"
+  },
+  {
+    "file": "Zip.deflate.WinzipAES2.zip",
+    "bytes": 60801,
+    "sha256": "F483C724AD0192B52BDED9E729BC70512277847A3604F2C13B294B9DD39F2E40"
+  },
+  {
+    "file": "Zip.deflate.zip",
+    "bytes": 61017,
+    "sha256": "78720AF73FACE20069DCABDA43589095B439F236531C6268F8301028DBB65F9C"
+  }
+]
