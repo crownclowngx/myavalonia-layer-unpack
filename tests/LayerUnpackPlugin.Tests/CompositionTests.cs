@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using LayerUnpackPlugin.Constants;
 using LayerUnpackPlugin.Features.Unpack;
+using LayerUnpackPlugin.Features.Pack;
 using LayerUnpackPlugin.Headless.Application;
 using LayerUnpackPlugin.Plugin;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,11 +15,16 @@ namespace LayerUnpackPlugin.Tests;
 public sealed class CompositionTests
 {
     [Fact]
-    public void 组合只注册一个普通Document且无Tool历史命令或Workflow()
+    public void 组合注册压缩解压两个普通Document且无Tool历史命令或Workflow()
     {
         var registration = new Registration();
         new LayerUnpackPluginModule().Configure(registration);
-        var document = Assert.Single(registration.Documents);
+        Assert.Equal(2, registration.Documents.Count);
+        var document = Assert.Single(registration.Documents, d => d.Model == typeof(UnpackDocument));
+        var pack = Assert.Single(registration.Documents, d => d.Model == typeof(PackDocument));
+        Assert.Equal(PluginIds.PackDocument, pack.Descriptor.DocumentTypeId);
+        Assert.Equal(typeof(PackView), pack.View);
+        Assert.False(typeof(IPersistablePluginDocument).IsAssignableFrom(typeof(PackDocument)));
         Assert.Equal("myavalonia.plugin.layer.unpack", PluginIds.Plugin.Value);
         Assert.Equal("myavalonia.plugin.layer.unpack.document.main", document.Descriptor.DocumentTypeId.Value);
         Assert.Equal(typeof(UnpackDocument), document.Model);

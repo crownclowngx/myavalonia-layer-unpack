@@ -1,0 +1,101 @@
+{
+  "checkedAt": "2026-09-07T22:34:20.5636453+08:00",
+  "candidate": "R02 / G0008 local working tree - unpublished",
+  "baselineGitCommit": "c7ddcb05ff5e9c89c1d550640a3bf832e9b31791",
+  "sourceFileCount": 111,
+  "sourceSha256": "a201412cd430f099c6ff0e4898d03c641a0904024400c159126368735d5c6421",
+  "sourceHashAlgorithm": "SHA-256 of ordinal-path-sorted UTF-8 lines: lowercase file SHA-256 + two spaces + slash-normalized relative path + LF",
+  "sourceScope": "src, tests, tools (rg default ignore rules); .gitignore; Directory.Build.props; Directory.Packages.props; LayerUnpackPlugin.slnx. Excludes docs, root README, bin, obj and artifacts.",
+  "environment": {
+    "os": "Microsoft Windows NT 10.0.26200.0",
+    "architecture": "X64",
+    "dotnetSdk": "10.0.302",
+    "avalonia": "12.1.0",
+    "pluginSdk": "3.3.0",
+    "sharpZipLib": "1.4.2"
+  },
+  "tests": {
+    "headless": 135,
+    "plugin": 37,
+    "passed": 172,
+    "failed": 0,
+    "skipped": 0,
+    "newHeadless": 27,
+    "newPlugin": 12
+  },
+  "buildWarnings": 0,
+  "checks": [
+    {
+      "name": "locked-restore",
+      "exitCode": 0,
+      "seconds": 0.7233265,
+      "command": "dotnet restore LayerUnpackPlugin.slnx --locked-mode"
+    },
+    {
+      "name": "debug-build",
+      "exitCode": 0,
+      "seconds": 2.6194864,
+      "command": "dotnet build LayerUnpackPlugin.slnx -c Debug -warnaserror --no-restore"
+    },
+    {
+      "name": "debug-assets",
+      "exitCode": 0,
+      "seconds": 0.7278653,
+      "command": "dotnet msbuild src/LayerUnpackPlugin.Plugin/LayerUnpackPlugin.Plugin.csproj -t:ResolveReferences -p:Configuration=Debug -getItem:ManagedPluginAsset,ManagedPluginPrivatePackage,RuntimeCopyLocalItems"
+    },
+    {
+      "name": "headless-tests",
+      "exitCode": 0,
+      "seconds": 10.2083004,
+      "command": "dotnet test tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj -c Debug --no-build --logger trx;LogFileName=headless.trx --results-directory D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "plugin-tests",
+      "exitCode": 0,
+      "seconds": 4.4675486,
+      "command": "dotnet test tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj -c Debug --no-build --logger trx;LogFileName=plugin.trx --results-directory D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "format",
+      "exitCode": 0,
+      "seconds": 5.982971,
+      "command": "dotnet format LayerUnpackPlugin.slnx --verify-no-changes --no-restore"
+    },
+    {
+      "name": "docs",
+      "exitCode": 0,
+      "seconds": 0.0900912,
+      "command": "./tools/check-docs.ps1"
+    }
+  ],
+  "evidenceDirectory": "artifacts/G0008/local-verification",
+  "uiEvidenceDirectory": "artifacts/ui/G0008",
+  "uiScreenshotCount": 12,
+  "uiInspected": [
+    "pack-ready-light-900x760.png",
+    "pack-ready-dark-900x760.png",
+    "pack-completed-light-900x760.png",
+    "pack-completed-dark-640x520.png"
+  ],
+  "performanceSample": {
+    "files": 2001,
+    "bytes": 8000,
+    "ArchiveBytes": 219248,
+    "elapsedMs": 3608
+  },
+  "nativeObserved": [],
+  "nativePending": [
+    "successful native file and folder selection",
+    "Explorer drag and drop",
+    "125%, 150%, 200% DPI",
+    "opening committed output directory in Explorer",
+    "reading generated ZIP with external GUI archive tools"
+  ],
+  "releasePending": [
+    "real Host loading, ALC, Dock and document lifetime",
+    "Release build, formal plugin package, clean installation and deployment"
+  ],
+  "releaseGatesExecuted": false,
+  "windowsCiExecuted": false,
+  "aiflowUsed": false
+}

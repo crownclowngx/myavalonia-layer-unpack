@@ -12,6 +12,17 @@ public static class PathPolicy
 
     public static string EntryPath(string root, string entry, bool isDirectory)
     {
+        var normalized = NormalizeEntryName(entry, isDirectory);
+        if (normalized.Length == 0) return Path.GetFullPath(root);
+        var full = Path.GetFullPath(Path.Combine(root, normalized.Replace('/', Path.DirectorySeparatorChar)));
+        if (!IsWithin(root, full)) Unsafe();
+        EnsureNoLinks(full);
+        return full;
+    }
+
+    /// <summary>只校验和规范化归档内名称，供解压路径与 ZIP 创建共享；此步骤不访问假想输出路径。</summary>
+    public static string NormalizeEntryName(string entry, bool isDirectory)
+    {
         if (string.IsNullOrEmpty(entry) || Path.IsPathRooted(entry) || entry.StartsWith('/') || entry.StartsWith('\\')) Unsafe();
         if (entry.Contains('\uFFFD'))
             throw new UnpackFailureException(UnpackError.InvalidNameEncoding, "文件名包含无法解码的字符；旧 ZIP 可更换编码，TAR 需要 UTF-8 文件名。");
@@ -29,13 +40,10 @@ public static class PathPolicy
         }
         if (normalized.Count == 0)
         {
-            if (isDirectory) return Path.GetFullPath(root);
+            if (isDirectory) return "";
             Unsafe();
         }
-        var full = Path.GetFullPath(Path.Combine(root, Path.Combine(normalized.ToArray())));
-        if (!IsWithin(root, full)) Unsafe();
-        EnsureNoLinks(full);
-        return full;
+        return string.Join('/', normalized);
     }
 
     public static void EnsureNoLinks(string path)

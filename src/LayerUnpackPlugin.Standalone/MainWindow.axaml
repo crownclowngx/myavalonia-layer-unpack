@@ -4,6 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Width="900" MinWidth="640"
     Height="760" MinHeight="520"
-    Title="层解 · Layer Unpack · Standalone">
-  <ContentControl Name="PreviewHost" />
+    Title="压缩包工作台 · Archive Workbench · Standalone">
+  <TabControl Name="TaskTabs">
+    <TabItem Header="解压任务"><ContentControl Name="PreviewHost" /></TabItem>
+    <TabItem Header="压缩任务"><ContentControl Name="PackPreviewHost" /></TabItem>
+  </TabControl>
 </Window>

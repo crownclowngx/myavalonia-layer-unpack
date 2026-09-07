@@ -1,26 +1,36 @@
 # Layer Unpack 插件形态、产品定位与闭环实施计划
 
-> 文档版本：v1.2，2026-09-07
+> 文档版本：v1.3，2026-09-07
 >
-> 文档状态：V1 加 R01 本地候选已实施；R01 实机遗留见 G0007，发布范围沿用 G0006
+> 文档状态：V1 加 R01 / R02 本地候选；R02 最新验证见 G0008，人工与发布范围分别记录
 >
 > 项目名称：`myavalonia-layer-unpack`
 >
-> 产品显示名：Layer Unpack / 层解
+> 产品显示名：压缩包工作台 / Archive Workbench
 >
 > 插件持久身份：`myavalonia.plugin.layer.unpack`
 >
 > Document 持久身份：`myavalonia.plugin.layer.unpack.document.main`
 >
-> 当前工程状态：Headless、Plugin、Standalone 与两个测试项目；一个普通解压 Document，零 Tool、零全局命令、无历史持久化
+> 当前工程状态：Headless、Plugin、Standalone 与两个测试项目；解压、压缩两个普通 Document，零 Tool、零全局命令、无历史持久化
 
-> 后续规划：2026-09-07 的产品讨论已整理为[压缩包工作台路线图](roadmap/README.md)，以简洁界面为原则，分阶段扩展压缩、浏览、整理、重打包和 Workflow。下文记录 V1 当前范围；“首版不包含”不表示永久排除，未来能力须经相应阶段实施验收后再更新为当前事实。
+> 后续规划：[路线图](roadmap/README.md)中的 R02 已进入 G0008 本地候选，新增普通 ZIP 创建，见下述 R02 增量。下文首版范围与历史 G0001–G0006 路线仍用于说明解压基线，不表示当前没有压缩；未来浏览、整理和 Workflow 仍未实现。
+
+## R02 当前增量：基础 ZIP 压缩
+
+产品显示名为“压缩包工作台 / Archive Workbench”，仓库和程序集名称保持。新增 `PackDocument / PackView` 与稳定 ID `myavalonia.plugin.layer.unpack.document.pack`；原解压入口保持，Standalone 用独立 Scope 同时预览两类任务。
+
+用户添加文件和目录，使用自动建议的名称／位置，按需查看清单，开始生成一个 ZIP。固定标准 Deflate、UTF-8、无密码；保留文件内容、顶层目录和空目录。同名根编号、父子重复合并，重要映射在落盘前可检查；完成结果位于表单之前。
+
+Headless 提供 PackService.PrepareAsync / ExecuteAsync，来源摘要、有限预算、异步写入、清单复验与不覆盖提交由独立职责实现。取消清理未提交文件，失败后再次开始重新准备。源内新输出子目录需预先存在；Zip64、元数据和原生互操作按证据限定。
+
+方案与当前验证见[G0008](refactoring/G0008/implementation.md)、[创建契约](refactoring/G0008/creation-contract.md)、[创建矩阵](refactoring/G0008/format-support-matrix.md)和[结果](refactoring/G0008/result.md)。加密、分别打包、其他创建格式、浏览与工作流尚未实施。
 
 本文定义产品做什么、用户如何完成任务、各入口如何分工，以及后续按 `Gxxxx` 推进的实施顺序。
 阶段档案与状态口径见[实施档案与文档治理](refactoring/README.md)，共同验收约束见[质量基线](refactoring/quality-baseline.md)。
 
 具体实施使用 [V1 执行计划](v1-execution-plan.md)：按 G0001–G0006 列出工作项、依赖、阶段出口和验收归属。
-执行计划已更新为本轮执行记录。按用户最新约束，不使用 AIFLOW、不新增 Windows CI，不执行 Release、ZIP、部署或发布门禁。
+V1 执行计划保留其历史记录；当前增量见 G0008。按用户最新约束，不使用 AIFLOW、不新增 Windows CI，不执行 Release、正式插件 ZIP、部署或发布门禁。
 
 ## 1. 已确认需求与本版设计建议
 
@@ -47,18 +57,19 @@
 
 ## 2. 当前工程事实
 
-以下为 2026-09-07 的最终源码事实。实际本地检查见[G0007 结果](refactoring/G0007/result.md)，不代表真实 Host 或正式包已验收。
+以下为 2026-09-07 的当前源码事实。实际本地检查见[G0008 结果](refactoring/G0008/result.md)，不代表真实 Host 或正式包已验收。
 
 | 项目 | 当前事实 |
 | --- | --- |
 | 解决方案 | `LayerUnpackPlugin.slnx`，Headless、Plugin、Standalone 与两个测试项目 |
 | 正式入口 | `LayerUnpackPlugin.Plugin`，入口为 `LayerUnpackPluginModule` |
-| Document | `UnpackDocument/UnpackView`，通过 `AddDocument` 注册，显示名“解压任务” |
+| Document | `UnpackDocument/UnpackView` 与 `PackDocument/PackView`，通过 `AddDocument` 注册为“解压任务”“压缩任务” |
 | 全局贡献 | 零 Tool、命令、菜单、快捷键、Workflow 和 Gateway 贡献 |
 | 独立预览 | 独立 Scope，复用插件服务和界面，异步初始化及关闭排空 |
 | 测试 | 真实格式、内容摘要、密码、递归、输出、生命周期、UI 渲染和性能基线 |
 | 依赖 | 当前集中配置 Plugin SDK `3.3.0`，工程目标 `net10.0`，插件交付 RID 为 `win-x64` |
 | 解压能力 | Headless 使用 BCL、SharpCompress 0.50.4 与 SharpZipLib 1.4.2；统一会话管理深度、密码和预算 |
+| 压缩能力 | .NET 10 普通 ZIP 写入、UTF-8、标准 Deflate；清单与来源摘要、独立输出预算和文件事务 |
 
 Plugin ID 与 Document ID 沿用初始化值。后续可以调整类名、显示名和内部目录，不为产品化改名而变更身份。
 当前工程版本号不等于产品功能已经达到首版验收标准。

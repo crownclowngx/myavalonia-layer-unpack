@@ -14,7 +14,17 @@
 
 旧 ZIP 默认采用 GB18030 解读未标记 Unicode 的文件名，可选择 UTF-8、CP437 或 CP866；带 Unicode 标志的名称遵循包内标志。TAR 目前要求 UTF-8，无法解码的名称会明确失败，不提交乱码文件。ZipCrypto 密码按 UTF-8 处理。
 
-## 本地开发
+## 开始一个压缩任务
+
+1. 在插件中打开“压缩任务”，或在 Standalone 切换到同名标签。
+2. 添加或拖入文件／文件夹。同一直接父目录会自动建议输出位置，多来源需选择；名称和位置可修改。
+3. 查看文件数、总源字节；需要时展开清单检查父子合并和同名根编号。输入准备只读，不创建 ZIP。
+4. 点击“开始压缩”，使用普通 ZIP、标准 Deflate、UTF-8，无需配置算法。首次才发现重要路径映射变化时会先展示清单，再点击开始执行。
+5. 完成后在页面上方查看实际路径、大小和耗时，点击“打开输出文件夹”。取消等待清理退出；失败后再次开始会重新准备来源。
+
+保留顶层文件夹、内容和空目录。同名输出自动编号，源文件保留；既有源目录内输出会排除本次目标和暂存文件，源内新输出子目录需先创建或改选已有目录。创建矩阵、资源与来源变化边界见[G0008 契约](refactoring/G0008/creation-contract.md)。当前没有压缩密码、分别打包或其他创建格式。
+
+## 本地开发环境
 
 依赖：.NET SDK 10，当前验证环境为 Windows x64、Avalonia 12.1.0、Plugin SDK 3.3.0。Python 仅在重新生成标准样本时需要，正常构建和测试不依赖 Python。
 
@@ -51,6 +61,18 @@ if (!result.RetryBlocked && retryIds.Length > 0)
 
 示例中的 `cancellationToken` 由调用方传入。密码示例只是占位文字，不是真实凭据。请求在创建会话时验证，`ExecuteAsync` 每会话只能开始一次，后续用 `RetryAsync` 或新会话。取消通过结果 `Cancelled` 表达；进入互斥锁之前的取消可能直接抛出 `OperationCanceledException`。完整契约见[执行契约](refactoring/G0002/execution-contract.md)。
 
+创建 ZIP 使用独立用例：
+
+```csharp
+var pack = new PackService();
+var plan = await pack.PrepareAsync(
+    new PackRequest([@"D:\资料\项目"], @"D:\交付\项目.zip"),
+    cancellationToken: cancellationToken);
+var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken);
+```
+
+先检查 `plan.Roots` / `plan.Entries` 的路径与清单，再执行。准备不落盘；重复执行可能生成编号新包。压缩与解压使用不同契约，共同保持无 UI 依赖和独立生命周期。
+
 ## 项目与文档入口
 
 | 项目 | 职责 |
@@ -67,6 +89,6 @@ if (!result.RetryBlocked && retryIds.Length > 0)
 
 ## 后续产品阶段规划
 
-[压缩包工作台路线图](roadmap/README.md)规划 R01–R08：先简化现有解压交互，再增加 ZIP 压缩、批量打包与加密、浏览提取、输出整理、重打包、格式诊断和工作流协作。R01 已实施，本地验证及原生遗留见[G0007 结果](refactoring/G0007/result.md)；R02–R08 仍为未来目标。
+[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01 简洁解压已实施，R02 基础 ZIP 已进入 G0008 本地候选，实际验证见[G0008 结果](refactoring/G0008/result.md)。R03–R08 的分别打包、加密、浏览、整理等仍为未来目标。
 
-生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。产品阶段 R 编号与实施档案 G 编号分别维护，R01 已映射 G0007；后续可细化 R02，并复核 R01 的原生交互遗留。
+生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008，后续可细化 R03，并复核各阶段原生交互遗留。

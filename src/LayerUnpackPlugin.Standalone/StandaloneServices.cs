@@ -1,4 +1,5 @@
 using LayerUnpackPlugin.Features.Unpack;
+using LayerUnpackPlugin.Features.Pack;
 using LayerUnpackPlugin.Plugin;
 using Microsoft.Extensions.DependencyInjection;
 using MyAvaloniaManagement.PluginSdk;
@@ -16,6 +17,8 @@ internal static class StandaloneServices
         services.AddScoped<IDocumentLifetime>(p => p.GetRequiredService<PreviewDocumentLifetime>());
         services.AddScoped<UnpackDocument>();
         services.AddTransient<UnpackView>();
+        services.AddScoped<PackDocument>();
+        services.AddTransient<PackView>();
         return services;
     }
 }

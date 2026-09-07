@@ -12,6 +12,9 @@ public static class LayerUnpackPluginServices
         ArgumentNullException.ThrowIfNull(services);
         services.AddSingleton<IArchiveExtractor, ArchiveExtractor>();
         services.AddScoped<IUnpackService, UnpackService>();
+        services.AddSingleton<PackPlanner>();
+        services.AddSingleton<IArchiveWriter, ZipArchiveWriter>();
+        services.AddScoped<IPackService, PackService>();
         return services;
     }
 }

@@ -1,0 +1,64 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:vm="using:LayerUnpackPlugin.Features.Pack" x:Class="LayerUnpackPlugin.Features.Pack.PackView"
+ x:DataType="vm:PackDocument" x:CompileBindings="True" DragDrop.AllowDrop="True">
+ <Grid Margin="20" RowDefinitions="Auto,*,Auto" RowSpacing="12" MaxWidth="940">
+    <StackPanel Grid.Row="0" Spacing="4">
+     <TextBlock Text="压缩任务" FontSize="24" FontWeight="SemiBold" />
+     <TextBlock Text="添加文件或文件夹，合成一个 ZIP。" Opacity="0.7" TextWrapping="Wrap" />
+    </StackPanel>
+  <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+   <StackPanel Spacing="16">
+    <!-- 结果先于表单呈现，窄窗口完成后也能直接找到产物，不要求用户滚过原输入。 -->
+    <Border Background="#11888888" CornerRadius="8" Padding="14" IsVisible="{Binding HasFeedback}">
+     <StackPanel Spacing="8">
+      <TextBlock Text="{Binding Summary}" FontWeight="SemiBold" TextWrapping="Wrap" />
+      <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+      <Button Name="OpenResultButton" Content="打开输出文件夹" Click="OpenOutput" IsVisible="{Binding HasOutput}" HorizontalAlignment="Left" />
+     </StackPanel>
+    </Border>
+    <Border BorderBrush="#44888888" BorderThickness="1" CornerRadius="8" Padding="18">
+     <StackPanel Spacing="12">
+      <TextBlock Text="将文件或文件夹拖到这里" IsVisible="{Binding !HasInputs}" FontSize="17" />
+      <TextBlock Text="{Binding InputSummary}" IsVisible="{Binding HasInputs}" />
+      <WrapPanel IsEnabled="{Binding CanEdit}">
+       <Button Content="添加文件" Click="PickFiles" Margin="0,0,8,4" />
+       <Button Content="添加文件夹" Click="PickFolders" Margin="0,0,8,4" />
+      </WrapPanel>
+      <Expander Header="查看输入与打包清单" IsExpanded="{Binding DetailsExpanded}" IsVisible="{Binding HasInputs}">
+       <StackPanel Spacing="10">
+        <ListBox ItemsSource="{Binding Inputs}" MaxHeight="170" IsEnabled="{Binding CanEdit}">
+         <ListBox.ItemTemplate><DataTemplate x:DataType="vm:PackInputItem">
+          <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" ToolTip.Tip="{Binding Path}" />
+         </DataTemplate></ListBox.ItemTemplate>
+        </ListBox>
+        <Button Content="移除所选" Command="{Binding RemoveSelectedCommand}" HorizontalAlignment="Left" />
+        <ItemsControl ItemsSource="{Binding RootMappings}">
+         <ItemsControl.ItemTemplate><DataTemplate x:DataType="x:String"><TextBlock Text="{Binding}" TextWrapping="Wrap" FontSize="12" /></DataTemplate></ItemsControl.ItemTemplate>
+        </ItemsControl>
+       </StackPanel>
+      </Expander>
+     </StackPanel>
+    </Border>
+    <StackPanel Spacing="8" IsEnabled="{Binding CanEdit}">
+     <TextBlock Text="压缩包名称" />
+     <TextBox Name="NameEditor" Text="{Binding ArchiveName}" PlaceholderText="资料.zip" />
+     <TextBlock Text="输出文件夹" />
+     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+      <TextBox Name="OutputEditor" Text="{Binding OutputDirectory}" PlaceholderText="选择输出位置" />
+      <Button Grid.Column="1" Content="选择" Click="PickOutput" />
+     </Grid>
+     <TextBlock Text="{Binding TargetHint}" Opacity="0.65" FontSize="12" TextWrapping="Wrap" />
+    </StackPanel>
+   </StackPanel>
+  </ScrollViewer>
+  <StackPanel Grid.Row="2" Spacing="8">
+   <TextBlock Text="{Binding CurrentEntry}" IsVisible="{Binding IsBusy}" TextTrimming="CharacterEllipsis" />
+   <ProgressBar IsVisible="{Binding IsBusy}" IsIndeterminate="{Binding IsIndeterminate}" Value="{Binding ProgressValue}" Height="4" />
+   <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+    <Button Content="清空任务" Command="{Binding ClearCommand}" />
+    <Button Grid.Column="2" Content="取消" Command="{Binding CancelCommand}" IsVisible="{Binding IsBusy}" />
+    <Button Name="StartButton" Grid.Column="3" Content="开始压缩" Command="{Binding StartCommand}" />
+   </Grid>
+  </StackPanel>
+ </Grid>
+</UserControl>
