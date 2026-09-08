@@ -271,5 +271,5 @@ public sealed class PackTests
     private sealed class InlineProgress(Action<PackProgress> action) : IProgress<PackProgress>
     { public void Report(PackProgress value) => action(value); }
     private sealed class Writer(Func<PackPlan, Stream, IProgress<PackProgress>?, CancellationToken, Task> action) : IArchiveWriter
-    { public Task WriteAsync(PackPlan plan, Stream output, IProgress<PackProgress>? progress, CancellationToken cancellationToken) => action(plan, output, progress, cancellationToken); }
+    { public Task WriteAsync(PackPlan plan, Stream output, IProgress<PackProgress>? progress, CancellationToken cancellationToken, PackSecret? secret = null) => action(plan, output, progress, cancellationToken); }
 }

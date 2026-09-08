@@ -15,6 +15,7 @@ public static class LayerUnpackPluginServices
         services.AddSingleton<PackPlanner>();
         services.AddSingleton<IArchiveWriter, ZipArchiveWriter>();
         services.AddScoped<IPackService, PackService>();
+        services.AddScoped<IPackBatchService, PackBatchService>();
         return services;
     }
 }

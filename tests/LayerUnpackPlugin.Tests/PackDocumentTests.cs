@@ -32,7 +32,7 @@ public sealed class PackDocumentTests
     public async Task 默认操作建议路径并完成ZIP无需高级选项()
     {
         using var w = new TestWorkspace(); using var lifetime = new TestLifetime();
-        await using var document = new PackDocument(new PackService(), lifetime);
+        await using var document = new PackDocument(new PackBatchService(), lifetime);
         await document.InitializeAsync(new NewDocumentActivation("压缩任务"), Token);
         await document.AddPathsAsync([Source(w, "资料/正文.txt")]);
         Assert.Equal(w.FilePath("资料"), document.OutputDirectory);
@@ -48,7 +48,7 @@ public sealed class PackDocumentTests
     public async Task 手动名称位置不被后续输入建议覆盖且多来源要求选择位置()
     {
         using var w = new TestWorkspace(); using var lifetime = new TestLifetime();
-        await using var document = new PackDocument(new PackService(), lifetime);
+        await using var document = new PackDocument(new PackBatchService(), lifetime);
         await document.AddPathsAsync([Source(w, "a/one.txt"), Source(w, "b/two.txt")]);
         Assert.Empty(document.OutputDirectory); Assert.False(document.StartCommand.CanExecute(null));
         document.ArchiveName = "交付.zip"; document.ChooseOutputDirectory(w.Output);
@@ -61,7 +61,7 @@ public sealed class PackDocumentTests
     public async Task 不合法名称和变更来源给出可恢复的新任务提示()
     {
         using var w = new TestWorkspace(); using var lifetime = new TestLifetime();
-        await using var document = new PackDocument(new PackService(), lifetime);
+        await using var document = new PackDocument(new PackBatchService(), lifetime);
         var source = Source(w, "input/a.txt"); await document.AddPathsAsync([source]);
         File.WriteAllText(source, "变更内容");
         await document.StartCommand.ExecuteAsync(null);
@@ -82,7 +82,7 @@ public sealed class PackDocumentTests
             entered.TrySetResult(); await release.Task.WaitAsync(token);
             await new ZipArchiveWriter().WriteAsync(plan, output, progress, token);
         }));
-        await using var document = new PackDocument(service, lifetime) { OutputDirectory = w.Output };
+        await using var document = new PackDocument(new PackBatchService(service), lifetime) { OutputDirectory = w.Output };
         await document.AddPathsAsync([Source(w, "source.txt")]);
         var work = document.StartCommand.ExecuteAsync(null);
         try
@@ -107,7 +107,7 @@ public sealed class PackDocumentTests
             captured = progress; await output.WriteAsync(new byte[32], token); entered.TrySetResult();
             try { await Task.Delay(Timeout.Infinite, token); } finally { stopped = true; }
         }));
-        await using var document = new PackDocument(service, lifetime) { OutputDirectory = w.Output };
+        await using var document = new PackDocument(new PackBatchService(service), lifetime) { OutputDirectory = w.Output };
         await document.AddPathsAsync([Source(w, "source.txt")]);
         var work = document.StartCommand.ExecuteAsync(null);
         await entered.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
@@ -124,7 +124,7 @@ public sealed class PackDocumentTests
         var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var service = new PackService(new(), new Writer(async (_, _, _, token) => { entered.TrySetResult(); await Task.Delay(Timeout.Infinite, token); }));
-        await using var pack = new PackDocument(service, packLife) { OutputDirectory = w.Output };
+        await using var pack = new PackDocument(new PackBatchService(service), packLife) { OutputDirectory = w.Output };
         await using var unpack = new UnpackDocument(new UnpackService(new DelegatingExtractor(async call => { await release.Task.WaitAsync(call.Token); return await call.WriteAsync([1]); })), unpackLife) { OutputDirectory = w.FilePath("unpacked") };
         await pack.AddPathsAsync([Source(w, "source.txt")]); await unpack.AddPathsAsync([w.Zip("source.zip")]);
         var packWork = pack.StartCommand.ExecuteAsync(null); var unpackWork = unpack.StartCommand.ExecuteAsync(null);
@@ -145,7 +145,7 @@ public sealed class PackDocumentTests
     public async Task 压缩页面空状态准备完成状态在主题尺寸下可用(bool dark, int width, int height)
     {
         using var w = new TestWorkspace(); using var lifetime = new TestLifetime();
-        await using var document = new PackDocument(new PackService(), lifetime);
+        await using var document = new PackDocument(new PackBatchService(), lifetime);
         var view = new PackView { DataContext = document };
         var window = new Window { Content = view, Width = width, Height = height, RequestedThemeVariant = dark ? ThemeVariant.Dark : ThemeVariant.Light };
         var destination = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../artifacts/ui/G0008"));
@@ -158,7 +158,7 @@ public sealed class PackDocumentTests
             var origin = start.TranslatePoint(default, window)!.Value;
             Assert.InRange(origin.Y, 0, window.ClientSize.Height - start.Bounds.Height);
             Assert.InRange(origin.X, 0, window.ClientSize.Width - start.Bounds.Width);
-            Assert.Empty(view.GetVisualDescendants().OfType<ComboBox>());
+            Assert.False(document.MoreOptionsExpanded);
             using var frame = window.CaptureRenderedFrame(); Assert.NotNull(frame);
             frame.Save(Path.Combine(destination, $"pack-{state}-{(dark ? "dark" : "light")}-{width}x{height}.png"), Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
         }
@@ -209,7 +209,7 @@ public sealed class PackDocumentTests
     public async Task 同名来源未预览映射时先展示清单再执行()
     {
         using var w = new TestWorkspace(); using var lifetime = new TestLifetime();
-        await using var document = new PackDocument(new PackService(), lifetime);
+        await using var document = new PackDocument(new PackBatchService(), lifetime);
         await document.AddPathsAsync([Source(w, "a/same.txt"), Source(w, "b/same.txt")]);
         document.OutputDirectory = w.Output;
         await document.StartCommand.ExecuteAsync(null);
@@ -220,5 +220,5 @@ public sealed class PackDocumentTests
     }
 
     private sealed class Writer(Func<PackPlan, Stream, IProgress<PackProgress>?, CancellationToken, Task> action) : IArchiveWriter
-    { public Task WriteAsync(PackPlan plan, Stream output, IProgress<PackProgress>? progress, CancellationToken cancellationToken) => action(plan, output, progress, cancellationToken); }
+    { public Task WriteAsync(PackPlan plan, Stream output, IProgress<PackProgress>? progress, CancellationToken cancellationToken, PackSecret? secret = null) => action(plan, output, progress, cancellationToken); }
 }

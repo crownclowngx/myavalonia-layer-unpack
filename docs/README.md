@@ -20,9 +20,10 @@
 2. 添加或拖入文件／文件夹。同一直接父目录会自动建议输出位置，多来源需选择；名称和位置可修改。
 3. 查看文件数、总源字节；需要时展开清单检查父子合并和同名根编号。输入准备只读，不创建 ZIP。
 4. 点击“开始压缩”，使用普通 ZIP、标准 Deflate、UTF-8，无需配置算法。首次才发现重要路径映射变化时会先展示清单，再点击开始执行。
-5. 完成后在页面上方查看实际路径、大小和耗时，点击“打开输出文件夹”。取消等待清理退出；失败后再次开始会重新准备来源。
+5. 需要时展开“更多选项”，选择分别打包、排除项、压缩偏好或 AES-256；点击预览检查分组和排除原因。加密需输入两遍本次密码，默认遮蔽；文件名仍然可见，接收方工具须支持。
+6. 完成后在页面上方查看每组状态、实际路径和字节数，点击“打开输出文件夹”。可恢复故障使用“重试可恢复失败组”，沿用原清单、目标和密码，成功包不重复生成。来源变化、取消或准备失败时点击“重新准备未完成项”，确认新清单和密码后开始。取消与关闭均等待清理退出。
 
-保留顶层文件夹、内容和空目录。同名输出自动编号，源文件保留；既有源目录内输出会排除本次目标和暂存文件，源内新输出子目录需先创建或改选已有目录。创建矩阵、资源与来源变化边界见[G0008 契约](refactoring/G0008/creation-contract.md)。当前没有压缩密码、分别打包或其他创建格式。
+保留顶层文件夹、内容和空目录。同名输出自动编号，源文件保留；既有源目录内输出会排除本次目标和暂存文件，源内新输出子目录需先创建或改选已有目录。创建矩阵、资源与来源变化边界见[G0008 契约](refactoring/G0008/creation-contract.md)。分别模式要求输出位于所有源文件夹之外；不创建其他格式。批次、规则和秘密的详细契约见[G0009](refactoring/G0009/batch-creation-contract.md)，具体加密和压缩映射见[互操作矩阵](refactoring/G0009/encryption-and-compression-matrix.md)。
 
 ## 本地开发环境
 
@@ -71,7 +72,7 @@ var plan = await pack.PrepareAsync(
 var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken);
 ```
 
-先检查 `plan.Roots` / `plan.Entries` 的路径与清单，再执行。准备不落盘；重复执行可能生成编号新包。压缩与解压使用不同契约，共同保持无 UI 依赖和独立生命周期。
+先检查 `plan.Roots` / `plan.Entries` 的路径与清单，再执行。准备不落盘；重复执行可能生成编号新包。批量创建使用 `PackBatchService.PrepareAsync/CreateSession`，通过独立 `PackSecret` 传入目标密码，见[G0009 示例](refactoring/G0009/batch-creation-contract.md)。压缩与解压使用不同契约，共同保持无 UI 依赖和独立生命周期。
 
 ## 项目与文档入口
 
@@ -89,6 +90,6 @@ var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken)
 
 ## 后续产品阶段规划
 
-[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01 简洁解压已实施，R02 基础 ZIP 已进入 G0008 本地候选，实际验证见[G0008 结果](refactoring/G0008/result.md)。R03–R08 的分别打包、加密、浏览、整理等仍为未来目标。
+[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01、R02、R03 已实施，本地 230 项测试及门禁通过，实际证据见[G0009 结果](refactoring/G0009/result.md)。R04–R08 的浏览、整理等仍为未来目标。
 
-生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008，后续可细化 R03，并复核各阶段原生交互遗留。
+生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008、R03 映射 G0009，后续可细化 R04，并复核各阶段原生交互遗留。

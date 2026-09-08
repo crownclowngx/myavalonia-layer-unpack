@@ -15,7 +15,10 @@ internal static class StreamCopy
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var count = await source.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+            // SharpZipLib 1.4.2 的 ZipAESStream 在 byte[] 重载中验证认证尾部。
+            // Memory 重载可能分派到基类 CryptoStream，绕开 Stored AES（包括零字节条目）的认证逻辑。
+            // 显式使用该公开重载，确保读到 EOF 的同时完成认证，不能仅凭明文长度认定成功。
+            var count = await source.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
             if (count == 0) break;
             length += count;
             budget.AddBytes(count, length);

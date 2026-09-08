@@ -11,6 +11,7 @@ public sealed class PackPlanner
     {
         ArgumentNullException.ThrowIfNull(request);
         request.Limits.Validate();
+        request.Options.Validate();
         if (request.Inputs.Count == 0 || request.Inputs.Count > request.Limits.MaxInputs)
             throw new PackValidationException("请添加输入，且输入项数量不能超过限制。");
         if (string.IsNullOrWhiteSpace(request.OutputPath) || !Path.IsPathFullyQualified(request.OutputPath))
@@ -22,31 +23,14 @@ public sealed class PackPlanner
         PackPaths.CheckEntry(name, false);
         PackPaths.Check(output);
         if (Directory.Exists(output)) throw new PackValidationException("ZIP 输出路径不能是已有文件夹。");
-        var sourcePaths = request.Inputs.Select(p =>
-        {
-            if (string.IsNullOrWhiteSpace(p) || !Path.IsPathFullyQualified(p)) throw new PackValidationException("输入必须是完整的文件或文件夹路径。");
-            return Path.TrimEndingDirectorySeparator(Path.GetFullPath(p));
-        }).Distinct(PackPaths.Comparer).OrderBy(p => p, PackPaths.Comparer).ToArray();
-        var sources = sourcePaths.Select(p => new PackRoot(p, Path.GetFileName(p), PackPaths.IsDirectory(p))).ToArray();
-        if (sources.Any(s => string.IsNullOrEmpty(s.EntryName))) throw new PackValidationException("请选具体文件夹，不支持整个磁盘根目录。");
-        if (sources.Any(s => PackPaths.Equal(s.SourcePath, output))) throw new PackValidationException("源文件不能同时作为本次 ZIP 输出。");
-        var roots = sources.Where(s => !sources.Any(parent => parent.IsDirectory && PathPolicy.IsWithin(parent.SourcePath, s.SourcePath))).ToArray();
+        var selection = PackInputSelection.Resolve(request.Inputs, request.Limits);
+        var roots = selection.Roots;
+        if (selection.Sources.Any(s => PackPaths.Equal(s, output))) throw new PackValidationException("源文件不能同时作为本次 ZIP 输出。");
         var parentPath = Path.GetDirectoryName(output)!;
         if (!Directory.Exists(parentPath) && roots.Any(r => r.IsDirectory && PathPolicy.IsWithin(r.SourcePath, parentPath)))
             throw new PackValidationException("在源文件夹内部输出时请选择已有目录，或先创建目标子目录后重新添加输入。");
-        // 不依赖用户添加顺序：先按规范来源排序，再分配不区分大小写的唯一根名，兼容 Windows 接收端。
-        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        for (var i = 0; i < roots.Length; i++)
-        {
-            var root = roots[i];
-            var candidate = root.EntryName;
-            for (var suffix = 1; !used.Add(candidate); suffix++)
-                candidate = root.IsDirectory ? $"{root.EntryName} ({suffix})" : $"{Path.GetFileNameWithoutExtension(root.EntryName)} ({suffix}){Path.GetExtension(root.EntryName)}";
-            PackPaths.CheckEntry(candidate, root.IsDirectory);
-            roots[i] = root with { EntryName = candidate };
-        }
-        var normalized = new PackRequest(sourcePaths, output, request.Limits);
-        var inventory = Enumerate(roots, normalized, null, token, out var excluded);
+        var normalized = new PackRequest(selection.Sources, output, request.Limits, request.Options);
+        var inventory = Enumerate(roots, normalized, null, token, out var excluded, out var excludedItems);
         var entries = new List<PackEntry>();
         var totalBytes = inventory.Sum(e => e.Length);
         var buffer = new byte[131072];
@@ -74,7 +58,7 @@ public sealed class PackPlanner
             }
             entries.Add(entry with { Sha256 = digest });
         }
-        var plan = new PackPlan(normalized, roots, entries, request.Inputs.Count - roots.Length, excluded);
+        var plan = new PackPlan(normalized, roots, entries, request.Inputs.Count - roots.Length, excluded, excludedItems);
         VerifyInventory(plan, null, token);
         return plan;
     }
@@ -82,7 +66,7 @@ public sealed class PackPlanner
     /// <summary>写入前后核对来源清单与元数据。目录本身的时间不作内容凭据，避免自有临时文件改变目录时间而误判。</summary>
     internal void VerifyInventory(PackPlan plan, string? temporaryFile, CancellationToken token)
     {
-        var current = Enumerate(plan.Roots, plan.Request, temporaryFile, token, out _);
+        var current = Enumerate(plan.Roots, plan.Request, temporaryFile, token, out _, out _);
         if (current.Count != plan.Entries.Count) SourceChanged();
         for (var i = 0; i < current.Count; i++)
         {
@@ -92,18 +76,29 @@ public sealed class PackPlanner
         }
     }
 
-    private static List<PackEntry> Enumerate(IReadOnlyList<PackRoot> roots, PackRequest request, string? temporaryFile, CancellationToken token, out int excluded)
+    private static List<PackEntry> Enumerate(IReadOnlyList<PackRoot> roots, PackRequest request, string? temporaryFile, CancellationToken token, out int excluded, out List<PackExcludedItem> excludedItems)
     {
         var entries = new List<PackEntry>();
         var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var pending = new Stack<(string Path, string Name, int Depth)>();
         foreach (var root in roots.Reverse()) pending.Push((root.SourcePath, root.EntryName, 0));
         long total = 0; excluded = 0;
+        excludedItems = [];
+        var originallyEmpty = new HashSet<string>(PackPaths.Comparer);
+        var scanned = 0;
         while (pending.TryPop(out var item))
         {
             token.ThrowIfCancellationRequested();
             if (PackPaths.Equal(item.Path, request.OutputPath) || (temporaryFile is not null && PackPaths.Equal(item.Path, temporaryFile))) { excluded++; continue; }
+            if (++scanned > request.Limits.MaxEntries || item.Depth > request.Limits.MaxDirectoryDepth)
+                throw new PackFailureException(PackError.BudgetExceeded, "输入扫描数量或目录深度超过创建上限。");
             var directory = PackPaths.IsDirectory(item.Path);
+            var reason = request.Options.Exclusions.Match(item.Path, directory);
+            if (reason is not null)
+            {
+                excludedItems.Add(new(item.Path, item.Name, directory, reason));
+                continue;
+            }
             PackPaths.CheckEntry(item.Name, directory);
             if (!names.Add(item.Name)) throw new PackFailureException(PackError.UnsafePath, "来源包含重复或大小写冲突的包内路径。");
             if (entries.Count >= request.Limits.MaxEntries || item.Depth > request.Limits.MaxDirectoryDepth)
@@ -125,9 +120,26 @@ public sealed class PackPlanner
                         throw new PackFailureException(PackError.BudgetExceeded, "目录条目超过创建上限。");
                     children.Add(child);
                 }
+                if (children.Count == 0) originallyEmpty.Add(item.Path);
                 foreach (var child in children.OrderByDescending(p => p, PackPaths.Comparer))
                     pending.Push((child, item.Name + "/" + Path.GetFileName(child), item.Depth + 1));
             }
+        }
+        // 排除造成的空容器不生成空壳包；原本就存在的空目录仍属于用户资料，沿用 R02 保留。
+        if (excludedItems.Count > 0)
+        {
+            var retained = new HashSet<string>(PackPaths.Comparer);
+            var kept = new List<PackEntry>();
+            for (var i = entries.Count - 1; i >= 0; i--)
+            {
+                var entry = entries[i];
+                if (entry.IsDirectory && !originallyEmpty.Contains(entry.SourcePath) && !retained.Contains(entry.SourcePath))
+                    continue;
+                kept.Add(entry);
+                if (Path.GetDirectoryName(entry.SourcePath) is string parent) retained.Add(parent);
+            }
+            kept.Reverse();
+            return kept;
         }
         return entries;
     }

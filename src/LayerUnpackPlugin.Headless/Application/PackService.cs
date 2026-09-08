@@ -7,7 +7,7 @@ namespace LayerUnpackPlugin.Headless.Application;
 public interface IPackService
 {
     Task<PackPlan> PrepareAsync(PackRequest request, IProgress<PackProgress>? progress = null, CancellationToken cancellationToken = default);
-    Task<PackResult> ExecuteAsync(PackPlan plan, IProgress<PackProgress>? progress = null, CancellationToken cancellationToken = default);
+    Task<PackResult> ExecuteAsync(PackPlan plan, IProgress<PackProgress>? progress = null, CancellationToken cancellationToken = default, PackSecret? secret = null);
 }
 
 /// <summary>朴素的创建用例编排：规划器负责源，写入器负责 ZIP，事务负责目标。每次调用的状态均为局部变量。</summary>
@@ -27,9 +27,14 @@ public sealed class PackService(PackPlanner planner, IArchiveWriter writer) : IP
         { throw new PackFailureException(PackError.InputUnavailable, "无法准备输入，请检查来源、权限及输出路径的可用性。"); }
     }
 
-    public async Task<PackResult> ExecuteAsync(PackPlan plan, IProgress<PackProgress>? progress = null, CancellationToken cancellationToken = default)
+    public async Task<PackResult> ExecuteAsync(PackPlan plan, IProgress<PackProgress>? progress = null, CancellationToken cancellationToken = default, PackSecret? secret = null)
     {
         ArgumentNullException.ThrowIfNull(plan);
+        if (plan.Request.Options.Encrypt != (secret is not null))
+            throw new PackValidationException("加密开关与本次目标密码必须一致，不能自动降级为普通 ZIP。");
+        if (secret is not null) _ = secret.Password;
+        if (plan.Entries.Count == 0)
+            return new(PackState.Skipped, null, 0, 0, 0, TimeSpan.Zero, null, null);
         var watch = Stopwatch.StartNew();
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(plan.Request.Limits.Timeout);
@@ -47,7 +52,7 @@ public sealed class PackService(PackPlanner planner, IArchiveWriter writer) : IP
             await using (var file = transaction.Open())
             {
                 using var output = new PackOutputStream(file, plan.Request.Limits.MaxArchiveBytes, token);
-                await writer.WriteAsync(plan, output, progress, token).ConfigureAwait(false);
+                await writer.WriteAsync(plan, output, progress, token, secret).ConfigureAwait(false);
                 await output.FlushAsync(token).ConfigureAwait(false);
                 length = file.Length;
             }

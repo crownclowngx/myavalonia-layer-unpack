@@ -21,22 +21,24 @@ public sealed record PackLimits
     }
 }
 
-/// <summary>一次全部合包请求。复制输入，避免调用方编辑集合改变后台任务；R02 不含密码和格式开关。</summary>
+/// <summary>一次单包请求。复制输入、冻结偏好；目标密码必须经执行端的独立秘密参数传递。</summary>
 public sealed class PackRequest
 {
-    public PackRequest(IEnumerable<string> inputs, string outputPath, PackLimits? limits = null)
+    public PackRequest(IEnumerable<string> inputs, string outputPath, PackLimits? limits = null, PackOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(inputs);
         Inputs = Array.AsReadOnly(inputs.ToArray());
         OutputPath = outputPath;
         Limits = limits ?? new PackLimits();
+        Options = options ?? new PackOptions();
     }
     public IReadOnlyList<string> Inputs { get; }
     public string OutputPath { get; }
     public PackLimits Limits { get; }
+    public PackOptions Options { get; }
 }
 
-public enum PackState { Scanning, Writing, Finalizing, Completed, Failed, Cancelled }
+public enum PackState { Scanning, Writing, Finalizing, Completed, Failed, Cancelled, Pending, Skipped }
 public enum PackError { InputUnavailable, InputChanged, UnsafePath, OutputError, BudgetExceeded, Timeout, UnexpectedError }
 public sealed record PackDiagnostic(PackError Code, string Message);
 public sealed record PackRoot(string SourcePath, string EntryName, bool IsDirectory);
@@ -45,19 +47,21 @@ public sealed record PackEntry(string SourcePath, string EntryName, bool IsDirec
 /// <summary>只由规划器生成的不可变清单。摘要是源内容验证依据，路径映射是 UI 可检查的产品结果。</summary>
 public sealed class PackPlan
 {
-    internal PackPlan(PackRequest request, IEnumerable<PackRoot> roots, IEnumerable<PackEntry> entries, int mergedInputs, int excludedOutputs)
+    internal PackPlan(PackRequest request, IEnumerable<PackRoot> roots, IEnumerable<PackEntry> entries, int mergedInputs, int excludedOutputs, IEnumerable<PackExcludedItem> excludedItems)
     {
         Request = request;
         Roots = Array.AsReadOnly(roots.ToArray());
         Entries = Array.AsReadOnly(entries.ToArray());
         MergedInputs = mergedInputs;
         ExcludedOutputs = excludedOutputs;
+        ExcludedItems = Array.AsReadOnly(excludedItems.ToArray());
     }
     public PackRequest Request { get; }
     public IReadOnlyList<PackRoot> Roots { get; }
     public IReadOnlyList<PackEntry> Entries { get; }
     public int MergedInputs { get; }
     public int ExcludedOutputs { get; }
+    public IReadOnlyList<PackExcludedItem> ExcludedItems { get; }
     public long TotalBytes => Entries.Sum(e => e.Length);
     public int FileCount => Entries.Count(e => !e.IsDirectory);
 }

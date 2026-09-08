@@ -4,9 +4,9 @@
  <Grid Margin="20" RowDefinitions="Auto,*,Auto" RowSpacing="12" MaxWidth="940">
     <StackPanel Grid.Row="0" Spacing="4">
      <TextBlock Text="压缩任务" FontSize="24" FontWeight="SemiBold" />
-     <TextBlock Text="添加文件或文件夹，合成一个 ZIP。" Opacity="0.7" TextWrapping="Wrap" />
+     <TextBlock Text="添加文件或文件夹，生成 ZIP。" Opacity="0.7" TextWrapping="Wrap" />
     </StackPanel>
-  <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+  <ScrollViewer Name="MainScroller" Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
    <StackPanel Spacing="16">
     <!-- 结果先于表单呈现，窄窗口完成后也能直接找到产物，不要求用户滚过原输入。 -->
     <Border Background="#11888888" CornerRadius="8" Padding="14" IsVisible="{Binding HasFeedback}">
@@ -14,6 +14,21 @@
       <TextBlock Text="{Binding Summary}" FontWeight="SemiBold" TextWrapping="Wrap" />
       <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
       <Button Name="OpenResultButton" Content="打开输出文件夹" Click="OpenOutput" IsVisible="{Binding HasOutput}" HorizontalAlignment="Left" />
+      <ItemsControl ItemsSource="{Binding GroupResults}">
+       <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:PackGroupDisplay">
+        <StackPanel Spacing="3" Margin="0,6">
+         <TextBlock Text="{Binding Source}" FontWeight="SemiBold" TextWrapping="Wrap" />
+         <TextBlock Text="{Binding Status}" />
+         <TextBlock Text="{Binding Detail}" TextWrapping="Wrap" />
+         <TextBlock Text="{Binding OutputPath}" TextWrapping="Wrap" FontSize="12" />
+        </StackPanel>
+       </DataTemplate></ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <ItemsControl ItemsSource="{Binding PreviousOutputs}">
+       <ItemsControl.ItemTemplate><DataTemplate x:DataType="x:String"><TextBlock Text="{Binding}" TextWrapping="Wrap" FontSize="12" /></DataTemplate></ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <Button Name="RetryFailedButton" Content="重试可恢复失败组" Command="{Binding RetryFailedCommand}" IsVisible="{Binding HasRetryableGroups}" HorizontalAlignment="Left" />
+      <Button Content="重新准备未完成项" Command="{Binding PrepareUnfinishedCommand}" IsVisible="{Binding HasUnfinishedGroups}" HorizontalAlignment="Left" />
      </StackPanel>
     </Border>
     <Border BorderBrush="#44888888" BorderThickness="1" CornerRadius="8" Padding="18">
@@ -35,13 +50,16 @@
         <ItemsControl ItemsSource="{Binding RootMappings}">
          <ItemsControl.ItemTemplate><DataTemplate x:DataType="x:String"><TextBlock Text="{Binding}" TextWrapping="Wrap" FontSize="12" /></DataTemplate></ItemsControl.ItemTemplate>
         </ItemsControl>
+        <Expander Header="查看包内路径"><ListBox ItemsSource="{Binding EntryMappings}" MaxHeight="180" /></Expander>
+        <Expander Header="{Binding ExclusionSummary}"><ListBox ItemsSource="{Binding ExcludedMappings}" MaxHeight="180" /></Expander>
+        <Button Content="更新预览清单" Command="{Binding PreviewCommand}" HorizontalAlignment="Left" />
        </StackPanel>
       </Expander>
      </StackPanel>
     </Border>
     <StackPanel Spacing="8" IsEnabled="{Binding CanEdit}">
-     <TextBlock Text="压缩包名称" />
-     <TextBox Name="NameEditor" Text="{Binding ArchiveName}" PlaceholderText="资料.zip" />
+     <TextBlock Text="压缩包名称" IsVisible="{Binding !SeparateArchives}" />
+     <TextBox Name="NameEditor" Text="{Binding ArchiveName}" PlaceholderText="资料.zip" IsVisible="{Binding !SeparateArchives}" />
      <TextBlock Text="输出文件夹" />
      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
       <TextBox Name="OutputEditor" Text="{Binding OutputDirectory}" PlaceholderText="选择输出位置" />
@@ -49,6 +67,34 @@
      </Grid>
      <TextBlock Text="{Binding TargetHint}" Opacity="0.65" FontSize="12" TextWrapping="Wrap" />
     </StackPanel>
+    <!-- 普通合包不需要展开；所有额外偏好均默认关闭或标准。密码提示紧邻入口，避免误认为文件名也被隐藏。 -->
+    <Expander Name="MoreOptions" Header="更多选项：分别打包、排除与加密" IsExpanded="{Binding MoreOptionsExpanded}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+     <StackPanel Spacing="10" IsEnabled="{Binding CanEdit}">
+      <CheckBox Name="SeparateToggle" Content="分别打包（每个选中的顶层项生成 ZIP）" IsChecked="{Binding SeparateArchives}" />
+      <TextBlock Text="默认全部合成一个包；选中父目录后，子项仍归入父目录。" TextWrapping="Wrap" FontSize="12" />
+      <TextBlock Text="压缩偏好" />
+      <ComboBox Name="CompressionPicker" ItemsSource="{Binding CompressionChoices}" SelectedIndex="{Binding CompressionIndex}" HorizontalAlignment="Stretch" />
+      <Expander Header="排除内容（默认不排除）">
+       <StackPanel Spacing="5">
+        <CheckBox Content="文件类型 .tmp、.bak" IsChecked="{Binding ExcludeTemporaryFiles}" />
+        <CheckBox Content="文件类型 .log" IsChecked="{Binding ExcludeLogs}" />
+        <CheckBox Content="目录 bin、obj（含后代）" IsChecked="{Binding ExcludeBuildFolders}" />
+        <CheckBox Content="目录 .git（含后代）" IsChecked="{Binding ExcludeGitFolder}" />
+        <CheckBox Content="目录 node_modules（含后代）" IsChecked="{Binding ExcludeNodeModules}" />
+        <TextBlock Text="不区分大小写；按完整目录名或最后一段扩展名匹配。隐藏文件不会自动排除。" TextWrapping="Wrap" FontSize="12" />
+       </StackPanel>
+      </Expander>
+      <CheckBox Name="EncryptToggle" Content="为本次所有 ZIP 设置同一个密码（AES-256）" IsChecked="{Binding EncryptionEnabled}" />
+      <StackPanel Spacing="8" IsVisible="{Binding EncryptionEnabled}">
+       <TextBlock Text="接收方工具需要支持此加密 ZIP。文件名和目录名仍然可见。" TextWrapping="Wrap" />
+       <TextBox Name="PasswordEditor" Text="{Binding TargetPassword}" PasswordChar="{Binding PasswordCharacter}" MaxLength="1024" PlaceholderText="本次目标密码" />
+       <TextBox Name="ConfirmPasswordEditor" Text="{Binding ConfirmPassword}" PasswordChar="{Binding PasswordCharacter}" MaxLength="1024" PlaceholderText="再次输入目标密码" />
+       <CheckBox Content="临时显示密码" IsChecked="{Binding ShowPassword}" />
+       <TextBlock Text="密码仅用于当前创建会话；重试沿用原密码，新建任务需要重新设置。" TextWrapping="Wrap" FontSize="12" />
+      </StackPanel>
+      <Button Content="查看分组与排除预览" Command="{Binding PreviewCommand}" HorizontalAlignment="Left" />
+     </StackPanel>
+    </Expander>
    </StackPanel>
   </ScrollViewer>
   <StackPanel Grid.Row="2" Spacing="8">

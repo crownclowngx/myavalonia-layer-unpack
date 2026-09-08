@@ -14,6 +14,8 @@
 >
 > 当前工程状态：Headless、Plugin、Standalone 与两个测试项目；解压、压缩两个普通 Document，零 Tool、零全局命令、无历史持久化
 
+> 当前增量：R03 已实施，分别打包、有限排除、四级偏好和 AES-256 见[G0009 结果](refactoring/G0009/result.md)及[契约](refactoring/G0009/batch-creation-contract.md)。默认普通合包路径保持，逐组失败、重试和重新准备未完成项均有 GUI 入口。目标秘密与解压候选池完全分开。
+>
 > 后续规划：[路线图](roadmap/README.md)中的 R02 已进入 G0008 本地候选，新增普通 ZIP 创建，见下述 R02 增量。下文首版范围与历史 G0001–G0006 路线仍用于说明解压基线，不表示当前没有压缩；未来浏览、整理和 Workflow 仍未实现。
 
 ## R02 当前增量：基础 ZIP 压缩
@@ -24,13 +26,13 @@
 
 Headless 提供 PackService.PrepareAsync / ExecuteAsync，来源摘要、有限预算、异步写入、清单复验与不覆盖提交由独立职责实现。取消清理未提交文件，失败后再次开始重新准备。源内新输出子目录需预先存在；Zip64、元数据和原生互操作按证据限定。
 
-方案与当前验证见[G0008](refactoring/G0008/implementation.md)、[创建契约](refactoring/G0008/creation-contract.md)、[创建矩阵](refactoring/G0008/format-support-matrix.md)和[结果](refactoring/G0008/result.md)。加密、分别打包、其他创建格式、浏览与工作流尚未实施。
+方案与当前验证见[G0008](refactoring/G0008/implementation.md)、[创建契约](refactoring/G0008/creation-contract.md)、[创建矩阵](refactoring/G0008/format-support-matrix.md)和[结果](refactoring/G0008/result.md)。上述为 R02 历史增量；R03 已扩展分别打包和加密，其他创建格式、浏览与工作流尚未实施。
 
 本文定义产品做什么、用户如何完成任务、各入口如何分工，以及后续按 `Gxxxx` 推进的实施顺序。
 阶段档案与状态口径见[实施档案与文档治理](refactoring/README.md)，共同验收约束见[质量基线](refactoring/quality-baseline.md)。
 
 具体实施使用 [V1 执行计划](v1-execution-plan.md)：按 G0001–G0006 列出工作项、依赖、阶段出口和验收归属。
-V1 执行计划保留其历史记录；当前增量见 G0008。按用户最新约束，不使用 AIFLOW、不新增 Windows CI，不执行 Release、正式插件 ZIP、部署或发布门禁。
+V1 执行计划保留其历史记录；当前增量见 G0009。按用户最新约束，不使用 AIFLOW、不新增 Windows CI，不执行 Release、正式插件 ZIP、部署或发布门禁。
 
 ## 1. 已确认需求与本版设计建议
 
@@ -57,7 +59,7 @@ V1 执行计划保留其历史记录；当前增量见 G0008。按用户最新�
 
 ## 2. 当前工程事实
 
-以下为 2026-09-07 的当前源码事实。实际本地检查见[G0008 结果](refactoring/G0008/result.md)，不代表真实 Host 或正式包已验收。
+以下为 2026-09-08 的当前源码事实。实际本地检查见[G0009 结果](refactoring/G0009/result.md)，不代表真实 Host 或正式包已验收。
 
 | 项目 | 当前事实 |
 | --- | --- |
@@ -69,7 +71,7 @@ V1 执行计划保留其历史记录；当前增量见 G0008。按用户最新�
 | 测试 | 真实格式、内容摘要、密码、递归、输出、生命周期、UI 渲染和性能基线 |
 | 依赖 | 当前集中配置 Plugin SDK `3.3.0`，工程目标 `net10.0`，插件交付 RID 为 `win-x64` |
 | 解压能力 | Headless 使用 BCL、SharpCompress 0.50.4 与 SharpZipLib 1.4.2；统一会话管理深度、密码和预算 |
-| 压缩能力 | .NET 10 普通 ZIP 写入、UTF-8、标准 Deflate；清单与来源摘要、独立输出预算和文件事务 |
+| 压缩能力 | 普通 ZIP / AES-256、四级偏好、合并/分别、有限排除；冻结清单与来源摘要、逐组事务及恢复；详细映射见 G0009 |
 
 Plugin ID 与 Document ID 沿用初始化值。后续可以调整类名、显示名和内部目录，不为产品化改名而变更身份。
 当前工程版本号不等于产品功能已经达到首版验收标准。

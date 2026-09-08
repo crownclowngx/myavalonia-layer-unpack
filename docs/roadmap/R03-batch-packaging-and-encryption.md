@@ -1,10 +1,14 @@
 # R03：批量打包与加密
 
-> 状态：规划中 · 实施映射：未分配
+> 状态：已实施／本地验证通过，部分原生交互与桌面工具待验收，详见 [G0009 结果](../refactoring/G0009/result.md) · 实施映射：G0009
 >
 > 前置：R02 的 ZIP 创建、输入清单与文件提交闭环。
 >
 > 产出：一次处理多份交付资料，选项仅在需要时出现。
+
+实施档案：[计划](../refactoring/G0009/plan.md) · [方案](../refactoring/G0009/implementation.md) · [批次契约](../refactoring/G0009/batch-creation-contract.md) · [格式矩阵](../refactoring/G0009/encryption-and-compression-matrix.md) · [交互](../refactoring/G0009/interaction-design.md) · [验收](../refactoring/G0009/acceptance-matrix.md)。
+
+实际边界：分别输出须在所有来源目录之外；目录排除按命中目录计一项并包含后代；AES“仅打包”采用 Deflate 0。两套库的精确版本与读取方式已验证，桌面工具原生互操作仍待验收；不承诺系统自带工具支持。
 
 ## 1. 用户目标与主流程
 

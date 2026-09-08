@@ -1,6 +1,6 @@
 # Layer Unpack V1 执行计划
 
-> 本轮实施约束（2026-09-07，用户最新指令）：SOLID 优先，朴素设计模式，详细中文注释与设计思路，完整单元测试及本地门禁，同步维护专用文档。不使用 AIFLOW、Windows CI 或发布门禁。
+> 本轮实施约束（2026-09-08，用户最新指令）：SOLID 优先，朴素设计模式，详细中文注释与设计思路，完整单元测试及本地门禁，同步维护专用文档。不使用 AIFLOW、Windows CI 或发布门禁。
 >
 > 下文 G0002-09、G0003-09 的正式产物检查，以及 G0006 的 Release、ZIP、部署、安装、真实 Host 发布验收均移交发布阶段。本轮执行相应的源码依赖检查、Debug 验证、本地性能和文档工作；原发布要求保留以便后续追踪。
 
@@ -8,9 +8,9 @@
 >
 > 目标版本：V1 首个可交付版本；当前工程中的 `PluginVersion` 不代表产品已完成
 >
-> 当前状态：V1 本地候选已实施；108 个 Headless 测试、13 个 Plugin/UI 测试及本地门禁通过
+> 历史 V1 状态：108 个 Headless 测试、13 个 Plugin/UI 测试及 G0006 本地门禁通过。当前 R03 增量及新验证见[G0009 结果](refactoring/G0009/result.md)。
 >
-> 当前入口：先读 [G0006 结果](refactoring/G0006/result.md)，后续处理原生人工验收或在发布时恢复发布门禁
+> 当前入口：先读 [G0009 结果](refactoring/G0009/result.md)；下文保留 V1 历史清单，新增工作项见本文 R03 附录。发布时恢复发布门禁。
 
 本计划将[产品基线](product-shape-and-implementation-plan.md)转化为可执行工作项。
 文档方式参考 `myavalonia-fractal-art`：产品目标、阶段计划、实施方案和实际结果分开维护；
@@ -389,3 +389,13 @@ Standalone 用 `dotnet run --project src/LayerUnpackPlugin.Standalone` 启动并
 - [ ] 正式包与实际验收代码一致，满足“V1 可交付”封板标准。
 
 当前为 V1 本地候选。后续从未勾选项继续，不重做 G0001；发布工作启动前恢复正式包、安装及真实 Host 门禁。
+
+## 15. R03 / G0009 当前增量
+
+- [x] G0009-01：共用顶层规则、分别打包、有限排除、排空跳过和映射预览。
+- [x] G0009-02：逐组事务、可恢复失败重试、取消与关闭排空。
+- [x] G0009-03：四级偏好、独立目标秘密、ZIP AES-256、真实内容与认证回归。
+- [x] G0009-04：按需选项、密码重复核对、未完成项新任务、双压缩页与解压页隔离。
+- [x] G0009-05：统一本地门禁全部通过：182 项 Headless、48 项 Plugin/UI，零失败、零跳过；源码与证据归档见结果。
+
+实际范围与待验项见[计划](refactoring/G0009/plan.md)、[方案](refactoring/G0009/implementation.md)、[验收矩阵](refactoring/G0009/acceptance-matrix.md)和[结果](refactoring/G0009/result.md)。原生交互、桌面接收工具及发布验收继续单独追踪。

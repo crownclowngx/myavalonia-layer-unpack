@@ -22,7 +22,10 @@ V1 的依赖方向是 `Plugin → Headless`、`Standalone → Plugin → Headles
 | `IPackService / PackService` | 准备／执行编排、超时、统一结果，各调用无共享可变状态 |
 | `IArchiveWriter / ZipArchiveWriter` | 单个 ZIP 写入与中央目录收尾、逐文件摘要核对 |
 | `PackOutputStream / PackFileTransaction` | 输出文件位置预算、取消检查、自有暂存与不覆盖提交 |
-| `PackDocument / PackView` | 简洁创建任务、建议值与快照保护；窗口适配与来源清单按需展示 |
+| `PackInputSelection / PackExclusionRules` | 共用顶层收录规则，有限排除语法；不依赖 GUI |
+| `IPackBatchService / PackBatchSession` | 复用单包用例分组准备，顺序执行、逐组恢复和独立目标秘密寿命 |
+| `AesZipArchiveWriter / PackEntryCopier / PackSecret` | AES 适配、共享来源校验和独立秘密参数；不引用解压候选池 |
+| `PackDocument / PackView` | 依赖 IPackBatchService；按需选项、预览、逐组结果和未完成项新任务；窗口适配分离 |
 
 S：业务、格式、路径、事务和界面分责。O：新增格式优先扩展适配层，不改变密码和递归调度。L：测试替身遵守流所有权、预算、取消和输出契约。I：解压保留原端口，创建新增 IPackService 与 IArchiveWriter，不建设万能上下文。D：Document 依赖对应服务接口和公开 IDocumentLifetime；用例依赖窄格式适配端口。
 
