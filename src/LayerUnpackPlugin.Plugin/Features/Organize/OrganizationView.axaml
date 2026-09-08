@@ -1,7 +1,12 @@
 <UserControl x:Class="LayerUnpackPlugin.Features.Organize.OrganizationView"
  xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
- xmlns:vm="using:LayerUnpackPlugin.Features.Organize" x:DataType="vm:OrganizationDocument">
- <Grid Margin="20" RowDefinitions="Auto,*,Auto" RowSpacing="12" MaxWidth="940">
+ xmlns:vm="using:LayerUnpackPlugin.Features.Organize" xmlns:repack="using:LayerUnpackPlugin.Features.Repack" x:DataType="vm:OrganizationDocument">
+ <Grid>
+ <Grid IsVisible="{Binding ShowRepackTask}" RowDefinitions="Auto,*">
+  <Button Content="返回整理结果" Command="{Binding ReturnFromRepackCommand}" Margin="20,10,20,0" />
+  <repack:RepackView Grid.Row="1" DataContext="{Binding RepackTask}" />
+ </Grid>
+ <Grid IsVisible="{Binding !ShowRepackTask}" Margin="20" RowDefinitions="Auto,*,Auto" RowSpacing="12" MaxWidth="940">
   <StackPanel Spacing="4"><TextBlock Text="整理结果" FontSize="25" FontWeight="SemiBold" />
    <TextBlock Text="{Binding SourceSummary}" TextWrapping="Wrap" Opacity="0.65" /></StackPanel>
   <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
@@ -49,7 +54,9 @@
     <Button Name="ExecuteButton" Content="开始整理" Command="{Binding ExecuteCommand}" IsVisible="{Binding HasPlan}" Classes="accent" Margin="0,0,8,4" />
     <Button Content="取消" Command="{Binding CancelCommand}" IsVisible="{Binding IsBusy}" Margin="0,0,8,4" />
     <Button Name="OpenResultButton" Content="打开整理目录" Click="OpenResult" IsVisible="{Binding CanOpenResult}" Margin="0,0,0,4" />
+    <Button Name="PackResultButton" Content="打包结果" Command="{Binding PackResultCommand}" IsVisible="{Binding CanOpenResult}" Margin="8,0,0,4" />
    </WrapPanel>
   </StackPanel>
+ </Grid>
  </Grid>
 </UserControl>

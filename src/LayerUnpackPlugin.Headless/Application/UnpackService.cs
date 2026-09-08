@@ -25,6 +25,7 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
     private readonly IArchiveExtractor _extractor;
     private readonly string _outputDirectory;
     private readonly int _maxDepth;
+    private readonly bool _discoverChildren;
     private readonly LegacyNameEncoding _legacyNameEncoding;
     private readonly PasswordPool _passwords = new();
     private readonly ExecutionBudget _budget;
@@ -40,10 +41,11 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
     private readonly object _disposeLock = new();
     private Task? _disposeTask;
 
-    internal UnpackSession(UnpackRequest request, IArchiveExtractor extractor)
+    internal UnpackSession(UnpackRequest request, IArchiveExtractor extractor, ExecutionBudget? sharedBudget = null, bool discoverChildren = true)
     {
         ArgumentNullException.ThrowIfNull(request);
         _extractor = extractor;
+        _discoverChildren = discoverChildren;
         request.Limits.Validate();
         if (!Enum.IsDefined(request.LegacyNameEncoding)) throw new UnpackValidationException("LegacyNameEncoding", "文件名编码选项无效。");
         _legacyNameEncoding = request.LegacyNameEncoding;
@@ -58,7 +60,7 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
         if (paths.Length == 0 || paths.Length > request.Limits.MaxArchives)
             throw new UnpackValidationException("Inputs", "至少添加一个压缩包，且输入数量不得超过批次节点预算。");
         _passwords.Add(request.Passwords);
-        _budget = new ExecutionBudget(request.Limits);
+        _budget = sharedBudget ?? new ExecutionBudget(request.Limits);
         foreach (var path in paths) AddNode(path, null, 1);
         _snapshot = BuildSnapshot(BatchState.Ready);
     }
@@ -191,6 +193,8 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
                 throw lastFailure ?? new UnpackFailureException(UnpackError.PasswordRequiredOrInvalid, "没有可用密码或加密内容已损坏。");
             Publish(BatchState.Running, operationId, progress);
 
+            // 普通格式转换不探测内嵌归档，避免将一个应保留的文件变成递归节点或消耗发现预算。
+            if (!_discoverChildren) return;
             // 父包已经提交，后续任何子包失败都不能改变父包自身成功的事实。
             var children = new List<Node>();
             foreach (var relative in extracted!.RelativeFiles.Order(StringComparer.OrdinalIgnoreCase))

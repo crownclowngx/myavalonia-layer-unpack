@@ -66,6 +66,11 @@ public sealed class PackPlanner
     /// <summary>写入前后核对来源清单与元数据。目录本身的时间不作内容凭据，避免自有临时文件改变目录时间而误判。</summary>
     internal void VerifyInventory(PackPlan plan, string? temporaryFile, CancellationToken token)
     {
+        if (plan.ManifestInputs is not null)
+        {
+            foreach (var input in plan.ManifestInputs) { token.ThrowIfCancellationRequested(); OrganizationFiles.ValidateMetadata(input); }
+            return;
+        }
         var current = Enumerate(plan.Roots, plan.Request, temporaryFile, token, out _, out _);
         if (current.Count != plan.Entries.Count) SourceChanged();
         for (var i = 0; i < current.Count; i++)

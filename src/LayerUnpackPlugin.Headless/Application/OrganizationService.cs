@@ -62,7 +62,11 @@ public sealed class OrganizationService(OrganizationPlanner planner, IOrganizati
             if (OrganizationFiles.Occupied(plan.OutputDirectory))
                 throw new OrganizationFailureException(OrganizationError.OutputConflict, "预览目标在复制期间被占用，请重新预览。");
             var output = transaction.CommitExact(Path.GetFileName(plan.OutputDirectory), token);
-            result = new(OrganizationState.Completed, output, entries, null, null);
+            result = new(OrganizationState.Completed, output, entries, null, null)
+            {
+                SourceGroups = Array.AsReadOnly(plan.Sources.Select(s => new OrganizationOutputSource(s.ArchivePath, s.TargetName)).ToArray()),
+                SourceWarnings = plan.SourceWarnings
+            };
             Report("已完成", null, true);
         }
         catch (OperationCanceledException)

@@ -26,8 +26,8 @@ internal static class ZipArchiveExtractor
                 token.ThrowIfCancellationRequested();
                 budget.AddEntry(); encrypted |= entry.IsCrypted;
                 var attributes = entry.ExternalFileAttributes;
-                if (attributes != -1 && ((attributes & (int)FileAttributes.ReparsePoint) != 0 || ((attributes >> 16) & 0xF000) == 0xA000))
-                    throw new UnpackFailureException(UnpackError.UnsafePath, "ZIP 包含链接条目，已停止写入。", true);
+                if (ArchiveEntryPolicy.Unsupported(attributes, entry.IsDirectory))
+                    throw new UnpackFailureException(UnpackError.UnsafePath, "ZIP 包含链接、特殊对象或不一致的条目类型，已停止写入。", true);
                 var target = PathPolicy.EntryPath(destination, entry.Name, entry.IsDirectory);
                 if (!seen.Add(target)) throw new UnpackFailureException(UnpackError.OutputError, "ZIP 包含重复或大小写冲突的路径。");
                 if (entry.IsDirectory) { Directory.CreateDirectory(target); continue; }

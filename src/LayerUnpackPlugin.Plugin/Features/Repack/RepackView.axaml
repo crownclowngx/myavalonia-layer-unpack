@@ -1,0 +1,79 @@
+<UserControl x:Class="LayerUnpackPlugin.Features.Repack.RepackView"
+ xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:vm="using:LayerUnpackPlugin.Features.Repack" xmlns:organize="using:LayerUnpackPlugin.Features.Organize"
+ xmlns:unpack="using:LayerUnpackPlugin.Features.Unpack" x:DataType="vm:RepackDocument">
+ <Grid Margin="20" RowDefinitions="Auto,*,Auto" RowSpacing="12" MaxWidth="940">
+  <TextBlock Text="{Binding Title}" FontSize="25" FontWeight="SemiBold" />
+  <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+   <StackPanel Spacing="12">
+    <TextBlock Text="{Binding ContentRule}" TextWrapping="Wrap" />
+    <Expander Header="带入的来源" HorizontalAlignment="Stretch">
+     <ListBox ItemsSource="{Binding Sources}" MaxHeight="140" />
+    </Expander>
+    <StackPanel IsEnabled="{Binding CanEdit}" Spacing="8">
+     <TextBlock Text="新 ZIP 的位置" FontWeight="SemiBold" />
+     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+      <TextBox Name="OutputEditor" Text="{Binding OutputDirectory}" PlaceholderText="输入或选择完整目录路径" />
+      <Button Grid.Column="1" Content="选择位置" Click="PickOutput" />
+     </Grid>
+     <CheckBox Name="SeparateEditor" Content="按来源分别打包" IsChecked="{Binding SeparateArchives}" IsVisible="{Binding !IsConversion}" />
+     <Expander Header="转换规则与密码" IsExpanded="{Binding OptionsExpanded}" HorizontalAlignment="Stretch">
+      <StackPanel Spacing="8">
+       <StackPanel IsVisible="{Binding IsConversion}" Spacing="8">
+        <CheckBox Name="ExpandEditor" Content="展开内部包并按规则打包" IsChecked="{Binding ExpandInternalArchives}" />
+        <StackPanel IsVisible="{Binding ExpandInternalArchives}" Spacing="6">
+         <TextBlock Text="总解压层数（外层算第 1 层）" />
+         <NumericUpDown Name="DepthEditor" Minimum="1" Maximum="16" Value="{Binding MaxDepth}" FormatString="0" />
+         <ComboBox ItemsSource="{x:Static organize:OrganizationDocument.FileTypes}" SelectedItem="{Binding SelectedFileTypes}" HorizontalAlignment="Stretch" />
+         <CheckBox Content="去掉来源根处连续的单子目录包装层" IsChecked="{Binding FlattenWrappingDirectories}" />
+        </StackPanel>
+        <TextBlock Text="旧 ZIP 文件名编码" />
+        <ComboBox ItemsSource="{x:Static unpack:UnpackDocument.NameEncodings}" SelectedItem="{Binding SelectedNameEncoding}" HorizontalAlignment="Stretch" />
+        <TextBlock Text="来源密码（一行一个候选，仅用于读取）" />
+        <TextBox Name="SourcePasswordEditor" Text="{Binding SourcePasswordText}" PasswordChar="●" AcceptsReturn="True" MaxHeight="90" />
+       </StackPanel>
+       <CheckBox Name="EncryptionEditor" Content="为新 ZIP 设置独立目标密码（AES-256）" IsChecked="{Binding EncryptionEnabled}" />
+       <StackPanel IsVisible="{Binding EncryptionEnabled}" Spacing="6">
+        <TextBox Name="TargetPasswordEditor" Text="{Binding TargetPassword}" PasswordChar="●" PlaceholderText="目标密码" />
+        <TextBox Name="ConfirmPasswordEditor" Text="{Binding ConfirmPassword}" PasswordChar="●" PlaceholderText="再次输入目标密码" />
+        <TextBlock Text="文件名仍可见。目标密码不继承来源密码。" TextWrapping="Wrap" Opacity="0.65" />
+       </StackPanel>
+      </StackPanel>
+     </Expander>
+    </StackPanel>
+    <TextBlock Text="{Binding MetadataNotice}" TextWrapping="Wrap" FontSize="12" Opacity="0.65" />
+    <Expander Header="检查包内清单" IsVisible="{Binding HasPlan}" IsExpanded="{Binding DetailsExpanded}" HorizontalAlignment="Stretch">
+     <StackPanel Spacing="6">
+      <ListBox Name="MappingList" ItemsSource="{Binding Rows}" Height="180">
+       <ListBox.ItemTemplate><DataTemplate x:DataType="x:String"><TextBlock Text="{Binding}" TextWrapping="Wrap" /></DataTemplate></ListBox.ItemTemplate>
+      </ListBox>
+      <WrapPanel><Button Content="上一页" Command="{Binding PreviousPageCommand}" Margin="0,0,8,4" />
+       <Button Content="下一页" Command="{Binding NextPageCommand}" Margin="0,0,8,4" /><TextBlock Text="{Binding PageSummary}" /></WrapPanel>
+     </StackPanel>
+    </Expander>
+    <StackPanel IsVisible="{Binding HasResult}" Spacing="6">
+     <TextBlock Text="来源与产物" FontWeight="SemiBold" />
+     <ListBox Name="ResultsList" ItemsSource="{Binding Results}" MaxHeight="220">
+      <ListBox.ItemTemplate><DataTemplate x:DataType="x:String"><TextBlock Text="{Binding}" TextWrapping="Wrap" /></DataTemplate></ListBox.ItemTemplate>
+     </ListBox>
+    </StackPanel>
+    <Expander Header="当前任务已提交的 ZIP" HorizontalAlignment="Stretch">
+     <ListBox ItemsSource="{Binding Outputs}" MaxHeight="160">
+      <ListBox.ItemTemplate><DataTemplate x:DataType="x:String"><TextBlock Text="{Binding}" TextWrapping="Wrap" /></DataTemplate></ListBox.ItemTemplate>
+     </ListBox>
+    </Expander>
+   </StackPanel>
+  </ScrollViewer>
+  <StackPanel Grid.Row="2" Spacing="6">
+   <TextBlock Text="{Binding Summary}" FontWeight="SemiBold" TextWrapping="Wrap" />
+   <ScrollViewer MaxHeight="78" HorizontalScrollBarVisibility="Disabled"><TextBlock Text="{Binding Message}" TextWrapping="Wrap" /></ScrollViewer>
+   <ProgressBar IsVisible="{Binding IsBusy}" IsIndeterminate="True" Height="3" />
+   <WrapPanel>
+    <Button Name="PreviewButton" Content="检查带入清单" Command="{Binding PreviewCommand}" IsVisible="{Binding !IsConversion}" Margin="0,0,8,4" />
+    <Button Name="StartButton" Content="{Binding StartLabel}" Command="{Binding StartCommand}" Classes="accent" Margin="0,0,8,4" />
+    <Button Content="取消" Command="{Binding CancelCommand}" IsVisible="{Binding IsBusy}" Margin="0,0,8,4" />
+    <Button Name="OpenOutputButton" Content="打开 ZIP 所在目录" Click="OpenOutput" IsVisible="{Binding HasOutputs}" Margin="0,0,0,4" />
+   </WrapPanel>
+  </StackPanel>
+ </Grid>
+</UserControl>

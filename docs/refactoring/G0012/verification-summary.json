@@ -1,0 +1,111 @@
+{
+  "stage": "G0012 / R06",
+  "status": "implemented-local-verification-passed",
+  "verifiedAt": "2026-09-08T17:10:16.6181848+08:00",
+  "baselineCommit": "eaa256101ef6604c8490577980de650e72d96180",
+  "workingTreeIncluded": true,
+  "environment": {
+    "os": "Microsoft Windows NT 10.0.26200.0",
+    "architecture": "X64",
+    "dotnetSdk": "10.0.302",
+    "avalonia": "12.1.0",
+    "pluginSdk": "3.3.0",
+    "sharpCompress": "0.50.4",
+    "sharpZipLib": "1.4.2"
+  },
+  "tests": {
+    "headless": 332,
+    "plugin": 91,
+    "passed": 423,
+    "failed": 0,
+    "skipped": 0,
+    "addedHeadless": 62,
+    "addedPlugin": 14
+  },
+  "checks": [
+    {
+      "name": "locked-restore",
+      "exitCode": 0,
+      "seconds": 0.8519073,
+      "command": "dotnet restore LayerUnpackPlugin.slnx --locked-mode"
+    },
+    {
+      "name": "debug-build",
+      "exitCode": 0,
+      "seconds": 3.5103665,
+      "command": "dotnet build LayerUnpackPlugin.slnx -c Debug -warnaserror --no-restore"
+    },
+    {
+      "name": "debug-assets",
+      "exitCode": 0,
+      "seconds": 0.8249119,
+      "command": "dotnet msbuild src/LayerUnpackPlugin.Plugin/LayerUnpackPlugin.Plugin.csproj -t:ResolveReferences -p:Configuration=Debug -getItem:ManagedPluginAsset,ManagedPluginPrivatePackage,RuntimeCopyLocalItems"
+    },
+    {
+      "name": "headless-tests",
+      "exitCode": 0,
+      "seconds": 43.314068,
+      "command": "dotnet test tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj -c Debug --no-build --logger trx;LogFileName=headless.trx --results-directory D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "plugin-tests",
+      "exitCode": 0,
+      "seconds": 23.1632001,
+      "command": "dotnet test tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj -c Debug --no-build --logger trx;LogFileName=plugin.trx --results-directory D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "format",
+      "exitCode": 0,
+      "seconds": 8.433218,
+      "command": "dotnet format LayerUnpackPlugin.slnx --verify-no-changes --no-restore"
+    },
+    {
+      "name": "docs",
+      "exitCode": 0,
+      "seconds": 0.1404802,
+      "command": "./tools/check-docs.ps1"
+    },
+    {
+      "name": "diff-check",
+      "exitCode": 0,
+      "seconds": 0.0723274,
+      "command": "git diff --check"
+    }
+  ],
+  "sourceEvidence": {
+    "fileCount": 134,
+    "sha256": "301e6c11d93dc534424e35652dd962a7e063921482bac7d07becfb55e0b6ccbb",
+    "manifest": "artifacts/G0012/local-verification/source-sha256.tsv",
+    "scope": "src/tests/tools 中的 .cs/.axaml/.csproj/.json/.py/.ps1，以及根 Directory.*.props 与 LayerUnpackPlugin.slnx；git 非忽略的已跟踪和未跟踪文件；不含 docs、README、bin/obj、artifacts",
+    "algorithm": "路径 Ordinal 排序；每行路径、TAB、原始文件 SHA-256 小写；LF 换行并含末尾 LF；UTF-8 无 BOM 清单再取 SHA-256"
+  },
+  "performance": {
+    "sources": 2,
+    "depth": 2,
+    "files": 2002,
+    "elapsedMilliseconds": 12882.5501,
+    "allocatedBytes": 729708808,
+    "processPeakWorkingSet": 181886976,
+    "usage": {
+      "ExpandedBytes": 460047,
+      "ArchiveBytes": 364610,
+      "PackedEntries": 2006,
+      "WrittenBytes": 824657
+    },
+    "validation": "每来源 1001 个文件，逐路径 SHA-256 独立回读；暂存全部清理"
+  },
+  "artifacts": {
+    "verification": "artifacts/G0012/local-verification",
+    "screenshots": "artifacts/ui/G0012",
+    "screenshotCount": 20
+  },
+  "pending": [
+    "原生目录选择和系统打开目录",
+    "125%/150%/200% DPI 与辅助功能",
+    "真实 Host 实机验收",
+    "发布阶段的 Release、正式包、部署安装与发布门禁"
+  ],
+  "aiflowUsed": false,
+  "windowsCiExecuted": false,
+  "releaseGateExecuted": false
+}

@@ -63,8 +63,8 @@ public sealed class ArchiveExtractor : IArchiveExtractor
                         throw new UnpackFailureException(UnpackError.MissingVolume, "首版不支持分卷包，请提供完整的单文件压缩包。");
                     // TAR 没有实现 Attrib；RAR5 的重定向也不会出现在 LinkTarget 中，必须检查专用属性。
                     if (entry.LinkTarget is not null || entry is RarEntry { IsRedir: true } ||
-                        (kind != ArchiveKind.Tar && IsLinkAttribute(entry.Attrib)))
-                        throw new UnpackFailureException(UnpackError.UnsafePath, "压缩包包含链接条目，已停止写入。", true);
+                        (kind != ArchiveKind.Tar && ArchiveEntryPolicy.Unsupported(entry.Attrib, entry.IsDirectory)))
+                        throw new UnpackFailureException(UnpackError.UnsafePath, "压缩包包含链接、特殊对象或不一致的条目类型，已停止写入。", true);
                     var target = PathPolicy.EntryPath(destination, entry.Key ?? "", entry.IsDirectory);
                     if (target.Equals(Path.GetFullPath(destination), PathPolicy.Comparison) && entry.IsDirectory) continue;
                     if (!seen.Add(target)) throw new UnpackFailureException(UnpackError.OutputError, "压缩包包含重复或大小写冲突的路径。");
@@ -118,10 +118,6 @@ public sealed class ArchiveExtractor : IArchiveExtractor
             throw new UnpackFailureException(UnpackError.CorruptArchive, "无法完整读取压缩包，文件可能损坏或密码不可用。");
         }
     }
-
-    private static bool IsLinkAttribute(int? attributes) => attributes is int value &&
-        (((value & (int)FileAttributes.ReparsePoint) != 0) || ((value >> 16) & 0xF000) == 0xA000);
-
 
     /// <summary>TAR 使用运行时提供的读取器，能明确区分普通文件、目录和链接/设备等特殊条目。</summary>
     private static async Task<ExtractedArchive> ExtractTarAsync(string source, string destination, ExecutionBudget budget,

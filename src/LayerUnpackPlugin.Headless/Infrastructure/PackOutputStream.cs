@@ -3,8 +3,9 @@ using LayerUnpackPlugin.Headless.Contracts;
 namespace LayerUnpackPlugin.Headless.Infrastructure;
 
 /// <summary>在真实写入位置约束归档长度；ZIP 回填头部不重复累计预算。保留可定位流语义，归档关闭后由事务关闭底层文件。</summary>
-internal sealed class PackOutputStream(Stream inner, long limit, CancellationToken token) : Stream
+internal sealed class PackOutputStream(Stream inner, long limit, CancellationToken token, Action<long>? consumeBytes = null) : Stream
 {
+    private long _highWater;
     public override bool CanRead => false;
     public override bool CanSeek => inner.CanSeek;
     public override bool CanWrite => true;
@@ -14,6 +15,8 @@ internal sealed class PackOutputStream(Stream inner, long limit, CancellationTok
     {
         token.ThrowIfCancellationRequested();
         if (count > limit - Position) throw new PackFailureException(PackError.BudgetExceeded, "生成 ZIP 超过归档输出上限。");
+        var end = Position + count;
+        if (end > _highWater) { consumeBytes?.Invoke(end - _highWater); _highWater = end; }
     }
     public override void Write(byte[] buffer, int offset, int count) { Check(count); inner.Write(buffer, offset, count); }
     public override void Write(ReadOnlySpan<byte> buffer) { Check(buffer.Length); inner.Write(buffer); }

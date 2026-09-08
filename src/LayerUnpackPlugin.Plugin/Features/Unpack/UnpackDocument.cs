@@ -44,16 +44,17 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
 
     public ObservableCollection<InputItem> Inputs { get; } = [];
     public ObservableCollection<ArchiveNodeViewModel> Roots { get; } = [];
-    public bool CanEdit => !IsBusy && !IsClosed && !ShowOrganizationTask;
+    public bool CanEdit => !IsBusy && !IsClosed && ShowMainTask;
     public bool IsClosed => _closed || _lifetime.IsClosing;
     public DocumentPresentationState Presentation => _presentation;
     public event EventHandler? PresentationChanged;
     public UnpackResult? CurrentResult => _session?.Snapshot;
 
-    public UnpackDocument(IUnpackService service, IDocumentLifetime lifetime, IOrganizationService? organizationService = null)
+    public UnpackDocument(IUnpackService service, IDocumentLifetime lifetime, IOrganizationService? organizationService = null, IRepackService? repackService = null)
     {
         _service = service;
         _organizationService = organizationService ?? new OrganizationService();
+        _repackService = repackService ?? new RepackService();
         _lifetime = lifetime;
         _hostClosing = lifetime.ClosingToken.Register(() => _closing.Cancel());
         Inputs.CollectionChanged += (_, _) => { NotifyPresentation(); NotifyCommands(); };
@@ -89,6 +90,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
         RemoveSelectedCommand.NotifyCanExecuteChanged();
         ShowPasswordEntryCommand.NotifyCanExecuteChanged(); PrepareNewBatchCommand.NotifyCanExecuteChanged();
         OrganizeCommand.NotifyCanExecuteChanged(); ReturnToUnpackCommand.NotifyCanExecuteChanged();
+        ConvertToZipCommand.NotifyCanExecuteChanged(); PackResultsCommand.NotifyCanExecuteChanged(); ReturnFromRepackCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>文件选择、拖放与目录扫描共用同一入口，关闭后的扫描结果不能再写入界面。</summary>
@@ -266,6 +268,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
         _closed = true; ++_generation; _closing.Cancel();
         PasswordText = ""; _hostClosing.Dispose();
         if (OrganizationTask is not null) await OrganizationTask.DisposeAsync().ConfigureAwait(false);
+        if (RepackTask is not null) await RepackTask.DisposeAsync().ConfigureAwait(false);
         // 只排空不依赖 UI 的工作任务。排空整个命令续体会与 Host 同步释放 UI Scope 形成死锁。
         if (_session is not null) await _session.DisposeAsync().ConfigureAwait(false);
         try { await _backgroundWork.ConfigureAwait(false); } catch (Exception) { /* 工作结果由关闭前的命令观察；关闭不再次传播失败。 */ }

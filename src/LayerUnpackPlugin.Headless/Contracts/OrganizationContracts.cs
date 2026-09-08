@@ -54,10 +54,17 @@ public sealed class OrganizationPlan
     public int FileCount { get; }
     public long TotalBytes { get; }
     internal IReadOnlyList<OrganizationInput> Inputs { get; }
+    public IReadOnlyList<string> SourceWarnings { get; internal init; } = [];
 }
 
 /// <summary>内部源凭据与公开目标映射分离，UI 只呈现映射，不负责推断或验证磁盘身份。</summary>
 internal sealed record OrganizationInput(Guid SourceId, string Path, CommittedEntry Entry);
 public sealed record OrganizationProgress(string Phase, int FilesDone, int TotalFiles, long CopiedBytes, long TotalBytes, string? CurrentPath);
 public sealed record OrganizationResult(OrganizationState State, string? OutputDirectory,
-    IReadOnlyList<CommittedEntry> Entries, OrganizationDiagnostic? Error, string? CleanupWarning);
+    IReadOnlyList<CommittedEntry> Entries, OrganizationDiagnostic? Error, string? CleanupWarning)
+{
+    /// <summary>成功复制时冻结的来源边界，供结果分别打包；不靠事后扫描目录恢复来源。</summary>
+    public IReadOnlyList<OrganizationOutputSource> SourceGroups { get; init; } = [];
+    public IReadOnlyList<string> SourceWarnings { get; init; } = [];
+}
+public sealed record OrganizationOutputSource(string Source, string RelativeRoot);

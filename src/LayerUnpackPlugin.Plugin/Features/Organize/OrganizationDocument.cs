@@ -43,7 +43,7 @@ public sealed partial class OrganizationDocument : ObservableObject, IDisposable
         new OrganizationTypeOption(OrganizationFileTypes.PdfAndImages, "PDF 和图片")
     });
     public bool IsClosed => _closed || _closing.IsCancellationRequested;
-    public bool CanEdit => !IsClosed && !IsBusy;
+    public bool CanEdit => !IsClosed && !IsBusy && !ShowRepackTask;
     public bool HasPlan => Plan is not null;
     public bool CanOpenResult => Result?.State == OrganizationState.Completed;
     public string? OutputPath => Result?.OutputDirectory ?? Plan?.OutputDirectory;
@@ -52,9 +52,10 @@ public sealed partial class OrganizationDocument : ObservableObject, IDisposable
     public string FlattenSummary => Plan is null ? "" : string.Join(Environment.NewLine, Plan.Sources.Where(s => s.RemovedPrefix.Length > 0)
         .Take(10).Select(s => $"{s.TargetName}：去掉 {s.RemovedPrefix}/")) + (Plan.Sources.Count(s => s.RemovedPrefix.Length > 0) > 10 ? "\n其余路径变化见映射详情。" : "");
 
-    public OrganizationDocument(IOrganizationService service, UnpackResult input, string outputParent, CancellationToken parentClosing)
+    public OrganizationDocument(IOrganizationService service, UnpackResult input, string outputParent, CancellationToken parentClosing, IRepackService? repackService = null)
     {
         _service = service; _input = input; _outputParent = outputParent;
+        _repackService = repackService ?? new RepackService();
         _closing = CancellationTokenSource.CreateLinkedTokenSource(parentClosing);
     }
 
@@ -84,6 +85,7 @@ public sealed partial class OrganizationDocument : ObservableObject, IDisposable
     {
         PreviewCommand.NotifyCanExecuteChanged(); ExecuteCommand.NotifyCanExecuteChanged(); CancelCommand.NotifyCanExecuteChanged();
         PreviousPageCommand.NotifyCanExecuteChanged(); NextPageCommand.NotifyCanExecuteChanged();
+        PackResultCommand.NotifyCanExecuteChanged(); ReturnFromRepackCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand(CanExecute = nameof(CanPreview))]
@@ -103,6 +105,7 @@ public sealed partial class OrganizationDocument : ObservableObject, IDisposable
         _operation = operation;
         try
         {
+            await ResetRepackAsync();
             Result = null;
             if (!execute)
             {
@@ -173,6 +176,7 @@ public sealed partial class OrganizationDocument : ObservableObject, IDisposable
     private async Task CloseAsync()
     {
         _closed = true; ++_generation; _closing.Cancel();
+        if (RepackTask is not null) await RepackTask.DisposeAsync().ConfigureAwait(false);
         // 只等待无 UI 依赖的后台工作，Host 同步释放 Scope 时不会等待界面续体；清理完成后才归还所有权。
         try { await _backgroundWork.ConfigureAwait(false); } catch { /* 命令负责观察错误，关闭只负责排空。 */ }
         _closing.Dispose();

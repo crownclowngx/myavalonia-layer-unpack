@@ -8,9 +8,9 @@
 >
 > 目标版本：V1 首个可交付版本；当前工程中的 `PluginVersion` 不代表产品已完成
 >
-> 历史 V1 状态：108 个 Headless 测试、13 个 Plugin/UI 测试及 G0006 本地门禁通过。当前 R05 增量及新验证见[G0011 结果](refactoring/G0011/result.md)。
+> 历史 V1 状态：108 个 Headless 测试、13 个 Plugin/UI 测试及 G0006 本地门禁通过。当前 R06 增量及新验证见[G0012 结果](refactoring/G0012/result.md)。
 >
-> 当前入口：先读 [G0011 结果](refactoring/G0011/result.md)；下文保留 V1 历史清单，新增工作项见本文 R05 附录。发布时恢复发布门禁。
+> 当前入口：先读 [G0012 结果](refactoring/G0012/result.md)；下文保留 V1 历史清单，新增工作项见本文 R06 附录。发布时恢复发布门禁。
 
 本计划将[产品基线](product-shape-and-implementation-plan.md)转化为可执行工作项。
 文档方式参考 `myavalonia-fractal-art`：产品目标、阶段计划、实施方案和实际结果分开维护；
@@ -420,3 +420,16 @@ Standalone 用 `dotnet run --project src/LayerUnpackPlugin.Standalone` 启动并
 - [ ] 原生交互、DPI、辅助功能与真实 Host 实机验收；发布阶段恢复发布门禁。
 
 完整本地门禁、最终测试数量和证据以 [G0011 结果](refactoring/G0011/result.md)为准。专项：[整理契约](refactoring/G0011/organization-contract.md)、[验收矩阵](refactoring/G0011/acceptance-matrix.md)。
+
+## R06 附录：格式转换与重新打包 / G0012
+
+- [x] G0012-01：每来源普通 ZIP 转换，保留内容、相对路径、空目录及内部包字节。
+- [x] G0012-02：显式有限递归与 R05 整理映射，不复制另一套递归或筛选规则。
+- [x] G0012-03：解压／整理提交清单只读准备、合成／分别、源变化与历史隔离。
+- [x] G0012-04：来源和目标秘密分离、RAR5 校验限制传递。
+- [x] G0012-05：总体账本、逐 ZIP 回读提交、取消与清理残留责任。
+- [x] G0012-06：三个上下文入口、预览分页、父页面关闭排空和迟到回调隔离。
+- [x] G0012-07：真实格式、内容、故障、资源与 UI 专项测试和专用文档。
+- [ ] 原生目录选择、辅助功能、真实 DPI／Host 实机验收；发布阶段再运行发布门禁。
+
+完整本地门禁、最终测试数量和证据以 [G0012 结果](refactoring/G0012/result.md)为准。专项：[转换契约](refactoring/G0012/conversion-contract.md)、[保留矩阵](refactoring/G0012/preservation-matrix.md)、[验收矩阵](refactoring/G0012/acceptance-matrix.md)。

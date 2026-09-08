@@ -101,9 +101,9 @@ var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken)
 
 ## 后续产品阶段规划
 
-[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01–R05 已实施，当前本地验证和遗留见[G0011 结果](refactoring/G0011/result.md)。R06–R08 的转换与后续集成仍为未来目标。
+[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01–R06 已实施，当前本地验证和遗留见[G0012 结果](refactoring/G0012/result.md)。R07–R08 的格式扩展与后续集成仍为未来目标。
 
-生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008、R03 映射 G0009、R04 映射 G0010、R05 映射 G0011，后续可细化 R06，并复核各阶段原生交互遗留。
+生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008、R03 映射 G0009、R04 映射 G0010、R05 映射 G0011、R06 映射 G0012，后续可细化 R07，并复核各阶段原生交互遗留。
 
 ## 整理解压结果
 
@@ -114,3 +114,13 @@ var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken)
 5. 返回原结果保留整理子页，开始新批次、重试或清空释放旧子任务，已提交目录保留。
 
 类型基于扩展名，不识别内容；原包和原解压结果保留。没有匹配文件时不生成目录。只接受新版解压结果的提交清单，不补扫历史或任意目录。Headless 使用 `IOrganizationService.PlanAsync/ExecuteAsync`，结果提供独立清单供后续用例消费，见[契约与示例](refactoring/G0011/organization-contract.md)。
+
+## 转换归档与打包结果
+
+1. 在解压任务添加来源后点击“转换为 ZIP…”，检查来源和目标位置，默认每来源一个新 ZIP，保留内部归档字节、相对路径和空目录。
+2. 如需改变内容结构，展开规则，显式选择总层数、PDF／图片筛选或去包装链。页面显示含外层的总层数；类型规则决定边界内部包是否保留。
+3. 来源密码只用于读取。目标默认不加密；需要 AES-256 时单独输入两次目标密码，再点击“开始转换”。
+4. 解压或整理成功结果也可点击“打包结果”；先“检查带入清单”，按 100 行分页审阅，再“开始打包”。默认合成，可选择按来源分别；预览本身不写目录或 ZIP。
+5. 查看逐来源状态和实际产物路径。取消会排空并清理本任务暂存，已提交 ZIP 和用户已有结果保留；来源变化需重新检查，不自动带入历史文件。
+
+不保留原归档全部元数据，不宣称完全无损；来源认证限制不会因目标 ZIP 可读而消失。详细说明和 Headless 示例见[G0012 契约](refactoring/G0012/conversion-contract.md)，内容／元数据范围见[矩阵](refactoring/G0012/preservation-matrix.md)。

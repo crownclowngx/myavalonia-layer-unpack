@@ -78,7 +78,8 @@ public sealed class OrganizationPlanner
                 timeout.Token.ThrowIfCancellationRequested();
                 OrganizationFiles.EntryPath(output, mapping.TargetRelativePath, mapping.IsDirectory);
             }
-            return new(result.BatchId, output, rules, limits, sources, mappings, conflicts, inputs);
+            return new(result.BatchId, output, rules, limits, sources, mappings, conflicts, inputs)
+            { SourceWarnings = Array.AsReadOnly(result.Nodes.SelectMany(n => new[] { n.Warning, n.Error?.Message }).OfType<string>().Distinct().ToArray()) };
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         { throw new OrganizationFailureException(OrganizationError.Timeout, "生成预览超过时间预算，请减少本次结果数量。"); }

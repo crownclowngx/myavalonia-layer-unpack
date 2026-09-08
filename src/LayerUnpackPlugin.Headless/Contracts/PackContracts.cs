@@ -62,6 +62,9 @@ public sealed class PackPlan
     public int MergedInputs { get; }
     public int ExcludedOutputs { get; }
     public IReadOnlyList<PackExcludedItem> ExcludedItems { get; }
+    /// <summary>精确结果打包保留完整源凭据；执行只验证这些成员，不重新递归扫描以接纳历史文件。</summary>
+    internal IReadOnlyList<OrganizationInput>? ManifestInputs { get; init; }
+    internal bool AllowEmptyArchive { get; init; }
     public long TotalBytes => Entries.Sum(e => e.Length);
     public int FileCount => Entries.Count(e => !e.IsDirectory);
 }

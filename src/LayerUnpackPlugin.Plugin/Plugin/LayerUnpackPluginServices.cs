@@ -20,6 +20,9 @@ public static class LayerUnpackPluginServices
         services.AddSingleton<OrganizationPlanner>();
         services.AddSingleton<IOrganizationCopier, OrganizationCopier>();
         services.AddScoped<IOrganizationService, OrganizationService>();
+        services.AddSingleton<CommittedPackPlanner>();
+        services.AddScoped<IRepackWriter, RepackWriter>();
+        services.AddScoped<IRepackService, RepackService>();
         return services;
     }
 }

@@ -74,8 +74,8 @@ internal static class ZipBrowseCatalog
     internal static void ValidateEntry(ZipEntry entry)
     {
         var attributes = entry.ExternalFileAttributes;
-        if (attributes != -1 && ((attributes & (int)FileAttributes.ReparsePoint) != 0 || ((attributes >> 16) & 0xF000) == 0xA000))
-            throw new UnpackFailureException(UnpackError.UnsafePath, "ZIP 条目为链接或重解析点，不允许提取。", true);
+        if (ArchiveEntryPolicy.Unsupported(attributes, entry.IsDirectory))
+            throw new UnpackFailureException(UnpackError.UnsafePath, "ZIP 条目为链接、特殊对象或类型声明不一致，不允许提取。", true);
         if (!entry.IsDirectory && (!entry.IsCompressionMethodSupported() || (entry.Flags & (1 << 6)) != 0))
             throw new UnpackFailureException(UnpackError.UnsupportedEncryption, "此条目的压缩或强加密方式不在选择提取支持范围。");
     }
