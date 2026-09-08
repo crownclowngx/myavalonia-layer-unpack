@@ -26,6 +26,10 @@ V1 的依赖方向是 `Plugin → Headless`、`Standalone → Plugin → Headles
 | `IPackBatchService / PackBatchSession` | 复用单包用例分组准备，顺序执行、逐组恢复和独立目标秘密寿命 |
 | `AesZipArchiveWriter / PackEntryCopier / PackSecret` | AES 适配、共享来源校验和独立秘密参数；不引用解压候选池 |
 | `PackDocument / PackView` | 依赖 IPackBatchService；按需选项、预览、逐组结果和未完成项新任务；窗口适配分离 |
+| `ArchiveCatalog / ArchiveSelection` | 快照条目身份、有限分页、目录明确后代和祖先三态计数；与搜索显示分离 |
+| `IArchiveBrowseService / IArchiveBrowseSession` | ZIP 浏览与所选提取端口；来源摘要、会话互斥、累计读取/展开预算、取消与事务编排 |
+| `ZipDirectoryGuard / ZipBrowseCatalog / BrowseReadStream` | 引擎对象分配前验证目录规模；保留序号和冲突；为同步解析器提供取消与计量边界 |
+| `BrowseDocument / BrowseView / OwnedUnpackTask` | 第三个普通 Document；分页呈现、补密、生命周期及承载真实原解压任务 |
 
 S：业务、格式、路径、事务和界面分责。O：新增格式优先扩展适配层，不改变密码和递归调度。L：测试替身遵守流所有权、预算、取消和输出契约。I：解压保留原端口，创建新增 IPackService 与 IArchiveWriter，不建设万能上下文。D：Document 依赖对应服务接口和公开 IDocumentLifetime；用例依赖窄格式适配端口。
 
@@ -35,7 +39,7 @@ R01 使用单列滚动内容与固定操作区，Standalone 默认 900×760、�
 
 ## Scope 与生命周期
 
-Module 注册解压、压缩两个普通 Document，不保存注册对象。业务服务和 Document 按 Scope 创建；格式适配器与 PackPlanner 无状态，可共享实例；密码、节点、清单和预算属于相应调用／会话。Standalone 的两个标签分别拥有 Scope 与 ClosingToken，切换不会销毁任务。
+Module 注册解压、压缩、浏览三个普通 Document，不保存注册对象。业务服务和 Document 按 Scope 创建；格式适配器与 PackPlanner 无状态，可共享实例；密码、节点、清单和预算属于相应调用／会话。Standalone 的三个标签分别拥有 Scope 与 ClosingToken，切换不会销毁任务。浏览中的全部解压入口使用独立 ClosingToken 承载真实原解压 Document，只传来源与输出，不共享秘密或可变状态，见[G0010 方案](refactoring/G0010/implementation.md)。
 
 Standalone 在窗口构造阶段只创建对象，Opened 后观察异步初始化。首次关闭取消生命周期，等待 Headless 和扫描后台任务排空，再释放 Scope 并真正关闭窗口。Host 的同步 Scope 释放路径也受支持：只同步等待不依赖 UI 的核心任务，排队的 UI 续体观察关闭标记后退出。
 

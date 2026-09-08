@@ -1,6 +1,6 @@
 # 实施档案与文档治理
 
-日期：2026-09-08。当前为 R03 批量打包与加密本地候选：G0009 实现及完整本地门禁通过，共 230 项测试，部分原生交互与桌面工具待验收，见[G0009 结果](G0009/result.md)。G0001–G0008 保留历史实现和证据；发布项仍待验收。
+日期：2026-09-08。当前为 R04 压缩包浏览与选择提取本地候选：G0010 已实施，292 项测试与完整本地门禁通过，当前证据和原生遗留见[G0010 结果](G0010/result.md)。G0001–G0009 保留历史实现和证据；发布项仍待验收。
 
 沿用 `myavalonia-fractal-art` 的“产品主文档 + G 编号阶段三件套 + 质量基线 + 专项证据”方式，不复制参考项目的功能、进度、测试数量或临时规则。本轮以用户明确规则为准：SOLID 优先、朴素模式、详细中文注释、单元测试与本地门禁齐全、同步文档；不使用 AIFLOW、Windows CI 或发布门禁。
 
@@ -30,6 +30,7 @@
 | G0007 / R01 | 简洁交互与解压体验；已实施，本地验证通过，部分原生交互待验收 | [计划](G0007/plan.md) · [方案](G0007/implementation.md) · [结果](G0007/result.md) · [交互专项](G0007/interaction-design.md) · [验收矩阵](G0007/acceptance-matrix.md) |
 | G0008 / R02 | 基础 ZIP 创建；已实施，本地 172 项测试通过，部分原生交互待验收 | [计划](G0008/plan.md) · [方案](G0008/implementation.md) · [结果](G0008/result.md) · [创建契约](G0008/creation-contract.md) · [互操作矩阵](G0008/format-support-matrix.md) · [交互专项](G0008/interaction-design.md) · [验收矩阵](G0008/acceptance-matrix.md) |
 | G0009 / R03 | 批量打包与加密；已实施，本地 230 项测试通过，部分原生交互待验收 | [计划](G0009/plan.md) · [方案](G0009/implementation.md) · [结果](G0009/result.md) · [批次契约](G0009/batch-creation-contract.md) · [格式矩阵](G0009/encryption-and-compression-matrix.md) · [交互](G0009/interaction-design.md) · [验收](G0009/acceptance-matrix.md) |
+| G0010 / R04 | 压缩包浏览与选择提取；已实施，本地 292 项测试通过，部分原生交互待验收 | [计划](G0010/plan.md) · [方案](G0010/implementation.md) · [结果](G0010/result.md) · [浏览契约](G0010/browsing-contract.md) · [格式矩阵](G0010/format-support-matrix.md) · [交互](G0010/interaction-design.md) · [验收](G0010/acceptance-matrix.md) |
 
 ## 状态与维护规则
 
@@ -45,6 +46,10 @@ R02 基础 ZIP 创建已建立 G0008 实施档案：[计划](G0008/plan.md)、[�
 
 本地日志在忽略的 `artifacts/` 下便于复跑；当前摘要与验收状态保存在阶段结果中。G0006 验证时尚无基线提交；G0007 以 8ae2949 为基线，G0008 以 c7ddcb0 为基线，分别用源码/配置/夹具摘要标识验证工作区；后续 Git 提交保存验证快照，不改写原始门禁记录，不虚构正式包摘要。
 
-## R03 当前增量
+## R03 历史增量
 
 G0009 / R03 批量打包与加密已实施，最终本地验证与原生遗留见[结果](G0009/result.md)。专项：[计划](G0009/plan.md)、[方案](G0009/implementation.md)、[批次契约](G0009/batch-creation-contract.md)、[格式矩阵](G0009/encryption-and-compression-matrix.md)、[交互](G0009/interaction-design.md)、[验收](G0009/acceptance-matrix.md)。历史 G0008 记录保持，不将其 172 项测试作为当前新增功能的证据。
+
+## R04 当前增量
+
+G0010 / R04 实现 ZIP 元数据浏览、稳定身份与后代选择、一层提取、来源摘要复验及独立浏览 Document。完整契约、格式支持、交互和验收分别维护；实际本地命令、源码摘要、测试与图片检查见[结果](G0010/result.md)。历史 G0009 的 230 项测试不作为当前新增浏览功能的证据。

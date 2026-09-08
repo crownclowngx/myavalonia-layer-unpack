@@ -8,5 +8,6 @@
   <TabControl Name="TaskTabs">
     <TabItem Header="解压任务"><ContentControl Name="PreviewHost" /></TabItem>
     <TabItem Header="压缩任务"><ContentControl Name="PackPreviewHost" /></TabItem>
+    <TabItem Header="浏览任务"><ContentControl Name="BrowsePreviewHost" /></TabItem>
   </TabControl>
 </Window>

@@ -1,0 +1,76 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:vm="using:LayerUnpackPlugin.Features.Browse" xmlns:unpack="using:LayerUnpackPlugin.Features.Unpack"
+ x:Class="LayerUnpackPlugin.Features.Browse.BrowseView" x:DataType="vm:BrowseDocument" x:CompileBindings="True" DragDrop.AllowDrop="True">
+ <Grid>
+  <Grid IsVisible="{Binding !ShowUnpackTask}" Margin="16" RowDefinitions="Auto,*,Auto" RowSpacing="8">
+   <StackPanel Spacing="6">
+    <TextBlock Text="{Binding ArchiveName}" FontSize="22" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6" IsEnabled="{Binding CanEdit}">
+     <TextBox Name="SourceEditor" Text="{Binding SourcePath}" PlaceholderText="选择或拖入一个 ZIP" />
+     <Button Grid.Column="1" Content="选择归档" Click="PickArchive" />
+     <Button Name="ReloadButton" Grid.Column="2" Content="重新加载" Command="{Binding LoadCommand}" />
+    </Grid>
+    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+     <TextBox Name="SearchEditor" Text="{Binding SearchText}" PlaceholderText="按包内名称或路径搜索" IsEnabled="{Binding CanEdit}" />
+     <Button Grid.Column="1" Content="上一页" Command="{Binding PreviousPageCommand}" />
+     <Button Grid.Column="2" Content="下一页" Command="{Binding NextPageCommand}" />
+    </Grid>
+    <TextBlock Text="{Binding PageSummary}" FontSize="12" Opacity="0.7" />
+   </StackPanel>
+   <!-- 列表有独立有限视口，且每次最多 200 行；不在外层无限 ScrollViewer 中取消虚拟化。 -->
+   <ListBox Name="EntryList" Grid.Row="1" ItemsSource="{Binding Rows}" SelectedItem="{Binding SelectedRow}" IsEnabled="{Binding CanEdit}" MinHeight="70">
+    <ListBox.ItemTemplate><DataTemplate x:DataType="vm:BrowseEntryItem">
+     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="8">
+      <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected}" IsThreeState="True" ToolTip.Tip="{Binding Details}" />
+      <TextBlock Grid.Column="1" Text="{Binding SizeText}" VerticalAlignment="Center" FontSize="12" />
+      <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Note}" IsVisible="{Binding HasNote}" TextWrapping="Wrap" Opacity="0.7" FontSize="12" />
+     </Grid>
+    </DataTemplate></ListBox.ItemTemplate>
+   </ListBox>
+   <!-- 主动作固定在底部；补密和详情使用有限滚动区域，窄窗口仍能看到提取与取消。 -->
+   <StackPanel Grid.Row="2" Spacing="6">
+    <ScrollViewer MaxHeight="190" HorizontalScrollBarVisibility="Disabled">
+     <StackPanel Spacing="5">
+      <TextBlock Text="{Binding Summary}" FontWeight="SemiBold" TextWrapping="Wrap" />
+      <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="12" />
+      <Button Name="OpenResultButton" Content="打开最新结果" Click="OpenOutput" IsVisible="{Binding HasOutputs}" HorizontalAlignment="Left" />
+      <Expander Header="密码与旧 ZIP 文件名编码" IsExpanded="{Binding PasswordExpanded}">
+       <StackPanel Spacing="5" IsEnabled="{Binding CanEdit}">
+        <TextBox Name="PasswordEditor" Text="{Binding PasswordText}" PasswordChar="●" MaxLength="1024" PlaceholderText="本次提取密码（不保存）" />
+        <TextBlock Text="仅加密内容的 ZIP 可先查看目录；每次提取明确输入密码。更换编码后须重新加载。" TextWrapping="Wrap" FontSize="12" />
+        <ComboBox ItemsSource="{Binding NameEncodings}" SelectedItem="{Binding SelectedNameEncoding}" />
+       </StackPanel>
+      </Expander>
+      <Expander Header="条目详情、已提交路径与格式限制" IsExpanded="{Binding DetailsExpanded}">
+       <StackPanel Spacing="6">
+        <TextBlock Text="{Binding Details}" TextWrapping="Wrap" />
+        <ItemsControl ItemsSource="{Binding Outputs}" />
+        <ItemsControl ItemsSource="{Binding Capabilities}">
+         <ItemsControl.ItemTemplate><DataTemplate><TextBlock Text="{ReflectionBinding Description}" TextWrapping="Wrap" FontSize="12" Margin="0,3" /></DataTemplate></ItemsControl.ItemTemplate>
+        </ItemsControl>
+       </StackPanel>
+      </Expander>
+     </StackPanel>
+    </ScrollViewer>
+    <TextBlock Text="{Binding SelectionSummary}" FontSize="12" TextWrapping="Wrap" />
+    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6" IsEnabled="{Binding CanEdit}">
+     <TextBlock Text="输出位置" VerticalAlignment="Center" />
+     <TextBox Name="OutputEditor" Grid.Column="1" Text="{Binding OutputDirectory}" PlaceholderText="选择输出文件夹" />
+     <Button Grid.Column="2" Content="选择" Click="PickOutput" />
+    </Grid>
+    <ProgressBar Height="3" IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+    <WrapPanel>
+     <Button Content="清空任务" Command="{Binding ClearCommand}" Margin="0,0,6,4" />
+     <Button Content="清除选择" Command="{Binding ClearSelectionCommand}" Margin="0,0,6,4" />
+     <Button Name="AllUnpackButton" Content="全部解压…" Command="{Binding PrepareUnpackCommand}" Margin="0,0,6,4" />
+     <Button Content="取消" Command="{Binding CancelCommand}" IsVisible="{Binding IsBusy}" Margin="0,0,6,4" />
+     <Button Name="ExtractButton" Content="提取所选" Command="{Binding ExtractCommand}" Margin="0,0,0,4" />
+    </WrapPanel>
+   </StackPanel>
+  </Grid>
+  <Grid IsVisible="{Binding ShowUnpackTask}" RowDefinitions="Auto,*">
+   <Button Content="返回浏览（解压任务继续保留）" Command="{Binding ReturnToBrowseCommand}" Margin="16,8" />
+   <unpack:UnpackView Grid.Row="1" DataContext="{Binding UnpackTask}" />
+  </Grid>
+ </Grid>
+</UserControl>

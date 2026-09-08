@@ -25,6 +25,17 @@
 
 保留顶层文件夹、内容和空目录。同名输出自动编号，源文件保留；既有源目录内输出会排除本次目标和暂存文件，源内新输出子目录需先创建或改选已有目录。创建矩阵、资源与来源变化边界见[G0008 契约](refactoring/G0008/creation-contract.md)。分别模式要求输出位于所有源文件夹之外；不创建其他格式。批次、规则和秘密的详细契约见[G0009](refactoring/G0009/batch-creation-contract.md)，具体加密和压缩映射见[互操作矩阵](refactoring/G0009/encryption-and-compression-matrix.md)。
 
+## 浏览归档并提取所选
+
+1. 新建“浏览任务”，选择/拖入一个 ZIP，或输入本地路径后点击“重新加载”。目录读取不展开正文，不创建输出。
+2. 按名称或路径搜索，勾选文件或目录。每页 200 行，目录选择包含完整后代；翻页和搜索不改变隐藏的选择，取消子项后父目录呈部分选中。
+3. 检查可见输出位置，默认建议源包旁的“提取结果”，手动指定后保留。点击“提取所选”，默认一层、保持相对路径，同名产物自动编号。
+4. 加密内容在当前页补密后再次提取。每次提取都清空密码字段，其他任务不继承；重复/大小写冲突可分别选择独立提取，不能同时静默覆盖。
+5. 成功后打开结果；源包变化时旧选择失效，重新加载并选择。取消和关闭等待临时内容清理，之前的成功结果保留。
+6. 需要递归全部解压或浏览不支持的格式时，点击“全部解压…”转入真实原解压页；确认源路径、输出和可见层数，再开始。返回浏览保留正在执行的任务，清空/关闭会排空它。
+
+仅声明单卷 ZIP/ZIP64 浏览，其他格式不等同于已有解压能力。完整来源摘要会读取整个原包并计入预算。详细身份、分页、密码、资源与输出契约见[G0010 专项](refactoring/G0010/browsing-contract.md)，格式边界见[浏览矩阵](refactoring/G0010/format-support-matrix.md)。
+
 ## 本地开发环境
 
 依赖：.NET SDK 10，当前验证环境为 Windows x64、Avalonia 12.1.0、Plugin SDK 3.3.0。Python 仅在重新生成标准样本时需要，正常构建和测试不依赖 Python。
@@ -72,7 +83,7 @@ var plan = await pack.PrepareAsync(
 var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken);
 ```
 
-先检查 `plan.Roots` / `plan.Entries` 的路径与清单，再执行。准备不落盘；重复执行可能生成编号新包。批量创建使用 `PackBatchService.PrepareAsync/CreateSession`，通过独立 `PackSecret` 传入目标密码，见[G0009 示例](refactoring/G0009/batch-creation-contract.md)。压缩与解压使用不同契约，共同保持无 UI 依赖和独立生命周期。
+先检查 `plan.Roots` / `plan.Entries` 的路径与清单，再执行。准备不落盘；重复执行可能生成编号新包。批量创建使用 `PackBatchService.PrepareAsync/CreateSession`，通过独立 `PackSecret` 传入目标密码，见[G0009 示例](refactoring/G0009/batch-creation-contract.md)。浏览使用 `ArchiveBrowseService.OpenAsync`、`ArchiveCatalog.GetPage`、`ArchiveSelection.Capture` 与会话 `ExtractAsync`，见[G0010 示例](refactoring/G0010/browsing-contract.md)。各用例使用独立契约，共同保持无 UI 依赖和独立生命周期。
 
 ## 项目与文档入口
 
@@ -90,6 +101,6 @@ var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken)
 
 ## 后续产品阶段规划
 
-[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01、R02、R03 已实施，本地 230 项测试及门禁通过，实际证据见[G0009 结果](refactoring/G0009/result.md)。R04–R08 的浏览、整理等仍为未来目标。
+[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01–R04 已实施，当前本地验证和遗留见[G0010 结果](refactoring/G0010/result.md)。R05–R08 的整理、转换与后续集成仍为未来目标。
 
-生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008、R03 映射 G0009，后续可细化 R04，并复核各阶段原生交互遗留。
+生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008、R03 映射 G0009、R04 映射 G0010，后续可细化 R05，并复核各阶段原生交互遗留。

@@ -8,4 +8,5 @@ public static class PluginIds
     public static readonly PluginId Plugin = new("myavalonia.plugin.layer.unpack");
     public static readonly DocumentTypeId UnpackDocument = new("myavalonia.plugin.layer.unpack.document.main");
     public static readonly DocumentTypeId PackDocument = new("myavalonia.plugin.layer.unpack.document.pack");
+    public static readonly DocumentTypeId BrowseDocument = new("myavalonia.plugin.layer.unpack.document.browse");
 }

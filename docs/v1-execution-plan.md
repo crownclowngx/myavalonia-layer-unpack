@@ -8,9 +8,9 @@
 >
 > 目标版本：V1 首个可交付版本；当前工程中的 `PluginVersion` 不代表产品已完成
 >
-> 历史 V1 状态：108 个 Headless 测试、13 个 Plugin/UI 测试及 G0006 本地门禁通过。当前 R03 增量及新验证见[G0009 结果](refactoring/G0009/result.md)。
+> 历史 V1 状态：108 个 Headless 测试、13 个 Plugin/UI 测试及 G0006 本地门禁通过。当前 R04 增量及新验证见[G0010 结果](refactoring/G0010/result.md)。
 >
-> 当前入口：先读 [G0009 结果](refactoring/G0009/result.md)；下文保留 V1 历史清单，新增工作项见本文 R03 附录。发布时恢复发布门禁。
+> 当前入口：先读 [G0010 结果](refactoring/G0010/result.md)；下文保留 V1 历史清单，新增工作项见本文 R04 附录。发布时恢复发布门禁。
 
 本计划将[产品基线](product-shape-and-implementation-plan.md)转化为可执行工作项。
 文档方式参考 `myavalonia-fractal-art`：产品目标、阶段计划、实施方案和实际结果分开维护；
@@ -399,3 +399,13 @@ Standalone 用 `dotnet run --project src/LayerUnpackPlugin.Standalone` 启动并
 - [x] G0009-05：统一本地门禁全部通过：182 项 Headless、48 项 Plugin/UI，零失败、零跳过；源码与证据归档见结果。
 
 实际范围与待验项见[计划](refactoring/G0009/plan.md)、[方案](refactoring/G0009/implementation.md)、[验收矩阵](refactoring/G0009/acceptance-matrix.md)和[结果](refactoring/G0009/result.md)。原生交互、桌面接收工具及发布验收继续单独追踪。
+
+## 16. R04 / G0010 当前增量
+
+- [x] G0010-01：ZIP/ZIP64 元数据预检、稳定身份、目录推导、分页搜索与明确后代选择。
+- [x] G0010-02：来源摘要、冲突预检、共享 CRC/AES 验证、一层所选提取与不覆盖事务。
+- [x] G0010-03：累计读取/展开/条目预算、会话互斥、取消超时、清理残留与关闭排空。
+- [x] G0010-04：第三个普通 Document、三 Scope Standalone、就地补密与真实原解压任务衔接。
+- [x] G0010-05：完整本地门禁通过，230 项 Headless 与 62 项 Plugin/UI 合计 292 项，零失败、零跳过；源码摘要、16 张渲染图与 ZIP64 基线归档见结果。
+
+见[计划](refactoring/G0010/plan.md)、[方案](refactoring/G0010/implementation.md)、[浏览契约](refactoring/G0010/browsing-contract.md)、[验收矩阵](refactoring/G0010/acceptance-matrix.md)和[结果](refactoring/G0010/result.md)。原生交互、DPI 与发布验收继续单独追踪，历史 V1 清单不改写。

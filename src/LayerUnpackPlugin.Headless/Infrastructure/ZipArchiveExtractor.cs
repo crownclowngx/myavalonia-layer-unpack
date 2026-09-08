@@ -31,18 +31,7 @@ internal static class ZipArchiveExtractor
                 var target = PathPolicy.EntryPath(destination, entry.Name, entry.IsDirectory);
                 if (!seen.Add(target)) throw new UnpackFailureException(UnpackError.OutputError, "ZIP 包含重复或大小写冲突的路径。");
                 if (entry.IsDirectory) { Directory.CreateDirectory(target); continue; }
-                if (!entry.IsCompressionMethodSupported() || (entry.Flags & (1 << 6)) != 0)
-                    throw new UnpackFailureException(UnpackError.UnsupportedEncryption, "此 ZIP 使用首版不支持的压缩或强加密方式。");
-                if (entry.IsCrypted && password is null) throw PasswordFailure();
-                if (entry.Size > budget.Limits.MaxFileBytes)
-                    throw new UnpackFailureException(UnpackError.BudgetExceeded, "ZIP 条目大小超过单文件预算。", true);
-                Directory.CreateDirectory(Path.GetDirectoryName(target)!); PathPolicy.EnsureNoLinks(target);
-                using var decoded = archive.GetInputStream(entry);
-                await using var output = new FileStream(target, FileMode.CreateNew, FileAccess.Write, FileShare.None, 131072, true);
-                var copied = await StreamCopy.CopyAsync(decoded, output, budget, progress, token).ConfigureAwait(false);
-                // AES 条目由库验证认证码；AE-2 的 CRC 字段按规范为零，不能当普通 CRC 比较。
-                if (copied.Length != entry.Size || (entry.AESKeySize == 0 && copied.Crc != (uint)entry.Crc))
-                    throw new UnpackFailureException(UnpackError.CorruptArchive, "ZIP 条目长度或校验和不匹配。");
+                await ExtractEntryAsync(archive, entry, target, password, budget, progress, token).ConfigureAwait(false);
                 files.Add(Path.GetRelativePath(destination, target));
             }
             return new ExtractedArchive("Zip", files.AsReadOnly(), password is not null);
@@ -55,9 +44,27 @@ internal static class ZipArchiveExtractor
         }
     }
 
+    /// <summary>全量解压与选择提取共用同一正文校验边界，确保 AES 认证尾部和 CRC 不因入口不同而绕过。</summary>
+    internal static async Task ExtractEntryAsync(ZipFile archive, ZipEntry entry, string target, string? password,
+        ExecutionBudget budget, Action<long> progress, CancellationToken token)
+    {
+        if (!entry.IsCompressionMethodSupported() || (entry.Flags & (1 << 6)) != 0)
+            throw new UnpackFailureException(UnpackError.UnsupportedEncryption, "此 ZIP 使用首版不支持的压缩或强加密方式。");
+        if (entry.IsCrypted && password is null) throw PasswordFailure();
+        if (entry.Size > budget.Limits.MaxFileBytes)
+            throw new UnpackFailureException(UnpackError.BudgetExceeded, "ZIP 条目大小超过单文件预算。", true);
+        Directory.CreateDirectory(Path.GetDirectoryName(target)!); PathPolicy.EnsureNoLinks(target);
+        using var decoded = archive.GetInputStream(entry);
+        await using var output = new FileStream(target, FileMode.CreateNew, FileAccess.Write, FileShare.None, 131072, true);
+        var copied = await StreamCopy.CopyAsync(decoded, output, budget, progress, token).ConfigureAwait(false);
+        // AE-2 的 CRC 按规范为零，库验证认证码；普通 ZIP 和 ZipCrypto 额外验证长度及 CRC，包括 CRC=0。
+        if (copied.Length != entry.Size || (entry.AESKeySize == 0 && copied.Crc != (uint)entry.Crc))
+            throw new UnpackFailureException(UnpackError.CorruptArchive, "ZIP 条目长度或校验和不匹配。");
+    }
+
     private static UnpackFailureException PasswordFailure() => new(UnpackError.PasswordRequiredOrInvalid,
         "没有可用密码，或加密内容校验失败；可以补充候选密码后重试。");
-    private static Encoding GetEncoding(LegacyNameEncoding value)
+    internal static Encoding GetEncoding(LegacyNameEncoding value)
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         var codePage = value switch
