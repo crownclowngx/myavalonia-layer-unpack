@@ -1,0 +1,55 @@
+<UserControl x:Class="LayerUnpackPlugin.Features.Organize.OrganizationView"
+ xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:vm="using:LayerUnpackPlugin.Features.Organize" x:DataType="vm:OrganizationDocument">
+ <Grid Margin="20" RowDefinitions="Auto,*,Auto" RowSpacing="12" MaxWidth="940">
+  <StackPanel Spacing="4"><TextBlock Text="整理结果" FontSize="25" FontWeight="SemiBold" />
+   <TextBlock Text="{Binding SourceSummary}" TextWrapping="Wrap" Opacity="0.65" /></StackPanel>
+  <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+   <StackPanel Spacing="12">
+    <StackPanel Spacing="6" IsEnabled="{Binding CanEdit}">
+     <TextBlock Text="新整理目录的位置" FontWeight="SemiBold" />
+     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"><TextBox Name="OutputEditor" Text="{Binding OutputParent}" PlaceholderText="选择或输入绝对目录路径" />
+      <Button Grid.Column="1" Content="选择位置" Click="PickOutput" /></Grid>
+     <TextBlock Text="按来源分别归类，通过复制生成新目录。" Opacity="0.65" TextWrapping="Wrap" />
+     <Expander Name="RulesExpander" Header="文件类型与目录层级" IsExpanded="{Binding RulesExpanded}" HorizontalAlignment="Stretch">
+      <StackPanel Spacing="8">
+       <ComboBox Name="FileTypesEditor" ItemsSource="{x:Static vm:OrganizationDocument.FileTypes}" SelectedItem="{Binding SelectedFileTypes}" HorizontalAlignment="Stretch" />
+       <TextBlock Text="按扩展名筛选，不识别内容。图片：PNG、JPG、JPEG、GIF、BMP、WebP、TIF、TIFF。" TextWrapping="Wrap" Opacity="0.65" />
+       <CheckBox Content="去掉来源根处连续的单子目录包装层" IsChecked="{Binding FlattenWrappingDirectories}" />
+       <TextBlock Text="同层还有文件或其他目录时停止；依据完整清单判断，不改变文件名。" TextWrapping="Wrap" Opacity="0.65" />
+      </StackPanel>
+     </Expander>
+    </StackPanel>
+    <TextBlock Name="MappingSummary" Text="{Binding MappingSummary}" IsVisible="{Binding HasPlan}" TextWrapping="Wrap" FontWeight="SemiBold" />
+    <TextBlock Text="{Binding OutputPath}" TextWrapping="Wrap" />
+    <TextBlock Text="{Binding FlattenSummary}" TextWrapping="Wrap" />
+    <Expander Name="DetailsExpander" Header="查看目标映射与命名调整" IsExpanded="{Binding DetailsExpanded}" IsVisible="{Binding HasPlan}" HorizontalAlignment="Stretch">
+     <StackPanel Spacing="8">
+      <CheckBox Content="只看命名调整" IsChecked="{Binding ConflictsOnly}" />
+      <ListBox Name="MappingList" ItemsSource="{Binding Rows}" Height="200">
+       <ListBox.ItemTemplate><DataTemplate x:DataType="vm:OrganizationPreviewRow"><StackPanel Spacing="3">
+        <TextBlock Text="{Binding Source}" TextWrapping="Wrap" Opacity="0.6" />
+        <TextBlock Text="{Binding Target}" TextWrapping="Wrap" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding Details}" TextWrapping="Wrap" />
+       </StackPanel></DataTemplate></ListBox.ItemTemplate>
+      </ListBox>
+      <WrapPanel><Button Content="上一页" Command="{Binding PreviousPageCommand}" Margin="0,0,8,4" />
+       <Button Content="下一页" Command="{Binding NextPageCommand}" Margin="0,0,8,4" /><TextBlock Text="{Binding PageSummary}" VerticalAlignment="Center" /></WrapPanel>
+     </StackPanel>
+    </Expander>
+   </StackPanel>
+  </ScrollViewer>
+  <!-- 状态与操作固定在页底；大量映射按页展示，不向可视树一次塞入全部文件。 -->
+  <StackPanel Grid.Row="2" Spacing="6">
+   <TextBlock Text="{Binding Summary}" FontWeight="SemiBold" TextWrapping="Wrap" />
+   <ScrollViewer MaxHeight="84" HorizontalScrollBarVisibility="Disabled"><TextBlock Text="{Binding Message}" TextWrapping="Wrap" /></ScrollViewer>
+   <ProgressBar IsVisible="{Binding IsBusy}" IsIndeterminate="True" Height="3" />
+   <WrapPanel>
+    <Button Name="PreviewButton" Content="生成预览" Command="{Binding PreviewCommand}" Margin="0,0,8,4" />
+    <Button Name="ExecuteButton" Content="开始整理" Command="{Binding ExecuteCommand}" IsVisible="{Binding HasPlan}" Classes="accent" Margin="0,0,8,4" />
+    <Button Content="取消" Command="{Binding CancelCommand}" IsVisible="{Binding IsBusy}" Margin="0,0,8,4" />
+    <Button Name="OpenResultButton" Content="打开整理目录" Click="OpenResult" IsVisible="{Binding CanOpenResult}" Margin="0,0,0,4" />
+   </WrapPanel>
+  </StackPanel>
+ </Grid>
+</UserControl>

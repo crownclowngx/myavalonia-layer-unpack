@@ -74,6 +74,12 @@ try {
         $docsWatch.Stop()
         $checks.Add([pscustomobject]@{ name = 'docs'; exitCode = $docsExitCode; seconds = $docsWatch.Elapsed.TotalSeconds; command = './tools/check-docs.ps1' })
     }
+    $diffWatch = [Diagnostics.Stopwatch]::StartNew()
+    & git diff --check 2>&1 | Tee-Object -FilePath (Join-Path $evidenceDirectory 'diff-check.log')
+    $diffExitCode = $LASTEXITCODE
+    $diffWatch.Stop()
+    $checks.Add([pscustomobject]@{ name = 'diff-check'; exitCode = $diffExitCode; seconds = $diffWatch.Elapsed.TotalSeconds; command = 'git diff --check' })
+    if ($diffExitCode -ne 0) { throw "差异空白检查未通过，退出码 $diffExitCode。" }
     Write-Output '本地门禁全部通过。发布门禁本轮未执行。'
 }
 finally {

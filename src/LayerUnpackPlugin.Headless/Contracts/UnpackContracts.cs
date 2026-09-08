@@ -69,11 +69,19 @@ public sealed record ArchiveNodeResult(Guid Id, Guid? ParentId, string SourcePat
     NodeState State, string? Format, string? OutputDirectory, UnpackDiagnostic? Error,
     IReadOnlyList<string> CleanupWarnings, long WrittenBytes, string? Warning = null)
 {
+    /// <summary>本节点提交时捕获的完整条目清单，路径相对 OutputDirectory；不包含后来展开的子归档内容。
+    /// null 表示旧调用方未提供清单，不能据输出目录推测。空集合表示已确认的空归档。</summary>
+    public IReadOnlyList<CommittedEntry>? CommittedEntries { get; init; }
     /// <summary>重试保持原输入、编码和预算，只适用于补密或访问条件恢复；跨层和 UI 共用同一判断。</summary>
     public bool CanRetry => State == NodeState.Failed && CleanupWarnings.Count == 0 &&
         Error?.Code is not (UnpackError.UnsafePath or UnpackError.InputChanged or UnpackError.BudgetExceeded or
             UnpackError.InvalidNameEncoding or UnpackError.UnsupportedFormat or UnpackError.UnsupportedEncryption or UnpackError.MissingVolume);
 }
+
+/// <summary>已提交普通条目的身份与内容凭据。目录也保留，用于空目录和精确包装层判断。
+/// 创建时间与修改时间辅助发现替换，SHA-256 验证文件内容；它不是跨平台文件系统对象标识。</summary>
+public sealed record CommittedEntry(string RelativePath, bool IsDirectory, long Length,
+    DateTime LastWriteUtc, DateTime CreationUtc, string Sha256);
 
 /// <summary>运行结果是独立快照，不暴露调度器、密码池和可变节点。成功数只统计本包提交。</summary>
 public sealed record UnpackResult(Guid BatchId, BatchState State, IReadOnlyList<ArchiveNodeResult> Nodes,

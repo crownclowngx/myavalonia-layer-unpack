@@ -30,6 +30,11 @@ V1 的依赖方向是 `Plugin → Headless`、`Standalone → Plugin → Headles
 | `IArchiveBrowseService / IArchiveBrowseSession` | ZIP 浏览与所选提取端口；来源摘要、会话互斥、累计读取/展开预算、取消与事务编排 |
 | `ZipDirectoryGuard / ZipBrowseCatalog / BrowseReadStream` | 引擎对象分配前验证目录规模；保留序号和冲突；为同步解析器提供取消与计量边界 |
 | `BrowseDocument / BrowseView / OwnedUnpackTask` | 第三个普通 Document；分页呈现、补密、生命周期及承载真实原解压任务 |
+| `CommittedManifest / CommittedEntry` | 在解压暂存提交边界提供明确文件和目录凭据，不扫描历史输出 |
+| `OrganizationPlanner / OrganizationPlan` | 来源归属、扩展名规则、包装链、稳定命名与不可变预览映射 |
+| `IOrganizationService / OrganizationService` | 整理预览与复制执行端口；超时、来源复验和目录提交 |
+| `OrganizationFiles / IOrganizationCopier` | 路径、目录成员、普通文件摘要验证；窄流复制适配与故障注入 |
+| `OrganizationDocument / OrganizationView` | 解压结果临时子页、100 行分页与选择器，依赖整理用例端口 |
 
 S：业务、格式、路径、事务和界面分责。O：新增格式优先扩展适配层，不改变密码和递归调度。L：测试替身遵守流所有权、预算、取消和输出契约。I：解压保留原端口，创建新增 IPackService 与 IArchiveWriter，不建设万能上下文。D：Document 依赖对应服务接口和公开 IDocumentLifetime；用例依赖窄格式适配端口。
 
@@ -46,6 +51,8 @@ Standalone 在窗口构造阶段只创建对象，Opened 后观察异步初始�
 Avalonia 12 的 Headless.XUnit 使用 xUnit v3；两个测试项目统一为 3.2.2。窗口测试链接 Standalone 的实际组合/窗口/生命周期源码和 AXAML，不将 Desktop 平台程序集引入测试发现进程。它验证真实窗口代码在 Headless 平台下的行为，不等同于操作系统窗口或真实 Host 验收。
 
 ## 资产归属
+
+R05 整理子任务由当前 UnpackDocument 显式拥有，不新增第四个 Scope 或 Tool。返回只切换视图；运行期间冻结原操作；新批次、重试与清空释放旧子任务；父页关闭取消并排空复制。业务服务依旧无 UI 依赖、无共享可变运行状态。详细设计见[G0011 方案](refactoring/G0011/implementation.md)。
 
 正式入口只有 `.Plugin`，自有运行时为 `.Plugin.dll`、`.Headless.dll`、`SharpCompress.dll` 和 `ICSharpCode.SharpZipLib.dll`，并携带对应许可。SDK、Avalonia、CommunityToolkit 与 `Microsoft.Extensions.*` 由 Host 提供。Standalone、测试和夹具不进入插件资产。
 

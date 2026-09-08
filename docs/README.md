@@ -101,6 +101,16 @@ var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken)
 
 ## 后续产品阶段规划
 
-[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01–R04 已实施，当前本地验证和遗留见[G0010 结果](refactoring/G0010/result.md)。R05–R08 的整理、转换与后续集成仍为未来目标。
+[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01–R05 已实施，当前本地验证和遗留见[G0011 结果](refactoring/G0011/result.md)。R06–R08 的转换与后续集成仍为未来目标。
 
-生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008、R03 映射 G0009、R04 映射 G0010，后续可细化 R05，并复核各阶段原生交互遗留。
+生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008、R03 映射 G0009、R04 映射 G0010、R05 映射 G0011，后续可细化 R06，并复核各阶段原生交互遗留。
+
+## 整理解压结果
+
+1. 当前解压操作退出且有成功提交结果后，点击结果摘要处的“整理结果”。
+2. 核对新目录的位置。默认按来源整理全部文件；展开“文件类型与目录层级”可选择 PDF、图片或显式去掉单子目录包装层。
+3. 点击“生成预览”，检查来源数量、文件与字节、命名调整和精确输出位置；完整映射按 100 行分页，可只看命名调整。
+4. 点击“开始整理”，完成后打开整理目录。取消等待复制与清理退出；来源变化或目标占用会拒绝旧计划并给出下一步。
+5. 返回原结果保留整理子页，开始新批次、重试或清空释放旧子任务，已提交目录保留。
+
+类型基于扩展名，不识别内容；原包和原解压结果保留。没有匹配文件时不生成目录。只接受新版解压结果的提交清单，不补扫历史或任意目录。Headless 使用 `IOrganizationService.PlanAsync/ExecuteAsync`，结果提供独立清单供后续用例消费，见[契约与示例](refactoring/G0011/organization-contract.md)。

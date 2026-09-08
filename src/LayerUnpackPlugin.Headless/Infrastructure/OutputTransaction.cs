@@ -58,6 +58,19 @@ public sealed class OutputTransaction
         }
     }
 
+    /// <summary>整理预览已经约定精确名称，提交时不再自动编号。目标被占用必须重新预览，
+    /// 以保证用户检查的映射就是最终映射；Directory.Move 仍负责最后的不覆盖仲裁。</summary>
+    public string CommitExact(string name, CancellationToken cancellationToken)
+    {
+        if (_committed) throw new InvalidOperationException("输出事务已经提交。");
+        cancellationToken.ThrowIfCancellationRequested();
+        var target = PathPolicy.EntryPath(_parent, name, true);
+        PathPolicy.EnsureNoLinks(StagingDirectory);
+        Directory.Move(StagingDirectory, target);
+        _committed = true;
+        return target;
+    }
+
     private static void DeleteOwnedDirectory(string path)
     {
         PathPolicy.EnsureNoLinks(path);

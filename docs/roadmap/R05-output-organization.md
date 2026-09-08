@@ -1,10 +1,12 @@
 # R05：输出整理
 
-> 状态：规划中 · 实施映射：未分配
+> 状态：已实施／347 项测试与完整本地门禁通过，部分原生交互待验收 · 实施映射：[G0011](../refactoring/G0011/result.md)
 >
 > 前置：R04 的明确选择语义、现有递归解压与结果清单。
 >
 > 产出：将已解压资料整理到结构清楚的新目录。
+
+实际范围、规则及生命周期见[整理契约](../refactoring/G0011/organization-contract.md)、[交互专项](../refactoring/G0011/interaction-design.md)和[验收矩阵](../refactoring/G0011/acceptance-matrix.md)。当前输入为 UnpackResult 已提交清单，整理作为解压结果的临时子页；后续目标与原阶段要求保留如下。
 
 ## 1. 用户目标与主流程
 

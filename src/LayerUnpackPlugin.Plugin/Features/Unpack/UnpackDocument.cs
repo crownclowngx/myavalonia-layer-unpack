@@ -44,15 +44,16 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
 
     public ObservableCollection<InputItem> Inputs { get; } = [];
     public ObservableCollection<ArchiveNodeViewModel> Roots { get; } = [];
-    public bool CanEdit => !IsBusy && !IsClosed;
+    public bool CanEdit => !IsBusy && !IsClosed && !ShowOrganizationTask;
     public bool IsClosed => _closed || _lifetime.IsClosing;
     public DocumentPresentationState Presentation => _presentation;
     public event EventHandler? PresentationChanged;
     public UnpackResult? CurrentResult => _session?.Snapshot;
 
-    public UnpackDocument(IUnpackService service, IDocumentLifetime lifetime)
+    public UnpackDocument(IUnpackService service, IDocumentLifetime lifetime, IOrganizationService? organizationService = null)
     {
         _service = service;
+        _organizationService = organizationService ?? new OrganizationService();
         _lifetime = lifetime;
         _hostClosing = lifetime.ClosingToken.Register(() => _closing.Cancel());
         Inputs.CollectionChanged += (_, _) => { NotifyPresentation(); NotifyCommands(); };
@@ -87,6 +88,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
         RetryCommand.NotifyCanExecuteChanged(); ClearCommand.NotifyCanExecuteChanged();
         RemoveSelectedCommand.NotifyCanExecuteChanged();
         ShowPasswordEntryCommand.NotifyCanExecuteChanged(); PrepareNewBatchCommand.NotifyCanExecuteChanged();
+        OrganizeCommand.NotifyCanExecuteChanged(); ReturnToUnpackCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>文件选择、拖放与目录扫描共用同一入口，关闭后的扫描结果不能再写入界面。</summary>
@@ -138,12 +140,14 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
         try
         {
             var passwords = PasswordPool.ParseLines(PasswordText);
+            if (retry) await ResetOrganizationAsync();
             if (!retry)
             {
                 var request = new UnpackRequest(Inputs.Select(i => i.Path), OutputDirectory, MaxDepth, passwords,
                     legacyNameEncoding: SelectedNameEncoding.Encoding);
                 // 新参数先验证，成功创建下一会话后才释放旧会话；错误参数不会丢掉用户正在检查的结果。
                 var next = _service.CreateSession(request);
+                await ResetOrganizationAsync();
                 if (_session is not null) await _session.DisposeAsync();
                 _session = next;
                 _batchOutputDirectory = request.OutputDirectory;
@@ -238,6 +242,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
     private async Task ClearAsync()
     {
         if (!CanEdit) return;
+        await ResetOrganizationAsync();
         if (_session is not null) await _session.DisposeAsync();
         _session = null;
         Inputs.Clear(); Roots.Clear(); Issues.Clear(); _nodeIndex.Clear(); SelectedNode = null;
@@ -260,6 +265,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
     {
         _closed = true; ++_generation; _closing.Cancel();
         PasswordText = ""; _hostClosing.Dispose();
+        if (OrganizationTask is not null) await OrganizationTask.DisposeAsync().ConfigureAwait(false);
         // 只排空不依赖 UI 的工作任务。排空整个命令续体会与 Host 同步释放 UI Scope 形成死锁。
         if (_session is not null) await _session.DisposeAsync().ConfigureAwait(false);
         try { await _backgroundWork.ConfigureAwait(false); } catch (Exception) { /* 工作结果由关闭前的命令观察；关闭不再次传播失败。 */ }

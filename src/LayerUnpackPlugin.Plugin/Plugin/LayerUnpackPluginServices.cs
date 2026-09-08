@@ -17,6 +17,9 @@ public static class LayerUnpackPluginServices
         services.AddScoped<IPackService, PackService>();
         services.AddScoped<IPackBatchService, PackBatchService>();
         services.AddScoped<IArchiveBrowseService, ArchiveBrowseService>();
+        services.AddSingleton<OrganizationPlanner>();
+        services.AddSingleton<IOrganizationCopier, OrganizationCopier>();
+        services.AddScoped<IOrganizationService, OrganizationService>();
         return services;
     }
 }

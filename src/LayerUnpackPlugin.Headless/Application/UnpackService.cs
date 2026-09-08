@@ -168,8 +168,10 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
                         if (lastNotification.ElapsedMilliseconds >= 100)
                         { Publish(BatchState.Running, operationId, progress); lastNotification.Restart(); }
                     }, token).ConfigureAwait(false);
+                    var manifest = await CommittedManifest.CaptureAsync(transaction.StagingDirectory, _budget.Limits.MaxEntries, token).ConfigureAwait(false);
                     token.ThrowIfCancellationRequested();
                     node.Output = transaction.Commit(ArchiveProbe.OutputName(node.Source), token);
+                    node.Entries = manifest;
                     node.Format = extracted.Format;
                     node.Warning = extracted.Warning;
                     node.State = NodeState.Extracted;
@@ -292,7 +294,9 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
         internal UnpackDiagnostic? Error { get; set; }
         internal List<string> CleanupWarnings { get; } = [];
         internal long Bytes { get; set; }
+        internal IReadOnlyList<CommittedEntry>? Entries { get; set; }
         internal ArchiveNodeResult ToResult() => new(Id, ParentId, Source, Depth, State, Format, Output, Error,
-            Array.AsReadOnly(CleanupWarnings.ToArray()), Bytes, Warning);
+            Array.AsReadOnly(CleanupWarnings.ToArray()), Bytes, Warning)
+        { CommittedEntries = Entries };
     }
 }

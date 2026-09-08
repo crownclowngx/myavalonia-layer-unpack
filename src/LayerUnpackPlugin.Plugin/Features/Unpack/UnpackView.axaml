@@ -1,8 +1,13 @@
 <UserControl x:Class="LayerUnpackPlugin.Features.Unpack.UnpackView"
  xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
- xmlns:vm="using:LayerUnpackPlugin.Features.Unpack" x:DataType="vm:UnpackDocument" DragDrop.AllowDrop="True">
+ xmlns:vm="using:LayerUnpackPlugin.Features.Unpack" xmlns:organize="using:LayerUnpackPlugin.Features.Organize" x:DataType="vm:UnpackDocument" DragDrop.AllowDrop="True">
+ <Grid>
+ <Grid IsVisible="{Binding ShowOrganizationTask}" RowDefinitions="Auto,*">
+  <Button Content="返回解压结果" Command="{Binding ReturnToUnpackCommand}" Margin="20,10,20,0" />
+  <organize:OrganizationView Grid.Row="1" DataContext="{Binding OrganizationTask}" />
+ </Grid>
  <!-- 单列内容独立滚动，底部主要操作不随长路径、问题列表和展开选项滚出窗口。 -->
- <Grid Margin="20" RowDefinitions="Auto,*,Auto" RowSpacing="14" MaxWidth="940" HorizontalAlignment="Stretch">
+ <Grid IsVisible="{Binding !ShowOrganizationTask}" Margin="20" RowDefinitions="Auto,*,Auto" RowSpacing="14" MaxWidth="940" HorizontalAlignment="Stretch">
   <StackPanel Spacing="3">
    <TextBlock Text="解压任务" FontSize="25" FontWeight="SemiBold" />
    <TextBlock Text="放入压缩包，解出你需要的文件。" Opacity="0.65" />
@@ -23,6 +28,7 @@
     <StackPanel IsVisible="{Binding HasResults}" Spacing="10">
      <TextBlock Text="处理结果" FontSize="18" FontWeight="SemiBold" />
      <TextBlock Name="ResultSummary" Text="{Binding Summary}" TextWrapping="Wrap" />
+     <Button Name="OrganizeButton" Content="整理结果" Command="{Binding OrganizeCommand}" />
      <StackPanel IsVisible="{Binding HasIssues}" Spacing="6">
       <TextBlock Text="需要查看的项目" FontWeight="SemiBold" />
       <ScrollViewer MaxHeight="180" HorizontalScrollBarVisibility="Disabled">
@@ -130,5 +136,6 @@
     <Button Content="清空批次" Command="{Binding ClearCommand}" IsVisible="{Binding !IsEmpty}" Margin="0,0,0,4" />
    </WrapPanel>
   </StackPanel>
+ </Grid>
  </Grid>
 </UserControl>
