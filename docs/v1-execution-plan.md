@@ -1,6 +1,6 @@
 # Layer Unpack V1 执行计划
 
-> 本轮实施约束（2026-09-08，用户最新指令）：SOLID 优先，朴素设计模式，详细中文注释与设计思路，完整单元测试及本地门禁，同步维护专用文档。不使用 AIFLOW、Windows CI 或发布门禁。
+> 本轮实施约束（2026-09-09，用户最新指令）：SOLID 优先，朴素设计模式，详细中文注释与设计思路，完整单元测试及本地门禁，同步维护专用文档。不使用 AIFLOW、Windows CI 或发布门禁。
 >
 > 下文 G0002-09、G0003-09 的正式产物检查，以及 G0006 的 Release、ZIP、部署、安装、真实 Host 发布验收均移交发布阶段。本轮执行相应的源码依赖检查、Debug 验证、本地性能和文档工作；原发布要求保留以便后续追踪。
 
@@ -8,9 +8,9 @@
 >
 > 目标版本：V1 首个可交付版本；当前工程中的 `PluginVersion` 不代表产品已完成
 >
-> 历史 V1 状态：108 个 Headless 测试、13 个 Plugin/UI 测试及 G0006 本地门禁通过。当前 R06 增量及新验证见[G0012 结果](refactoring/G0012/result.md)。
+> 历史 V1 状态：108 个 Headless 测试、13 个 Plugin/UI 测试及 G0006 本地门禁通过。R06 历史增量见[G0012 结果](refactoring/G0012/result.md)，当前 R07 验证见[G0013 结果](refactoring/G0013/result.md)。
 >
-> 当前入口：先读 [G0012 结果](refactoring/G0012/result.md)；下文保留 V1 历史清单，新增工作项见本文 R06 附录。发布时恢复发布门禁。
+> 当前入口：先读 [G0013 结果](refactoring/G0013/result.md)；下文保留 V1 历史清单，新增工作项见本文 R07 附录。发布时恢复发布门禁。
 
 本计划将[产品基线](product-shape-and-implementation-plan.md)转化为可执行工作项。
 文档方式参考 `myavalonia-fractal-art`：产品目标、阶段计划、实施方案和实际结果分开维护；
@@ -433,3 +433,14 @@ Standalone 用 `dotnet run --project src/LayerUnpackPlugin.Standalone` 启动并
 - [ ] 原生目录选择、辅助功能、真实 DPI／Host 实机验收；发布阶段再运行发布门禁。
 
 完整本地门禁、最终测试数量和证据以 [G0012 结果](refactoring/G0012/result.md)为准。专项：[转换契约](refactoring/G0012/conversion-contract.md)、[保留矩阵](refactoring/G0012/preservation-matrix.md)、[验收矩阵](refactoring/G0012/acceptance-matrix.md)。
+
+## R07 / G0013 实施附录
+
+- [x] 独立读取／创建矩阵、统一诊断与下一步，GUI 与 Headless 共用能力判断。
+- [x] 目录检查与完整内容检查；真实 CRC/AES/长度证据、限制、取消、预算和临时清理。
+- [x] TAR/PAX 与 TAR.GZ 普通创建；中文、空文件、空目录、源变化、冲突及独立互操作。
+- [x] 7z 锁定版本候选评估与失败样本归档；产品保持关闭。
+- [ ] 7z 创建开放：留在 R07 后续单元，不能把候选拒绝测试计作创建验收通过。
+- [ ] 原生/DPI/Host 及发布检查：本轮用户明确不运行发布门禁。
+
+本地验收、实际命令与数量见[G0013 结果](refactoring/G0013/result.md)，专用文档入口见[阶段档案](refactoring/README.md)。

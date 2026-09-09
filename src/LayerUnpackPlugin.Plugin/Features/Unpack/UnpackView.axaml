@@ -1,6 +1,6 @@
 <UserControl x:Class="LayerUnpackPlugin.Features.Unpack.UnpackView"
  xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
- xmlns:vm="using:LayerUnpackPlugin.Features.Unpack" xmlns:organize="using:LayerUnpackPlugin.Features.Organize" xmlns:repack="using:LayerUnpackPlugin.Features.Repack" x:DataType="vm:UnpackDocument" DragDrop.AllowDrop="True">
+ xmlns:check="using:LayerUnpackPlugin.Features.Check" xmlns:vm="using:LayerUnpackPlugin.Features.Unpack" xmlns:organize="using:LayerUnpackPlugin.Features.Organize" xmlns:repack="using:LayerUnpackPlugin.Features.Repack" x:DataType="vm:UnpackDocument" DragDrop.AllowDrop="True">
  <Grid>
  <Grid IsVisible="{Binding ShowRepackTask}" RowDefinitions="Auto,*">
   <Button Content="返回解压任务" Command="{Binding ReturnFromRepackCommand}" Margin="20,10,20,0" />
@@ -75,6 +75,7 @@
      </Expander>
     </StackPanel>
     <StackPanel IsVisible="{Binding !IsEmpty}" Spacing="12">
+     <Button Content="检查压缩包…" Command="{Binding CheckArchiveCommand}" />
      <Button Name="ConvertButton" Content="转换为 ZIP…" Command="{Binding ConvertToZipCommand}" />
      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
       <TextBlock Text="{Binding InputSummary}" VerticalAlignment="Center" FontWeight="SemiBold" />
@@ -143,5 +144,9 @@
    </WrapPanel>
   </StackPanel>
  </Grid>
+  <Grid IsVisible="{Binding ShowCheckTask}" RowDefinitions="Auto,*">
+   <Button Content="返回原任务" Command="{Binding ReturnFromCheckCommand}" Margin="16,8" />
+   <check:ArchiveCheckView Grid.Row="1" DataContext="{Binding CheckTask}" />
+  </Grid>
  </Grid>
 </UserControl>

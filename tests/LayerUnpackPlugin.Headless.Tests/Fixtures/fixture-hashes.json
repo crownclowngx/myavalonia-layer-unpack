@@ -158,5 +158,25 @@
     "file": "Zip.deflate.zip",
     "bytes": 61017,
     "sha256": "78720AF73FACE20069DCABDA43589095B439F236531C6268F8301028DBB65F9C"
+  },
+  {
+    "file": "R07.candidate-header.7z",
+    "bytes": 493,
+    "sha256": "1C80B7E93F28069AD95966AD66E22072D6B6F2E24BD18F6370A829C655049880"
+  },
+  {
+    "file": "R07.candidate-plain-header.7z",
+    "bytes": 918,
+    "sha256": "BDA2353DA3198A1148EC4642CA5D0C198AEFE56ABB9B01867073C5ECBB0AB80F"
+  },
+  {
+    "file": "R07.created.tar",
+    "bytes": 14848,
+    "sha256": "781F2BFBE10C6A92D6D546EB15C7B8E1801F034F82B2FE50ABFCB7EEA529C99C"
+  },
+  {
+    "file": "R07.created.tar.gz",
+    "bytes": 785,
+    "sha256": "811EDF8DC8C47DC08C0EAC5330E77CA0B549B2F3A47C4FBAA1CB3DFD17343CDB"
   }
 ]

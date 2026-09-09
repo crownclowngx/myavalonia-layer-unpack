@@ -15,17 +15,18 @@ public sealed class PackPlanner
         if (request.Inputs.Count == 0 || request.Inputs.Count > request.Limits.MaxInputs)
             throw new PackValidationException("请添加输入，且输入项数量不能超过限制。");
         if (string.IsNullOrWhiteSpace(request.OutputPath) || !Path.IsPathFullyQualified(request.OutputPath))
-            throw new PackValidationException("请选择完整的 ZIP 输出路径。");
+            throw new PackValidationException("请选择完整的归档输出路径。");
         var output = Path.GetFullPath(request.OutputPath);
         var name = Path.GetFileName(output);
-        if (!name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) || name.Length > 180 || name.Length <= 4)
-            throw new PackValidationException("压缩包名称应以 .zip 结尾，且长度不超过 180 个字符。");
+        var extension = ArchiveCapabilities.For(request.Options.Format).Extension;
+        if (!name.EndsWith(extension, StringComparison.OrdinalIgnoreCase) || name.Length > 180 || name.Length <= extension.Length)
+            throw new PackValidationException($"压缩包名称应以 {extension} 结尾，且长度不超过 180 个字符。");
         PackPaths.CheckEntry(name, false);
         PackPaths.Check(output);
         if (Directory.Exists(output)) throw new PackValidationException("ZIP 输出路径不能是已有文件夹。");
         var selection = PackInputSelection.Resolve(request.Inputs, request.Limits);
         var roots = selection.Roots;
-        if (selection.Sources.Any(s => PackPaths.Equal(s, output))) throw new PackValidationException("源文件不能同时作为本次 ZIP 输出。");
+        if (selection.Sources.Any(s => PackPaths.Equal(s, output))) throw new PackValidationException("源文件不能同时作为本次归档输出。");
         var parentPath = Path.GetDirectoryName(output)!;
         if (!Directory.Exists(parentPath) && roots.Any(r => r.IsDirectory && PathPolicy.IsWithin(r.SourcePath, parentPath)))
             throw new PackValidationException("在源文件夹内部输出时请选择已有目录，或先创建目标子目录后重新添加输入。");

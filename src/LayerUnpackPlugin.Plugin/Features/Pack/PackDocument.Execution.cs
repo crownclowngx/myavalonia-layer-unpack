@@ -66,7 +66,7 @@ public sealed partial class PackDocument
             }
 
             ReleaseIdleSession(); BatchResult = null; GroupResults.Clear();
-            Summary = previewOnly ? "正在准备清单" : "正在创建 ZIP";
+            Summary = previewOnly ? "正在准备清单" : "正在创建归档";
             var request = CaptureRequest();
             var cachedPlan = !previewOnly ? _plan : null;
             // 秘密在 UI 线程复制后才进入后台。预览不索取密码；真正执行时两次输入必须完全一致，不做 Trim。
@@ -94,7 +94,7 @@ public sealed partial class PackDocument
             if (outcome.result is null)
             {
                 Summary = "清单已准备，可以开始压缩";
-                Message = $"共 {outcome.plan.Groups.Count} 个输出组。请查看来源到 ZIP 的对应关系。";
+                Message = $"共 {outcome.plan.Groups.Count} 个输出组。请查看来源到归档 的对应关系。";
                 if (outcome.plan.MergedInputs > 0) Message += $"合并 {outcome.plan.MergedInputs} 个重复或已包含的输入。";
                 if (outcome.plan.ExcludedCount > 0) Message += $"排除 {outcome.plan.ExcludedCount} 项（目录包含后代）。";
                 if (request.Grouping == PackGrouping.Separate || outcome.plan.ExcludedCount > 0 || outcome.plan.MergedInputs > 0)
@@ -140,12 +140,12 @@ public sealed partial class PackDocument
     {
         BatchResult = result; CurrentEntry = ""; GroupResults.Clear();
         Summary = $"成功 {result.CompletedCount} 组 · 失败 {result.FailedCount} 组 · 跳过 {result.SkippedCount} 组 · 取消 {result.CancelledCount} 组";
-        Message = $"已提交源内容 {result.SourceBytes:N0} 字节 · ZIP {result.ArchiveBytes:N0} 字节。";
+        Message = $"已提交源内容 {result.SourceBytes:N0} 字节 · 归档 {result.ArchiveBytes:N0} 字节。";
         foreach (var group in result.Groups)
         {
             var item = group.Result;
             var status = item.State switch { PackState.Completed => "已完成", PackState.Skipped => "无可打包内容／已跳过", PackState.Cancelled => "已取消", _ => "失败" };
-            var detail = item.Error?.Message ?? (item.State == PackState.Completed ? $"{item.FileCount} 个文件 · {item.ArchiveBytes:N0} 字节" : "未生成 ZIP。");
+            var detail = item.Error?.Message ?? (item.State == PackState.Completed ? $"{item.FileCount} 个文件 · {item.ArchiveBytes:N0} 字节" : "未生成归档。");
             if (group.CanRetry) detail += "可重试；沿用原输入、目标和密码。";
             else if (item.State is PackState.Failed or PackState.Cancelled) detail += "请重新选择此来源建立新任务。";
             if (item.CleanupWarning is not null) detail += "临时文件未能清理：" + item.CleanupWarning;

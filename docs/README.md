@@ -23,7 +23,7 @@
 5. 需要时展开“更多选项”，选择分别打包、排除项、压缩偏好或 AES-256；点击预览检查分组和排除原因。加密需输入两遍本次密码，默认遮蔽；文件名仍然可见，接收方工具须支持。
 6. 完成后在页面上方查看每组状态、实际路径和字节数，点击“打开输出文件夹”。可恢复故障使用“重试可恢复失败组”，沿用原清单、目标和密码，成功包不重复生成。来源变化、取消或准备失败时点击“重新准备未完成项”，确认新清单和密码后开始。取消与关闭均等待清理退出。
 
-保留顶层文件夹、内容和空目录。同名输出自动编号，源文件保留；既有源目录内输出会排除本次目标和暂存文件，源内新输出子目录需先创建或改选已有目录。创建矩阵、资源与来源变化边界见[G0008 契约](refactoring/G0008/creation-contract.md)。分别模式要求输出位于所有源文件夹之外；不创建其他格式。批次、规则和秘密的详细契约见[G0009](refactoring/G0009/batch-creation-contract.md)，具体加密和压缩映射见[互操作矩阵](refactoring/G0009/encryption-and-compression-matrix.md)。
+保留顶层文件夹、内容和空目录。同名输出自动编号，源文件保留；既有源目录内输出会排除本次目标和暂存文件，源内新输出子目录需先创建或改选已有目录。创建矩阵、资源与来源变化边界见[G0008 契约](refactoring/G0008/creation-contract.md)。分别模式要求输出位于所有源文件夹之外；普通创建现可选 TAR/TAR.GZ，见[G0013 矩阵](refactoring/G0013/format-support-matrix.md)。批次、规则和秘密的详细契约见[G0009](refactoring/G0009/batch-creation-contract.md)，具体加密和压缩映射见[互操作矩阵](refactoring/G0009/encryption-and-compression-matrix.md)。
 
 ## 浏览归档并提取所选
 
@@ -38,14 +38,14 @@
 
 ## 本地开发环境
 
-依赖：.NET SDK 10，当前验证环境为 Windows x64、Avalonia 12.1.0、Plugin SDK 3.3.0。Python 仅在重新生成标准样本时需要，正常构建和测试不依赖 Python。
+依赖：.NET SDK 10 与用于本地互操作检查的 bsdtar/libarchive（本机由系统 tar 提供），当前验证环境为 Windows x64、Avalonia 12.1.0、Plugin SDK 3.3.0。Python 仅在重新生成标准样本时需要，正常构建和测试不依赖 Python。
 
 ```powershell
 ./tools/verify-local.ps1
 dotnet run --project src/LayerUnpackPlugin.Standalone -c Debug
 ```
 
-统一脚本执行 locked restore、Debug 零警告构建、两个测试项目、格式及 Markdown 路径检查；测试必须非零且全部通过，不允许跳过。日志和 TRX 位于 `artifacts/local-verification/`，渲染图位于 `artifacts/ui/`，性能原始数据位于 `artifacts/performance/`。
+统一脚本执行 locked restore、Debug 零警告构建、两个测试项目、libarchive 独立互操作、格式及 Markdown 路径检查；测试必须非零且全部通过，不允许跳过。日志和 TRX 位于 `artifacts/local-verification/`，渲染图位于 `artifacts/ui/`，性能原始数据位于 `artifacts/performance/`。
 
 这些是本地开发检查。Release、正式 ZIP、安装部署、真实 Host 加载与发布门禁本轮均未执行，也没有新增 CI。
 
@@ -101,9 +101,9 @@ var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken)
 
 ## 后续产品阶段规划
 
-[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01–R06 已实施，当前本地验证和遗留见[G0012 结果](refactoring/G0012/result.md)。R07–R08 的格式扩展与后续集成仍为未来目标。
+[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01–R06 已实施，当前本地验证和遗留见[G0013 结果](refactoring/G0013/result.md)。R07 的能力矩阵、检查及 TAR/TAR.GZ 创建见[G0013](refactoring/G0013/result.md)；7z 创建与 R08 仍为未来目标。
 
-生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008、R03 映射 G0009、R04 映射 G0010、R05 映射 G0011、R06 映射 G0012，后续可细化 R07，并复核各阶段原生交互遗留。
+生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008、R03 映射 G0009、R04 映射 G0010、R05 映射 G0011、R06 映射 G0012，R07 本轮映射 G0013；后续继续验证 7z 并复核各阶段原生交互遗留。
 
 ## 整理解压结果
 
@@ -124,3 +124,11 @@ var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken)
 5. 查看逐来源状态和实际产物路径。取消会排空并清理本任务暂存，已提交 ZIP 和用户已有结果保留；来源变化需重新检查，不自动带入历史文件。
 
 不保留原归档全部元数据，不宣称完全无损；来源认证限制不会因目标 ZIP 可读而消失。详细说明和 Headless 示例见[G0012 契约](refactoring/G0012/conversion-contract.md)，内容／元数据范围见[矩阵](refactoring/G0012/preservation-matrix.md)。
+
+## 检查压缩包与创建 TAR
+
+解压页添加来源或浏览页选择来源后，点击“检查压缩包…”。选择本次来源，默认完整检查；需要时展开密码／旧编码，然后“开始检查”。仅目录检查只适用于 ZIP，成功也不会显示为正文完整。检查不生成用户输出，会消耗受预算约束的临时空间，完成、失败、取消后清理；原页面及其结果保留。失败说明原因与下一步，RAR5 MAC 等限制一直可见。
+
+普通压缩页可从默认 ZIP 改选 TAR/TAR.GZ，名称后缀随之更新。TAR 固定仅打包，TAR.GZ 可调三个压缩偏好，都不支持密码；格式切换清除密码和旧预览。7z 真实候选未通过验证，未开放。R06 转换与结果打包仍只输出 ZIP。
+
+Headless 使用 `ArchiveCheckService.CheckAsync`；创建使用 `PackOptions.Format`。完整示例、资源与秘密边界见[G0013 检查契约](refactoring/G0013/checking-contract.md)，支持范围见[矩阵](refactoring/G0013/format-support-matrix.md)。

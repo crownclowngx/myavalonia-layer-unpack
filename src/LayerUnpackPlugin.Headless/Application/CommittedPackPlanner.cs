@@ -105,6 +105,7 @@ public sealed class CommittedPackPlanner(OrganizationPlanner organizationPlanner
     internal static void ValidateOptions(PackOptions options)
     {
         options.Validate();
+        if (options.Format != PackFormat.Zip) throw new PackValidationException("转换与结果重新打包当前仅支持 ZIP 目标；其他格式请使用普通创建任务。");
         if (options.Exclusions.Extensions.Count > 0 || options.Exclusions.DirectoryNames.Count > 0)
             throw new PackValidationException("结果打包使用明确的提交清单；如需筛选请在整理规则中选择，不接受隐式排除。");
     }

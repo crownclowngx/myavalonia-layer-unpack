@@ -1,8 +1,8 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
- xmlns:vm="using:LayerUnpackPlugin.Features.Browse" xmlns:unpack="using:LayerUnpackPlugin.Features.Unpack"
+ xmlns:check="using:LayerUnpackPlugin.Features.Check" xmlns:vm="using:LayerUnpackPlugin.Features.Browse" xmlns:unpack="using:LayerUnpackPlugin.Features.Unpack"
  x:Class="LayerUnpackPlugin.Features.Browse.BrowseView" x:DataType="vm:BrowseDocument" x:CompileBindings="True" DragDrop.AllowDrop="True">
  <Grid>
-  <Grid IsVisible="{Binding !ShowUnpackTask}" Margin="16" RowDefinitions="Auto,*,Auto" RowSpacing="8">
+  <Grid IsVisible="{Binding ShowMainTask}" Margin="16" RowDefinitions="Auto,*,Auto" RowSpacing="8">
    <StackPanel Spacing="6">
     <TextBlock Text="{Binding ArchiveName}" FontSize="22" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6" IsEnabled="{Binding CanEdit}">
@@ -15,6 +15,7 @@
      <Button Grid.Column="1" Content="上一页" Command="{Binding PreviousPageCommand}" />
      <Button Grid.Column="2" Content="下一页" Command="{Binding NextPageCommand}" />
     </Grid>
+    <Button Content="检查压缩包…" Command="{Binding CheckArchiveCommand}" HorizontalAlignment="Left" />
     <TextBlock Text="{Binding PageSummary}" FontSize="12" Opacity="0.7" />
    </StackPanel>
    <!-- 列表有独立有限视口，且每次最多 200 行；不在外层无限 ScrollViewer 中取消虚拟化。 -->
@@ -71,6 +72,10 @@
   <Grid IsVisible="{Binding ShowUnpackTask}" RowDefinitions="Auto,*">
    <Button Content="返回浏览（解压任务继续保留）" Command="{Binding ReturnToBrowseCommand}" Margin="16,8" />
    <unpack:UnpackView Grid.Row="1" DataContext="{Binding UnpackTask}" />
+  </Grid>
+  <Grid IsVisible="{Binding ShowCheckTask}" RowDefinitions="Auto,*">
+   <Button Content="返回原任务" Command="{Binding ReturnFromCheckCommand}" Margin="16,8" />
+   <check:ArchiveCheckView Grid.Row="1" DataContext="{Binding CheckTask}" />
   </Grid>
  </Grid>
 </UserControl>

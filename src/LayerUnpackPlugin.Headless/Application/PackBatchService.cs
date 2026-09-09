@@ -35,7 +35,7 @@ public sealed class PackBatchService(IPackService service) : IPackBatchService
         PackPaths.Check(output);
         var selection = PackInputSelection.Resolve(request.Inputs, request.Limits);
         if (request.Grouping == PackGrouping.Combined && (string.IsNullOrWhiteSpace(request.ArchiveName) || request.ArchiveName != Path.GetFileName(request.ArchiveName)))
-            throw new PackValidationException("名称只能是一个 ZIP 文件名，位置请填写在输出文件夹中。");
+            throw new PackValidationException("名称只能是一个归档文件名，位置请填写在输出文件夹中。");
         // 多事务写入若落在任一源树中，会改变其他组已经冻结的清单。
         // 分别模式要求外部输出位置，把这个边界在准备时说明，避免凭临时文件名忽略用户资料。
         if (request.Grouping == PackGrouping.Separate && selection.Roots.Any(r => r.IsDirectory &&
@@ -49,7 +49,7 @@ public sealed class PackBatchService(IPackService service) : IPackBatchService
         for (var i = 0; i < groupInputs.Length; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var name = request.Grouping == PackGrouping.Combined ? request.ArchiveName : AllocateName(selection.Roots[i], output, used, cancellationToken);
+            var name = request.Grouping == PackGrouping.Combined ? request.ArchiveName : AllocateName(selection.Roots[i], output, used, ArchiveCapabilities.For(request.Options.Format).Extension, cancellationToken);
             var target = Path.Combine(output, name);
             if (request.Grouping == PackGrouping.Separate && selection.Sources.Any(p => PackPaths.Equal(p, target)))
                 throw new PackValidationException("批次输出不能同时作为选中的来源，请选择其他输出位置。");
@@ -73,7 +73,7 @@ public sealed class PackBatchService(IPackService service) : IPackBatchService
         return new(request, groups, request.Inputs.Count - selection.Roots.Length);
     }
 
-    private static string AllocateName(PackRoot root, string directory, HashSet<string> used, CancellationToken token)
+    private static string AllocateName(PackRoot root, string directory, HashSet<string> used, string extension, CancellationToken token)
     {
         var stem = root.IsDirectory ? root.EntryName : Path.GetFileNameWithoutExtension(root.EntryName);
         if (string.IsNullOrWhiteSpace(stem)) stem = "资料";
@@ -81,11 +81,11 @@ public sealed class PackBatchService(IPackService service) : IPackBatchService
         for (var i = 0; i < 10_000; i++)
         {
             token.ThrowIfCancellationRequested();
-            var name = i == 0 ? stem + ".zip" : $"{stem} ({i}).zip";
+            var name = i == 0 ? stem + extension : $"{stem} ({i}){extension}";
             if (!used.Contains(name) && !File.Exists(Path.Combine(directory, name)) && !Directory.Exists(Path.Combine(directory, name)))
             { used.Add(name); return name; }
         }
-        throw new PackValidationException("无法为批次分配不冲突的 ZIP 名称。");
+        throw new PackValidationException("无法为批次分配不冲突的归档名称。");
     }
 
     /// <summary>成功创建会话后，密码对象的释放责任转移给会话；每个会话需提供独立秘密对象。</summary>

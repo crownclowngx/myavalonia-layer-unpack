@@ -37,6 +37,7 @@ public sealed partial class UnpackDocument
     }
     private async Task ResetOrganizationAsync()
     {
+        await ResetCheckAsync();
         await ResetRepackAsync();
         if (OrganizationTask is null) return;
         OrganizationTask.PropertyChanged -= OrganizationChanged;

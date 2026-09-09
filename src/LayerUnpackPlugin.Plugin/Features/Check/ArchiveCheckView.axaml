@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:vm="using:LayerUnpackPlugin.Features.Check" x:Class="LayerUnpackPlugin.Features.Check.ArchiveCheckView"
+ x:DataType="vm:ArchiveCheckDocument" x:CompileBindings="True">
+ <Grid Margin="16" RowDefinitions="Auto,*,Auto" RowSpacing="10">
+  <TextBlock Text="检查压缩包" FontSize="22" FontWeight="SemiBold" />
+  <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+   <StackPanel Spacing="10">
+    <StackPanel Spacing="8" IsEnabled="{Binding CanEdit}">
+     <TextBlock Text="本次检查来源" />
+     <ComboBox Name="CheckSource" ItemsSource="{Binding Sources}" SelectedItem="{Binding SourcePath}" HorizontalAlignment="Stretch" />
+     <CheckBox Content="仅检查目录（当前支持 ZIP，不检查正文）" IsChecked="{Binding DirectoryOnly}" />
+     <Expander Header="密码与旧 ZIP 名称编码">
+      <StackPanel Spacing="6">
+       <TextBox Name="CheckPassword" Text="{Binding PasswordText}" PasswordChar="●" PlaceholderText="本次候选密码（一行一个，不保存）" AcceptsReturn="True" MaxLength="65536" IsVisible="{Binding !DirectoryOnly}" />
+       <ComboBox ItemsSource="{Binding NameEncodings}" SelectedItem="{Binding SelectedNameEncoding}" />
+      </StackPanel>
+     </Expander>
+    </StackPanel>
+    <TextBlock Name="CheckSummary" Text="{Binding Summary}" TextWrapping="Wrap" FontWeight="SemiBold" />
+    <TextBlock Name="CheckDetails" Text="{Binding Details}" TextWrapping="Wrap" />
+    <Expander Header="读取能力与诊断边界"><TextBlock Text="{Binding CapabilitySummary}" TextWrapping="Wrap" /></Expander>
+   </StackPanel>
+  </ScrollViewer>
+  <StackPanel Grid.Row="2" Spacing="8">
+   <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" Height="4" />
+   <WrapPanel>
+    <Button Name="CheckCancel" Content="取消" Command="{Binding CancelCommand}" IsVisible="{Binding IsBusy}" Margin="0,0,8,0" />
+    <Button Name="CheckStart" Content="开始检查" Command="{Binding StartCommand}" />
+   </WrapPanel>
+  </StackPanel>
+ </Grid>
+</UserControl>

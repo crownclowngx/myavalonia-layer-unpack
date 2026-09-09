@@ -59,11 +59,15 @@ public enum NodeState { Queued, Probing, Extracting, Extracted, Failed, Cancelle
 public enum UnpackError
 {
     PasswordRequiredOrInvalid, CorruptArchive, UnsupportedFormat, UnsupportedEncryption,
-    MissingVolume, UnsafePath, BudgetExceeded, InputChanged, InputUnavailable, OutputError, Timeout, InvalidNameEncoding, UnexpectedError
+    MissingVolume, UnsafePath, BudgetExceeded, InputChanged, InputUnavailable, OutputError, Timeout, InvalidNameEncoding, UnexpectedError,
+    MissingVolumeOrCorruptArchive
 }
 
 /// <summary>仅包含经过归一化的诊断；不保留引擎异常对象，避免密码通过异常链泄漏。</summary>
-public sealed record UnpackDiagnostic(UnpackError Code, string Message);
+public sealed record UnpackDiagnostic(UnpackError Code, string Message)
+{
+    public string NextStep => ArchiveDiagnosticAdvice.For(Code);
+}
 
 public sealed record ArchiveNodeResult(Guid Id, Guid? ParentId, string SourcePath, int Depth,
     NodeState State, string? Format, string? OutputDirectory, UnpackDiagnostic? Error,
@@ -75,7 +79,7 @@ public sealed record ArchiveNodeResult(Guid Id, Guid? ParentId, string SourcePat
     /// <summary>重试保持原输入、编码和预算，只适用于补密或访问条件恢复；跨层和 UI 共用同一判断。</summary>
     public bool CanRetry => State == NodeState.Failed && CleanupWarnings.Count == 0 &&
         Error?.Code is not (UnpackError.UnsafePath or UnpackError.InputChanged or UnpackError.BudgetExceeded or
-            UnpackError.InvalidNameEncoding or UnpackError.UnsupportedFormat or UnpackError.UnsupportedEncryption or UnpackError.MissingVolume);
+            UnpackError.InvalidNameEncoding or UnpackError.UnsupportedFormat or UnpackError.UnsupportedEncryption or UnpackError.MissingVolume or UnpackError.MissingVolumeOrCorruptArchive);
 }
 
 /// <summary>已提交普通条目的身份与内容凭据。目录也保留，用于空目录和精确包装层判断。

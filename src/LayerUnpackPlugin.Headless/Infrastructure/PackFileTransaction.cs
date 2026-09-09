@@ -29,11 +29,12 @@ internal sealed class PackFileTransaction
     {
         if (!_owned || _committed) throw new InvalidOperationException("文件事务状态无效。");
         var parent = Path.GetDirectoryName(_outputPath)!;
-        var stem = Path.GetFileNameWithoutExtension(_outputPath);
+        var extension = ArchiveCapabilities.ExtensionOf(_outputPath);
+        var stem = Path.GetFileName(_outputPath)[..^extension.Length];
         for (var i = 0; i < 10_000; i++)
         {
             token.ThrowIfCancellationRequested();
-            var target = i == 0 ? _outputPath : Path.Combine(parent, $"{stem} ({i}).zip");
+            var target = i == 0 ? _outputPath : Path.Combine(parent, $"{stem} ({i}){extension}");
             PackPaths.Check(TemporaryPath); PackPaths.Check(target);
             if (File.Exists(target) || Directory.Exists(target)) continue;
             try
@@ -44,7 +45,7 @@ internal sealed class PackFileTransaction
             }
             catch (IOException) when (File.Exists(target) || Directory.Exists(target)) { }
         }
-        throw new PackFailureException(PackError.OutputError, "无法为 ZIP 分配不冲突的输出名称。");
+        throw new PackFailureException(PackError.OutputError, "无法为归档分配不冲突的输出名称。");
     }
     internal string? Rollback()
     {

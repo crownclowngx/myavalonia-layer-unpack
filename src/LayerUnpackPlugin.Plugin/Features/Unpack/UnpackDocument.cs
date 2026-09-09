@@ -50,9 +50,10 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
     public event EventHandler? PresentationChanged;
     public UnpackResult? CurrentResult => _session?.Snapshot;
 
-    public UnpackDocument(IUnpackService service, IDocumentLifetime lifetime, IOrganizationService? organizationService = null, IRepackService? repackService = null)
+    public UnpackDocument(IUnpackService service, IDocumentLifetime lifetime, IOrganizationService? organizationService = null, IRepackService? repackService = null, IArchiveCheckService? checkService = null)
     {
         _service = service;
+        _checkService = checkService ?? new ArchiveCheckService();
         _organizationService = organizationService ?? new OrganizationService();
         _repackService = repackService ?? new RepackService();
         _lifetime = lifetime;
@@ -85,6 +86,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
 
     private void NotifyCommands()
     {
+        CheckArchiveCommand.NotifyCanExecuteChanged(); ReturnFromCheckCommand.NotifyCanExecuteChanged();
         StartCommand.NotifyCanExecuteChanged(); CancelCommand.NotifyCanExecuteChanged();
         RetryCommand.NotifyCanExecuteChanged(); ClearCommand.NotifyCanExecuteChanged();
         RemoveSelectedCommand.NotifyCanExecuteChanged();
@@ -267,6 +269,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
     {
         _closed = true; ++_generation; _closing.Cancel();
         PasswordText = ""; _hostClosing.Dispose();
+        if (CheckTask is not null) await CheckTask.DisposeAsync().ConfigureAwait(false);
         if (OrganizationTask is not null) await OrganizationTask.DisposeAsync().ConfigureAwait(false);
         if (RepackTask is not null) await RepackTask.DisposeAsync().ConfigureAwait(false);
         // 只排空不依赖 UI 的工作任务。排空整个命令续体会与 Host 同步释放 UI Scope 形成死锁。
@@ -303,7 +306,7 @@ public sealed partial class ArchiveNodeViewModel(Guid id) : ObservableObject
     public bool HasOutput => OutputPath is not null;
     public bool NeedsPassword => ErrorCode == UnpackError.PasswordRequiredOrInvalid;
     public bool RequiresNewBatch => ErrorCode is UnpackError.InvalidNameEncoding or UnpackError.InputChanged
-        or UnpackError.UnsupportedFormat or UnpackError.UnsupportedEncryption or UnpackError.MissingVolume or UnpackError.BudgetExceeded;
+        or UnpackError.UnsupportedFormat or UnpackError.UnsupportedEncryption or UnpackError.MissingVolume or UnpackError.MissingVolumeOrCorruptArchive or UnpackError.BudgetExceeded;
     partial void OnOutputPathChanged(string? value) => OnPropertyChanged(nameof(HasOutput));
     partial void OnErrorCodeChanged(UnpackError? value)
     {
@@ -327,6 +330,7 @@ public sealed partial class ArchiveNodeViewModel(Guid id) : ObservableObject
         // 可重试性完全服从 Headless；界面仅据错误类型提供补密或新批次的导航入口。
         CanRetry = node.CanRetry; ErrorCode = node.Error?.Code;
         Details = $"第 {node.Depth} 层 · {node.Format ?? "尚未识别"}\n{Status}\n{node.Error?.Message ?? ""}" +
+            (node.Error is null ? "" : "\n" + node.Error.NextStep) +
             (node.Warning is null ? "" : "\n" + node.Warning) +
             (node.CleanupWarnings.Count > 0 ? "\n临时输出清理失败：\n" + string.Join("\n", node.CleanupWarnings) : "");
     }

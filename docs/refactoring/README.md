@@ -1,6 +1,6 @@
 # 实施档案与文档治理
 
-日期：2026-09-08。当前为 R06 格式转换与重新打包本地候选：G0012 已实施，当前本地证据和原生遗留见[G0012 结果](G0012/result.md)。G0001–G0011 保留历史实现和证据；发布项仍待验收。
+日期：2026-09-09。当前为 R07 矩阵、检查与 TAR/TAR.GZ 创建本地候选：G0013 已实施，7z 创建未开放，当前本地证据见[G0013 结果](G0013/result.md)。G0001–G0012 保留历史实现和证据；发布项仍待验收。
 
 沿用 `myavalonia-fractal-art` 的“产品主文档 + G 编号阶段三件套 + 质量基线 + 专项证据”方式，不复制参考项目的功能、进度、测试数量或临时规则。本轮以用户明确规则为准：SOLID 优先、朴素模式、详细中文注释、单元测试与本地门禁齐全、同步文档；不使用 AIFLOW、Windows CI 或发布门禁。
 
@@ -33,6 +33,7 @@
 | G0010 / R04 | 压缩包浏览与选择提取；已实施，本地 292 项测试通过，部分原生交互待验收 | [计划](G0010/plan.md) · [方案](G0010/implementation.md) · [结果](G0010/result.md) · [浏览契约](G0010/browsing-contract.md) · [格式矩阵](G0010/format-support-matrix.md) · [交互](G0010/interaction-design.md) · [验收](G0010/acceptance-matrix.md) |
 | G0011 / R05 | 输出整理；已实施，本地 347 项测试与门禁通过，部分原生交互待验收 | [计划](G0011/plan.md) · [方案](G0011/implementation.md) · [结果](G0011/result.md) · [整理契约](G0011/organization-contract.md) · [交互](G0011/interaction-design.md) · [验收](G0011/acceptance-matrix.md) |
 | G0012 / R06 | 格式转换与重新打包；已实施，本地 423 项测试与门禁通过，部分原生交互待验收 | [计划](G0012/plan.md) · [方案](G0012/implementation.md) · [结果](G0012/result.md) · [转换契约](G0012/conversion-contract.md) · [保留矩阵](G0012/preservation-matrix.md) · [交互](G0012/interaction-design.md) · [验收](G0012/acceptance-matrix.md) |
+| G0013 / R07 | 统一能力、按需检查与 TAR/TAR.GZ 创建；本地 477 项测试与门禁通过，7z 候选失败未开放 | [计划](G0013/plan.md) · [方案](G0013/implementation.md) · [结果](G0013/result.md) · [检查契约](G0013/checking-contract.md) · [格式矩阵](G0013/format-support-matrix.md) · [7z 评估](G0013/sevenzip-evaluation.md) · [交互](G0013/interaction-design.md) · [验收](G0013/acceptance-matrix.md) |
 
 ## 状态与维护规则
 
@@ -60,6 +61,10 @@ G0010 / R04 实现 ZIP 元数据浏览、稳定身份与后代选择、一层提
 
 G0011 / R05 建立提交清单、独立整理预览/执行、来源与包装链规则、复制事务及上下文子页。专用文档记录来源契约、源变化策略、生命周期和真实样本；本地测试、图像与资源实测见[结果](G0011/result.md)。历史 G0010 的 292 项测试不作为本期新增整理功能的证据。
 
-## R06 当前增量
+## R06 历史增量
 
 G0012 / R06 复用递归解压、提交清单、整理映射和 ZIP 创建，新增普通转换、显式有限复合操作、结果打包、统一资源计量和逐包回读提交。页面衔接、秘密和元数据边界有专用文档，全部本地证据见[结果](G0012/result.md)；不改写 G0011 的历史验证。
+
+## R07 当前增量
+
+G0013 新增按操作独立矩阵、完整检查契约与上下文子页、GZip 尾部校验及 TAR 创建。独立工具证明 TAR/TAR.GZ 产物完整，7z 候选未通过且未开放。最终证据见[结果](G0013/result.md)，R07 整体仍有后续创建单元。

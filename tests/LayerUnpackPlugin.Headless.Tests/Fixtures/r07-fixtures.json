@@ -1,0 +1,114 @@
+[
+  {
+    "format": 1,
+    "archive": "sample.tar",
+    "sha256": "781F2BFBE10C6A92D6D546EB15C7B8E1801F034F82B2FE50ABFCB7EEA529C99C",
+    "entries": [
+      {
+        "path": "资料",
+        "directory": true,
+        "bytes": 0,
+        "sha256": ""
+      },
+      {
+        "path": "资料/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "directory": true,
+        "bytes": 0,
+        "sha256": ""
+      },
+      {
+        "path": "资料/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/data.bin",
+        "directory": false,
+        "bytes": 4096,
+        "sha256": "D67C656E01756650D77717B0839985A056EC28FFE174601D690FC407A2CEFFCA"
+      },
+      {
+        "path": "资料/empty.txt",
+        "directory": false,
+        "bytes": 0,
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      {
+        "path": "资料/空目录",
+        "directory": true,
+        "bytes": 0,
+        "sha256": ""
+      },
+      {
+        "path": "资料/说明.txt",
+        "directory": false,
+        "bytes": 17,
+        "sha256": "5300D864F70D5EE5028FB1EFC038228D06A410EC517DC5DA6763F26284F78D27"
+      }
+    ],
+    "file": "R07.created.tar"
+  },
+  {
+    "format": 2,
+    "archive": "sample.tar.gz",
+    "sha256": "811EDF8DC8C47DC08C0EAC5330E77CA0B549B2F3A47C4FBAA1CB3DFD17343CDB",
+    "entries": [
+      {
+        "path": "资料",
+        "directory": true,
+        "bytes": 0,
+        "sha256": ""
+      },
+      {
+        "path": "资料/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "directory": true,
+        "bytes": 0,
+        "sha256": ""
+      },
+      {
+        "path": "资料/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/data.bin",
+        "directory": false,
+        "bytes": 4096,
+        "sha256": "D67C656E01756650D77717B0839985A056EC28FFE174601D690FC407A2CEFFCA"
+      },
+      {
+        "path": "资料/empty.txt",
+        "directory": false,
+        "bytes": 0,
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      {
+        "path": "资料/空目录",
+        "directory": true,
+        "bytes": 0,
+        "sha256": ""
+      },
+      {
+        "path": "资料/说明.txt",
+        "directory": false,
+        "bytes": 17,
+        "sha256": "5300D864F70D5EE5028FB1EFC038228D06A410EC517DC5DA6763F26284F78D27"
+      }
+    ],
+    "file": "R07.created.tar.gz"
+  },
+  {
+    "dependency": "SharpCompress 0.50.4",
+    "compressHeader": true,
+    "sha256": "1C80B7E93F28069AD95966AD66E22072D6B6F2E24BD18F6370A829C655049880",
+    "State": 3,
+    "Error": {
+      "Code": 0,
+      "Message": "没有可用密码，或加密内容已经损坏；可以补充候选密码后重试。",
+      "NextStep": "补充可用密码后重试；若仍失败，请重新获取原包，加密内容也可能损坏。"
+    },
+    "file": "R07.candidate-header.7z"
+  },
+  {
+    "dependency": "SharpCompress 0.50.4",
+    "compressHeader": false,
+    "sha256": "BDA2353DA3198A1148EC4642CA5D0C198AEFE56ABB9B01867073C5ECBB0AB80F",
+    "State": 3,
+    "Error": {
+      "Code": 0,
+      "Message": "没有可用密码，或加密内容已经损坏；可以补充候选密码后重试。",
+      "NextStep": "补充可用密码后重试；若仍失败，请重新获取原包，加密内容也可能损坏。"
+    },
+    "file": "R07.candidate-plain-header.7z"
+  }
+]

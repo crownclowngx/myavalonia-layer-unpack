@@ -23,3 +23,7 @@ python tools/generate-fixtures.py
 ```
 
 其他普通 ZIP、混合明文/AES、路径逃逸、重复条目、TAR 链接/设备、截断和 CRC/认证篡改样本由各测试在独占临时目录中生成。混合 AES 样本使用 SharpZipLib 写入；正向 AES 兼容性同时由独立的上游真实包验证。性能样本按 64/128 MiB 和 2,000 个小文件的固定规模生成。
+
+## R07 自有创建与候选样本
+
+`R07.created.tar` / `.tar.gz` 为本插件 PAX 创建样本，独立 libarchive 3.8.4 逐项验证中文、长路径、3 个文件、3 个目录及 SHA-256。两个 `R07.candidate*.7z` 是直接调用 SharpCompress 0.50.4 Writer 生成的负向研究样本，混合空文件与目录时未通过独立读取，不表示 7z 创建支持。摘要、预期清单与来源见 [r07-fixtures.json](r07-fixtures.json)，全部文件摘要同时收录于 `fixture-hashes.json`。重新生成见 `FormatCreationTests` 与 `SevenZipCandidateTests`；独立检查脚本为 [verify-format-interop.ps1](../../../tools/verify-format-interop.ps1)。

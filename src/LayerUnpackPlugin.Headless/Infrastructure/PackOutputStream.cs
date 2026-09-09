@@ -14,7 +14,7 @@ internal sealed class PackOutputStream(Stream inner, long limit, CancellationTok
     private void Check(int count)
     {
         token.ThrowIfCancellationRequested();
-        if (count > limit - Position) throw new PackFailureException(PackError.BudgetExceeded, "生成 ZIP 超过归档输出上限。");
+        if (count > limit - Position) throw new PackFailureException(PackError.BudgetExceeded, "生成归档超过输出上限。");
         var end = Position + count;
         if (end > _highWater) { consumeBytes?.Invoke(end - _highWater); _highWater = end; }
     }

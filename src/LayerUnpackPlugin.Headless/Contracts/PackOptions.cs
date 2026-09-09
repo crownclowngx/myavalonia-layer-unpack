@@ -8,6 +8,7 @@ public enum PackGrouping { Combined, Separate }
 /// <summary>可记录的写入偏好只描述能力，不包含密码；默认值保持普通 ZIP 的原有行为。</summary>
 public sealed record PackOptions
 {
+    public PackFormat Format { get; init; } = PackFormat.Zip;
     public PackCompression Compression { get; init; } = PackCompression.Standard;
     public bool Encrypt { get; init; }
     public PackExclusionRules Exclusions { get; init; } = new();
@@ -16,6 +17,7 @@ public sealed record PackOptions
     {
         if (!Enum.IsDefined(Compression) || Exclusions is null)
             throw new PackValidationException("压缩偏好或排除规则无效。");
+        ArchiveCapabilities.Validate(this);
     }
 }
 

@@ -10,6 +10,7 @@ public sealed class ZipArchiveWriter : IArchiveWriter
 {
     public async Task WriteAsync(PackPlan plan, Stream output, IProgress<PackProgress>? progress, CancellationToken cancellationToken, PackSecret? secret = null)
     {
+        if (plan.Request.Options.Format != PackFormat.Zip) throw new PackValidationException("ZIP 写入器只能接收 ZIP 清单。");
         if (plan.Request.Options.Encrypt)
         {
             if (secret is null) throw new PackValidationException("本次加密输出缺少目标密码。");

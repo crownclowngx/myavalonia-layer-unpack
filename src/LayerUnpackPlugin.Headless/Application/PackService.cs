@@ -11,10 +11,10 @@ public interface IPackService
     Task<PackResult> ExecuteAsync(PackPlan plan, IProgress<PackProgress>? progress = null, CancellationToken cancellationToken = default, PackSecret? secret = null);
 }
 
-/// <summary>朴素的创建用例编排：规划器负责源，写入器负责 ZIP，事务负责目标。每次调用的状态均为局部变量。</summary>
+/// <summary>朴素的创建用例编排：规划器负责源，写入器负责容器，事务负责目标。每次调用的状态均为局部变量。</summary>
 public sealed class PackService(PackPlanner planner, IArchiveWriter writer) : IPackService
 {
-    public PackService() : this(new PackPlanner(), new ZipArchiveWriter()) { }
+    public PackService() : this(new PackPlanner(), new ArchiveWriter()) { }
     public async Task<PackPlan> PrepareAsync(PackRequest request, IProgress<PackProgress>? progress = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -35,6 +35,7 @@ public sealed class PackService(PackPlanner planner, IArchiveWriter writer) : IP
         PackSecret? secret, RepackBudget? budget, Action? verifying = null)
     {
         ArgumentNullException.ThrowIfNull(plan);
+        plan.Request.Options.Validate();
         if (plan.Request.Options.Encrypt != (secret is not null))
             throw new PackValidationException("加密开关与本次目标密码必须一致，不能自动降级为普通 ZIP。");
         if (secret is not null) _ = secret.Password;
@@ -78,12 +79,12 @@ public sealed class PackService(PackPlanner planner, IArchiveWriter writer) : IP
         catch (Exception) when (token.IsCancellationRequested)
         {
             state = cancellationToken.IsCancellationRequested ? PackState.Cancelled : PackState.Failed;
-            if (state == PackState.Failed) error = new(PackError.Timeout, "压缩超过时间上限，未提交 ZIP。");
+            if (state == PackState.Failed) error = new(PackError.Timeout, "压缩超过时间上限，未提交归档。");
         }
         catch (PackFailureException e) { error = new(e.Code, e.Message); }
         catch (OrganizationFailureException e) { error = new(e.Code == OrganizationError.UnsafePath ? PackError.UnsafePath : PackError.InputChanged, e.Message); }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-        { error = new(reading ? PackError.InputUnavailable : PackError.OutputError, reading ? "来源不可用，请重新检查输入。" : "无法写入或提交 ZIP，请检查输出目录、权限、占用和可用空间。"); }
+        { error = new(reading ? PackError.InputUnavailable : PackError.OutputError, reading ? "来源不可用，请重新检查输入。" : "无法写入或提交归档，请检查输出目录、权限、占用和可用空间。"); }
         catch (Exception) { error = new(PackError.UnexpectedError, "创建未完成，请重新检查输入和输出位置。"); }
         return new(state, null, plan.TotalBytes, 0, plan.FileCount, watch.Elapsed, error, transaction.Rollback());
     }

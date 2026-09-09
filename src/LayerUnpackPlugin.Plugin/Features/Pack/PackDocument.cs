@@ -125,7 +125,7 @@ public sealed partial class PackDocument : ObservableObject, IPluginDocument, ID
                 var stem = first is null ? "资料" : Path.GetFileNameWithoutExtension(first.Path);
                 if (first is not null && Directory.Exists(first.Path)) stem = Path.GetFileName(first.Path);
                 if (string.IsNullOrWhiteSpace(stem)) stem = "资料";
-                ArchiveName = (stem.Length > 100 ? stem[..100] : stem) + ".zip";
+                ArchiveName = (stem.Length > 100 ? stem[..100] : stem) + CreationCapability.Extension;
             }
             if (!_directoryChosen)
             {

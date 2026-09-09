@@ -1,8 +1,8 @@
 # 压缩包工作台：未来产品发展路线图
 
-> 版本：v1.5 · 2026-09-08
+> 版本：v1.6 · 2026-09-09
 >
-> 状态：R01–R06 已实施，当前本地证据见 [G0012](../refactoring/G0012/result.md)；R07–R08 规划中。原生人工与发布遗留分别记录。
+> 状态：R01–R06 已实施，R07 矩阵、检查与 TAR 创建本地证据见 [G0013](../refactoring/G0013/result.md)；7z 创建与 R08 规划中。原生人工与发布遗留分别记录。
 >
 > 用途：先确定每个阶段为什么做、做到什么程度，再为选定阶段生成详细执行计划。
 >
@@ -12,7 +12,7 @@
 
 当前产品为压缩包工作台 / Archive Workbench，项目为 `myavalonia-layer-unpack`。已有能力包括批量递归解压、当前批次候选密码、补密重试，以及 R02 普通 ZIP 创建、R03 分别打包/规则排除/AES-256、R04 ZIP 浏览/搜索/选择提取；Headless、Plugin 和 Standalone 复用对应业务与界面。
 
-当前事实以[产品主文档](../product-shape-and-implementation-plan.md)、[创建矩阵](../refactoring/G0009/encryption-and-compression-matrix.md)、[浏览矩阵](../refactoring/G0010/format-support-matrix.md)、[整理契约](../refactoring/G0011/organization-contract.md)、[转换契约](../refactoring/G0012/conversion-contract.md)和[G0012 结果](../refactoring/G0012/result.md)为依据。原生交互、DPI、真实 Host 与正式交付仍有待验收项，历史阶段的测试记录不代替新版本证据。
+当前事实以[产品主文档](../product-shape-and-implementation-plan.md)、[创建矩阵](../refactoring/G0009/encryption-and-compression-matrix.md)、[浏览矩阵](../refactoring/G0010/format-support-matrix.md)、[整理契约](../refactoring/G0011/organization-contract.md)、[转换契约](../refactoring/G0012/conversion-contract.md)、[R07 矩阵](../refactoring/G0013/format-support-matrix.md)和[G0013 结果](../refactoring/G0013/result.md)为依据。原生交互、DPI、真实 Host 与正式交付仍有待验收项，历史阶段的测试记录不代替新版本证据。
 
 本路线图按实际阶段结果更新。普通 ZIP 创建已在 R02 实现，分别打包和加密已在 R03 实现；ZIP 浏览与选择提取已在 R04 实现，输出整理已在 R05 实现，格式转换与结果打包已在 R06 实现；Workflow 仍为未来功能；路线图本身不触发部署或发布。
 
@@ -52,7 +52,7 @@
 | [R04 压缩包浏览与选择性提取](R04-archive-browsing-and-selection.md) | 先看内容，仅提取需要的文件 | R01；推荐在 R03 后 | 增加围绕单个包的浏览任务 | G0010 已实施／本地 292 项测试与门禁通过，部分原生交互待验收 |
 | [R05 输出整理](R05-output-organization.md) | 从复杂目录中得到结构清楚的新资料目录 | R04，复用现有解压能力 | 解压结果进入临时整理子页 | G0011 已实施／本地 347 项测试与门禁通过，部分原生交互待验收 |
 | [R06 格式转换与重新打包](R06-conversion-and-repack.md) | 将现有包转换或整理成新的 ZIP | R02、R04；整理后打包依赖 R05 | 转换和结果打包子页、有限复合操作 | G0012 已实施／本地 423 项测试与门禁通过，部分原生交互待验收 |
-| [R07 格式扩展与诊断](R07-format-support-and-diagnostics.md) | 有证据地增加创建格式，提高问题可解释性 | R02、R04；相关扩展依赖 R03/R06 | 按能力展示格式，提供按需检查 | 规划中 |
+| [R07 格式扩展与诊断](R07-format-support-and-diagnostics.md) | 有证据地增加创建格式，提高问题可解释性 | R02、R04；相关扩展依赖 R03/R06 | 按能力展示格式，提供按需检查 | G0013 已实施前两单元；7z 候选失败、创建未开放 |
 | [R08 工作流与插件协作](R08-workflow-integration.md) | 下载、解压、文件处理、打包可以组合执行 | R02；选入动作依赖对应 R 阶段 | 简单 GUI 加可组合的 Headless 动作 | 规划中 |
 
 推荐按表中顺序推进，每完成一个阶段都可以停在有独立用途的版本。依赖列用于说明哪些阶段可在实际需求明确后调整顺序，不代表要求并行开发。

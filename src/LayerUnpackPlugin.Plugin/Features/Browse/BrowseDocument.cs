@@ -52,7 +52,7 @@ public sealed partial class BrowseDocument : ObservableObject, IPluginDocument, 
     public static IReadOnlyList<NameEncodingOption> NameEncodings => UnpackDocument.NameEncodings;
     public static IReadOnlyList<BrowseCapability> Capabilities => BrowseCapabilities.All;
     public bool IsClosed => _closed || _lifetime.IsClosing;
-    public bool CanEdit => !IsBusy && !IsClosed;
+    public bool CanEdit => !IsBusy && !IsClosed && !ShowCheckTask;
     public bool HasCatalog => _session is { IsInvalidated: false } && _selection is not null;
     public bool HasOutputs => Outputs.Count > 0;
     public int SelectedCount => _selection?.Count ?? 0;
@@ -64,9 +64,10 @@ public sealed partial class BrowseDocument : ObservableObject, IPluginDocument, 
     public DocumentPresentationState Presentation => _presentation;
     public event EventHandler? PresentationChanged;
 
-    public BrowseDocument(IArchiveBrowseService service, IUnpackService unpackService, IDocumentLifetime lifetime)
+    public BrowseDocument(IArchiveBrowseService service, IUnpackService unpackService, IDocumentLifetime lifetime, IArchiveCheckService? checkService = null)
     {
         _service = service; _unpackService = unpackService; _lifetime = lifetime;
+        _checkService = checkService ?? new ArchiveCheckService();
         _hostClosing = lifetime.ClosingToken.Register(() => _closing.Cancel());
     }
     public ValueTask InitializeAsync(DocumentActivation activation, CancellationToken cancellationToken)
@@ -96,6 +97,7 @@ public sealed partial class BrowseDocument : ObservableObject, IPluginDocument, 
     private bool CanNext() => CanEdit && _page?.HasNext == true;
     private void NotifyCommands()
     {
+        CheckArchiveCommand.NotifyCanExecuteChanged(); ReturnFromCheckCommand.NotifyCanExecuteChanged();
         LoadCommand.NotifyCanExecuteChanged(); ExtractCommand.NotifyCanExecuteChanged(); CancelCommand.NotifyCanExecuteChanged();
         PreviousPageCommand.NotifyCanExecuteChanged(); NextPageCommand.NotifyCanExecuteChanged();
         ClearSelectionCommand.NotifyCanExecuteChanged(); ClearCommand.NotifyCanExecuteChanged(); PrepareUnpackCommand.NotifyCanExecuteChanged();
@@ -155,6 +157,7 @@ public sealed partial class BrowseDocument : ObservableObject, IPluginDocument, 
     [RelayCommand(CanExecute = nameof(CanEdit))]
     private async Task ClearAsync()
     {
+        await ResetCheckAsync();
         if (!CanEdit) return;
         IsBusy = true;
         if (_unpackTask is not null)
@@ -174,6 +177,7 @@ public sealed partial class BrowseDocument : ObservableObject, IPluginDocument, 
     private async Task CloseAsync()
     {
         _closed = true; ++_generation; _closing.Cancel(); _hostClosing.Dispose();
+        if (CheckTask is not null) await CheckTask.DisposeAsync().ConfigureAwait(false);
         try { await _background.ConfigureAwait(false); } catch (Exception) { /* 关闭只排空，错误由当前命令归一化呈现。 */ }
         if (_session is not null) await _session.DisposeAsync().ConfigureAwait(false);
         if (_unpackTask is not null) await _unpackTask.DisposeAsync().ConfigureAwait(false);

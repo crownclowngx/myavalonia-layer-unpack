@@ -11,6 +11,7 @@ public sealed partial class PackDocument
     [ObservableProperty] private bool _moreOptionsExpanded;
     [ObservableProperty] private bool _separateArchives;
     [ObservableProperty] private int _compressionIndex;
+    [ObservableProperty] private int _formatIndex;
     [ObservableProperty] private bool _excludeTemporaryFiles;
     [ObservableProperty] private bool _excludeLogs;
     [ObservableProperty] private bool _excludeBuildFolders;
@@ -25,7 +26,26 @@ public sealed partial class PackDocument
     [property: JsonIgnore]
     private string _confirmPassword = "";
 
-    public IReadOnlyList<string> CompressionChoices { get; } = ["标准", "快速", "高压缩", "仅打包"];
+    public IReadOnlyList<string> FormatChoices { get; } = ArchiveCapabilities.Creation.Select(c => c.Name).ToArray();
+    private ArchiveCreationCapability CreationCapability => ArchiveCapabilities.Creation[Math.Clamp(FormatIndex, 0, ArchiveCapabilities.Creation.Count - 1)];
+    public IReadOnlyList<string> CompressionChoices => CreationCapability.Compressions.Select(c => c switch
+    { PackCompression.Fast => "快速", PackCompression.High => "高压缩", PackCompression.Store => "仅打包", _ => "标准" }).ToArray();
+    public bool CanChooseCompression => CreationCapability.Compressions.Count > 1;
+    public bool CanEncrypt => CreationCapability.CanEncrypt;
+    public string FormatDescription => CreationCapability.Description;
+
+    partial void OnFormatIndexChanged(int value)
+    {
+        // 切换容器立即使预览失效；不把 ZIP 的加密密码带入不支持加密的格式。
+        CompressionIndex = 0; EncryptionEnabled = false; ClearSecretFields();
+        if (!string.IsNullOrWhiteSpace(ArchiveName))
+        {
+            var extension = ArchiveCapabilities.ExtensionOf(ArchiveName);
+            ArchiveName = (extension.Length == 0 ? ArchiveName : ArchiveName[..^extension.Length]) + CreationCapability.Extension;
+        }
+        OnPropertyChanged(nameof(CompressionChoices)); OnPropertyChanged(nameof(CanChooseCompression));
+        OnPropertyChanged(nameof(CanEncrypt)); OnPropertyChanged(nameof(FormatDescription)); InvalidatePlan();
+    }
     public ObservableCollection<string> EntryMappings { get; } = [];
     public ObservableCollection<string> ExcludedMappings { get; } = [];
     public ObservableCollection<PackGroupDisplay> GroupResults { get; } = [];
@@ -57,7 +77,7 @@ public sealed partial class PackDocument
         if (ExcludeNodeModules) directories.Add("node_modules");
         return new(Inputs.Select(i => i.Path), OutputDirectory, ArchiveName,
             SeparateArchives ? PackGrouping.Separate : PackGrouping.Combined,
-            new() { Compression = (PackCompression)CompressionIndex, Encrypt = EncryptionEnabled, Exclusions = new(extensions, directories) });
+            new() { Format = (PackFormat)FormatIndex, Compression = (PackCompression)CompressionIndex, Encrypt = EncryptionEnabled, Exclusions = new(extensions, directories) });
     }
 
     private PackSecret? CaptureSecret()
@@ -69,7 +89,7 @@ public sealed partial class PackDocument
     private void ClearSecretFields() { TargetPassword = ""; ConfirmPassword = ""; ShowPassword = false; }
     private void ResetOptions()
     {
-        SeparateArchives = false; CompressionIndex = 0; EncryptionEnabled = false; ClearSecretFields();
+        FormatIndex = 0; SeparateArchives = false; CompressionIndex = 0; EncryptionEnabled = false; ClearSecretFields();
         ExcludeTemporaryFiles = false; ExcludeLogs = false; ExcludeBuildFolders = false;
         ExcludeGitFolder = false; ExcludeNodeModules = false; MoreOptionsExpanded = false;
     }

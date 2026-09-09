@@ -59,3 +59,7 @@ R06 的 RepackDocument 由解压或整理页面显式拥有，复用上下文子
 正式入口只有 `.Plugin`，自有运行时为 `.Plugin.dll`、`.Headless.dll`、`SharpCompress.dll` 和 `ICSharpCode.SharpZipLib.dll`，并携带对应许可。SDK、Avalonia、CommunityToolkit 与 `Microsoft.Extensions.*` 由 Host 提供。Standalone、测试和夹具不进入插件资产。
 
 Headless DLL 在引用解析后显式纳入 ManagedPluginAsset，两个引擎通过 ManagedPluginPrivatePackage 声明。Debug 资产门禁对 MSBuild 实际求值结果和文件存在性作检查；干净插件目录、ZIP、ALC 与真实 Host 在发布阶段验证，见[部署说明](deployment-and-release.md)。
+
+## R07 职责增量
+
+`ArchiveCapabilities` 独立维护读取／创建；`IArchiveCheckService` 编排检查，证据由解码适配器实际产生；`ArchiveWriter` 分派原 ZIP 与运行时 TAR，`VerifiedPackReadStream` 负责拉取式源验证。解压／浏览父页拥有临时检查子页，关闭排空，顶级 Document 数量与 ID 不变。详见[G0013 方案](refactoring/G0013/implementation.md)。

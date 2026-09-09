@@ -2,7 +2,7 @@
 
 MyAvaloniaManagement 的压缩包工作台。提供独立 Headless 类库，以及“解压任务”“压缩任务”“浏览任务”三个临时 Document。解压支持指定深度和当前批次候选密码共享；压缩支持默认合成一个 ZIP，或按顶层来源分别打包，按需排除、调整压缩偏好和设置 AES-256 密码；浏览支持先查看 ZIP，再提取所需文件或目录。
 
-当前为 **R06 格式转换与重新打包本地候选**：支持每来源转换为 ZIP、显式展开整理后打包，以及解压／整理提交清单打包。最新实施与验证边界见[G0012 结果](docs/refactoring/G0012/result.md)，历史证据保留在 G0001–G0011。本轮不使用 AIFLOW、Windows CI、Release、正式插件包、部署或发布门禁。
+当前为 **R07 能力矩阵、检查与 TAR 创建本地候选**：新增按需完整检查、统一诊断及 TAR/TAR.GZ 创建。7z 候选真实验证失败，暂不开放，R07 仍有后续单元。最新边界见[G0013 结果](docs/refactoring/G0013/result.md)，历史证据保留在 G0001–G0012。本轮不使用 AIFLOW、Windows CI、Release、正式插件包、部署或发布门禁。
 
 ```powershell
 ./tools/verify-local.ps1
@@ -23,6 +23,8 @@ dotnet run --project src/LayerUnpackPlugin.Standalone -c Debug
 
 解压输入处点击“转换为 ZIP…”：默认保留内部包字节，每来源一个新 ZIP；按需显式选择展开层数和整理规则。解压或整理结果处点击“打包结果”，检查提交清单后开始，可合成或分别。来源与目标密码独立，目标默认不加密；每个 ZIP 回读核对后独立提交，来源校验限制保留。见[转换契约](docs/refactoring/G0012/conversion-contract.md)和[保留矩阵](docs/refactoring/G0012/preservation-matrix.md)。
 
-后续发展见[压缩包工作台路线图](docs/roadmap/README.md)：R01 对应 G0007，R02 对应 G0008，R03 对应 G0009，R04 对应 G0010，R05 对应 G0011，R06 对应 G0012；R07–R08 仍为后续目标。
+后续发展见[压缩包工作台路线图](docs/roadmap/README.md)：R01 对应 G0007，R02 对应 G0008，R03 对应 G0009，R04 对应 G0010，R05 对应 G0011，R06 对应 G0012，R07 的矩阵、检查与 TAR 创建对应 G0013；7z 创建与 R08 仍为后续目标。
 
 Plugin ID 保持 `myavalonia.plugin.layer.unpack`，解压 Document ID 保持 `myavalonia.plugin.layer.unpack.document.main`，压缩 Document ID 为 `myavalonia.plugin.layer.unpack.document.pack`，浏览 Document ID 为 `myavalonia.plugin.layer.unpack.document.browse`。Standalone 用独立 Scope 预览三类真实任务；正式插件包仅由 Plugin Build 生成，后续发布流程见[部署说明](docs/deployment-and-release.md)。
+
+解压或浏览页点击“检查压缩包…”：默认完整内容检查，密码本次输入；仅目录检查只支持 ZIP。结果明确列出实际校验和限制，结束后清理临时内容。压缩页可选择 TAR/TAR.GZ，默认 ZIP；新格式不支持密码，转换与结果打包仍输出 ZIP。详见[检查契约](docs/refactoring/G0013/checking-contract.md)与[按操作矩阵](docs/refactoring/G0013/format-support-matrix.md)。

@@ -1,10 +1,12 @@
 # R07：格式扩展与诊断
 
-> 状态：规划中 · 实施映射：未分配
+> 状态：矩阵、检查与 TAR/TAR.GZ 创建已实施；7z 创建验证未通过、继续规划 · 实施映射：[G0013](../refactoring/G0013/result.md)
 >
 > 前置：R02 创建、R04 浏览；加密和转换扩展分别复用 R03、R06 已完成部分。
 >
 > 产出：按验证证据增加格式能力，帮助用户理解归档为什么无法处理。
+
+本轮选入前两个实施单元并独立验证 7z 候选。SharpCompress 0.50.4 的混合条目样本未通过插件回读与独立 libarchive 验证，7z 创建未开放，不能将整个 R07 标为完成。详见[G0013 计划](../refactoring/G0013/plan.md)、[实际矩阵](../refactoring/G0013/format-support-matrix.md)和[候选评估](../refactoring/G0013/sevenzip-evaluation.md)。
 
 ## 1. 用户目标与优先顺序
 

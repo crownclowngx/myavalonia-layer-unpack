@@ -13,10 +13,11 @@ public static class LayerUnpackPluginServices
         services.AddSingleton<IArchiveExtractor, ArchiveExtractor>();
         services.AddScoped<IUnpackService, UnpackService>();
         services.AddSingleton<PackPlanner>();
-        services.AddSingleton<IArchiveWriter, ZipArchiveWriter>();
+        services.AddSingleton<IArchiveWriter, ArchiveWriter>();
         services.AddScoped<IPackService, PackService>();
         services.AddScoped<IPackBatchService, PackBatchService>();
         services.AddScoped<IArchiveBrowseService, ArchiveBrowseService>();
+        services.AddScoped<IArchiveCheckService, ArchiveCheckService>();
         services.AddSingleton<OrganizationPlanner>();
         services.AddSingleton<IOrganizationCopier, OrganizationCopier>();
         services.AddScoped<IOrganizationService, OrganizationService>();

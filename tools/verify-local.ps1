@@ -55,6 +55,16 @@ try {
     }
     Invoke-DotNetCheck 'headless-tests' @('test', 'tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj', '-c', 'Debug', '--no-build', '--logger', 'trx;LogFileName=headless.trx', '--results-directory', $evidenceDirectory)
     Invoke-DotNetCheck 'plugin-tests' @('test', 'tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj', '-c', 'Debug', '--no-build', '--logger', 'trx;LogFileName=plugin.trx', '--results-directory', $evidenceDirectory)
+    $interopWatch = [Diagnostics.Stopwatch]::StartNew()
+    $interopExit = 1
+    try {
+        & (Join-Path $PSScriptRoot 'verify-format-interop.ps1') | Tee-Object -FilePath (Join-Path $evidenceDirectory 'format-interop.log')
+        $interopExit = 0
+    }
+    finally {
+        $interopWatch.Stop()
+        $checks.Add([pscustomobject]@{ name = 'format-interop'; exitCode = $interopExit; seconds = $interopWatch.Elapsed.TotalSeconds; command = './tools/verify-format-interop.ps1' })
+    }
     # VSTest 在发现零测试时可能返回成功，因此结果数量和跳过数同样属于门禁。
     foreach ($file in @('headless.trx', 'plugin.trx')) {
         [xml]$trx = Get-Content -LiteralPath (Join-Path $evidenceDirectory $file) -Raw

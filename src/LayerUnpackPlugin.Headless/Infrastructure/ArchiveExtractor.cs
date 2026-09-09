@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Buffers.Binary;
 using System.Formats.Tar;
 using System.Text;
 using LayerUnpackPlugin.Headless.Application;
@@ -20,6 +21,7 @@ public sealed class ArchiveExtractor : IArchiveExtractor
         ExecutionBudget budget, Action<long> progress, CancellationToken cancellationToken)
     {
         var encrypted = false;
+        var possibleSplit = false;
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -28,6 +30,7 @@ public sealed class ArchiveExtractor : IArchiveExtractor
             if (new FileInfo(source).Length > budget.Limits.MaxInputBytes)
                 throw new UnpackFailureException(UnpackError.BudgetExceeded, "输入文件超过单包读取上限。", true);
             var kind = await ArchiveProbe.DetectAsync(source, cancellationToken).ConfigureAwait(false);
+            possibleSplit = kind == ArchiveKind.SevenZip && Path.GetExtension(source) is { Length: 4 } extension && extension[1..].All(char.IsDigit);
             if (kind == ArchiveKind.Unknown)
                 throw new UnpackFailureException(UnpackError.UnsupportedFormat, "无法识别此格式，或压缩包头已损坏。");
             if (kind == ArchiveKind.Zip)
@@ -50,6 +53,7 @@ public sealed class ArchiveExtractor : IArchiveExtractor
             };
             await using var reader = await EntryCursor.CreateAsync(input, options, kind, cancellationToken).ConfigureAwait(false);
             var files = new List<string>();
+            var crcFiles = 0; var lengthFiles = 0;
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             try
             {
@@ -85,6 +89,8 @@ public sealed class ArchiveExtractor : IArchiveExtractor
                             if (entry.IsEncrypted) PasswordFailure();
                             throw new UnpackFailureException(UnpackError.CorruptArchive, "条目长度或校验和不匹配，文件可能损坏。");
                         }
+                        if (!(isRar5 && entry.IsEncrypted)) crcFiles++;
+                        if (entry.Size > 0) lengthFiles++;
                     }
                     catch
                     {
@@ -99,7 +105,11 @@ public sealed class ArchiveExtractor : IArchiveExtractor
             // 上游 0.50.4 对加密 RAR 关闭 CRC；RAR4 由本适配器补验，RAR5 的 MAC 不可当作普通 CRC。
             // 保留已验证的解码能力，同时把实际校验限制随节点呈现；不自行实现密码学或声称完整性已验证。
             return new ExtractedArchive(isRar5 ? "Rar5" : kind.ToString(), files.AsReadOnly(), password is not null,
-                isRar5 && encrypted ? "RAR5 加密内容已解码，但当前引擎未验证加密内容的校验值；请保留原包。" : null);
+                isRar5 && encrypted ? "RAR5 加密内容已解码，但当前引擎未验证加密内容的校验值；请保留原包。" : null)
+            {
+                Evidence = Array.AsReadOnly(new[] { new ArchiveCheckEvidence("条目长度（非零声明）", lengthFiles),
+                    new ArchiveCheckEvidence("CRC32", crcFiles) }.Where(e => e.Files > 0).ToArray())
+            };
         }
         catch (UnpackFailureException) { throw; }
         catch (Exception) when (cancellationToken.IsCancellationRequested) { throw new OperationCanceledException(cancellationToken); }
@@ -115,6 +125,7 @@ public sealed class ArchiveExtractor : IArchiveExtractor
         {
             // 加密头解码失败也可能发生在取得 Entry 之前。为所有已提供候选的失败保留“密码或损坏”的歧义。
             if (encrypted || password is not null) PasswordFailure();
+            if (possibleSplit) throw new UnpackFailureException(UnpackError.MissingVolumeOrCorruptArchive, "7z 数字卷来源不完整；可能缺卷，也可能已经截断损坏。");
             throw new UnpackFailureException(UnpackError.CorruptArchive, "无法完整读取压缩包，文件可能损坏或密码不可用。");
         }
     }
@@ -147,7 +158,11 @@ public sealed class ArchiveExtractor : IArchiveExtractor
             if (copied.Length != entry.Length) throw new UnpackFailureException(UnpackError.CorruptArchive, "TAR 条目内容不完整。");
             files.Add(Path.GetRelativePath(destination, target));
         }
-        return new ExtractedArchive("Tar", files.AsReadOnly(), false);
+        return new ExtractedArchive("Tar", files.AsReadOnly(), false)
+        {
+            Evidence = files.Count == 0 ? [] : Array.AsReadOnly(new[] { new ArchiveCheckEvidence("条目长度", files.Count) }),
+            CheckLimitations = Array.AsReadOnly(new[] { "TAR 没有正文校验和；长度正确不能发现等长内容篡改。" })
+        };
     }
 
     private async Task<ExtractedArchive> ExtractCompressionStreamAsync(string source, string destination, ArchiveKind kind,
@@ -169,19 +184,40 @@ public sealed class ArchiveExtractor : IArchiveExtractor
         await using (var output = new FileStream(intermediate, FileMode.CreateNew, FileAccess.Write, FileShare.None, 131072, true))
         {
             budget.AddEntry();
-            await StreamCopy.CopyAsync(decoded, output, budget, progress, cancellationToken).ConfigureAwait(false);
+            var copied = await StreamCopy.CopyAsync(decoded, output, budget, progress, cancellationToken).ConfigureAwait(false);
+            if (kind == ArchiveKind.GZip)
+            {
+                // GZipStream 在部分截断尾部上可能直接返回 EOF。单成员流必须另外核对尾部 CRC 和 ISIZE，
+                // 不能把读取结束当作完整容器；多成员拼接未声明支持，合计内容不能冒充最后成员的校验值。
+                if (input.Length < 18) throw new UnpackFailureException(UnpackError.CorruptArchive, "GZip 尾部不完整。");
+                input.Position = input.Length - 8; var footer = new byte[8];
+                await input.ReadExactlyAsync(footer, cancellationToken).ConfigureAwait(false);
+                if (BinaryPrimitives.ReadUInt32LittleEndian(footer) != copied.Crc ||
+                    BinaryPrimitives.ReadUInt32LittleEndian(footer.AsSpan(4)) != unchecked((uint)copied.Length))
+                    throw new UnpackFailureException(UnpackError.CorruptArchive, "GZip 长度或 CRC 不符：可能截断、损坏或属于未支持的多成员拼接流。");
+            }
         }
         if (await ArchiveProbe.DetectAsync(intermediate, cancellationToken).ConfigureAwait(false) == ArchiveKind.Tar)
         {
             var tarResult = await ExtractAsync(intermediate, destination, null, LegacyNameEncoding.Utf8, budget, progress, cancellationToken).ConfigureAwait(false);
             File.Delete(intermediate);
-            return tarResult with { Format = "Tar+" + kind };
+            return tarResult with
+            {
+                Format = "Tar+" + kind,
+                Evidence = kind == ArchiveKind.GZip ? Array.AsReadOnly(tarResult.Evidence.Append(new ArchiveCheckEvidence("外层 GZip CRC32 与长度（1 个 TAR 流）", 1)).ToArray()) : tarResult.Evidence,
+                CheckLimitations = kind == ArchiveKind.GZip ? tarResult.CheckLimitations :
+                    Array.AsReadOnly(tarResult.CheckLimitations.Append("外层压缩流已完整解码；未单独报告容器校验算法，不能据此声明认证通过。").ToArray())
+            };
         }
         var name = Path.GetFileNameWithoutExtension(source);
         if (string.IsNullOrWhiteSpace(name)) name = "内容";
         var target = PathPolicy.EntryPath(destination, name, false);
         File.Move(intermediate, target);
-        return new ExtractedArchive(kind.ToString(), Array.AsReadOnly(new[] { name }), false);
+        return new ExtractedArchive(kind.ToString(), Array.AsReadOnly(new[] { name }), false)
+        {
+            Evidence = Array.AsReadOnly(new[] { new ArchiveCheckEvidence(kind == ArchiveKind.GZip ? "GZip CRC32 与长度" : "完整压缩流解码", 1) }),
+            CheckLimitations = kind == ArchiveKind.GZip ? [] : Array.AsReadOnly(new[] { "未单独报告容器校验算法；XZ 等无校验变体不能据完整解码声明校验和或认证通过。" })
+        };
     }
 
     private static void PasswordFailure() => throw new UnpackFailureException(UnpackError.PasswordRequiredOrInvalid,

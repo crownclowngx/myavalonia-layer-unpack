@@ -17,9 +17,13 @@ internal static class ZipArchiveExtractor
         try
         {
             await using var input = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, 131072, true);
+            // 在引擎分配完整目录前检查卷号和有限条目/目录空间，正文检查与浏览保持同一分卷边界。
+            ZipDirectoryGuard.Validate(input, new BrowseLimits { Extraction = budget.Limits, MaxRows = budget.Limits.MaxEntries }, token);
+            input.Position = 0;
             using var archive = new ZipFile(input, leaveOpen: true, StringCodec.FromEncoding(GetEncoding(encoding)).WithZipCryptoEncoding(Encoding.UTF8));
             archive.Password = password;
             var files = new List<string>();
+            var crcFiles = 0; var authenticatedFiles = 0;
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (ZipEntry entry in archive)
             {
@@ -32,9 +36,14 @@ internal static class ZipArchiveExtractor
                 if (!seen.Add(target)) throw new UnpackFailureException(UnpackError.OutputError, "ZIP 包含重复或大小写冲突的路径。");
                 if (entry.IsDirectory) { Directory.CreateDirectory(target); continue; }
                 await ExtractEntryAsync(archive, entry, target, password, budget, progress, token).ConfigureAwait(false);
+                if (entry.AESKeySize == 0) crcFiles++; else authenticatedFiles++;
                 files.Add(Path.GetRelativePath(destination, target));
             }
-            return new ExtractedArchive("Zip", files.AsReadOnly(), password is not null);
+            return new ExtractedArchive("Zip", files.AsReadOnly(), password is not null)
+            {
+                Evidence = Array.AsReadOnly(new[] { new ArchiveCheckEvidence("条目长度", files.Count),
+                    new ArchiveCheckEvidence("CRC32", crcFiles), new ArchiveCheckEvidence("AES 认证码", authenticatedFiles) }.Where(e => e.Files > 0).ToArray())
+            };
         }
         catch (ICSharpCode.SharpZipLib.SharpZipBaseException)
         {
@@ -59,7 +68,10 @@ internal static class ZipArchiveExtractor
         var copied = await StreamCopy.CopyAsync(decoded, output, budget, progress, token).ConfigureAwait(false);
         // AE-2 的 CRC 按规范为零，库验证认证码；普通 ZIP 和 ZipCrypto 额外验证长度及 CRC，包括 CRC=0。
         if (copied.Length != entry.Size || (entry.AESKeySize == 0 && copied.Crc != (uint)entry.Crc))
+        {
+            if (entry.IsCrypted) throw PasswordFailure();
             throw new UnpackFailureException(UnpackError.CorruptArchive, "ZIP 条目长度或校验和不匹配。");
+        }
     }
 
     private static UnpackFailureException PasswordFailure() => new(UnpackError.PasswordRequiredOrInvalid,

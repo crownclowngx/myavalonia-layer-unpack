@@ -51,10 +51,8 @@ public sealed record BrowseCapability(string Format, bool CanList, bool CanExtra
 
 public static class BrowseCapabilities
 {
-    public static IReadOnlyList<BrowseCapability> All { get; } = Array.AsReadOnly(new[]
-    {
-        new BrowseCapability("ZIP", true, true, "可读中心目录；普通、ZipCrypto 与 WinZip AES 内容按条目提取，保留相对路径。"),
-        new BrowseCapability("7z / RAR", false, false, "本期未接入浏览；加密头、固实和分卷请进入解压任务，按解压支持矩阵处理。"),
-        new BrowseCapability("TAR / GZip / BZip2 / XZ", false, false, "本期不提供顺序格式浏览与选择提取；可进入解压任务，不承诺仅读取所选文件。")
-    });
+    // 保留旧公开契约，数据投影自统一读取矩阵，避免两个页面分别维护不一致的能力表。
+    public static IReadOnlyList<BrowseCapability> All { get; } = Array.AsReadOnly(ArchiveCapabilities.Reading.Select(c =>
+        new BrowseCapability(c.Format, c.CanList, c.CanExtractSelection,
+            $"{c.Format}：{(c.CanList ? "可浏览并选择提取" : "仅全量解压或完整检查，不提供目录浏览与选择提取")}。{c.Limitations}")).ToArray());
 }

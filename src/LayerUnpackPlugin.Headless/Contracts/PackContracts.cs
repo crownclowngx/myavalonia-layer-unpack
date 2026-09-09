@@ -1,6 +1,6 @@
 namespace LayerUnpackPlugin.Headless.Contracts;
 
-/// <summary>创建归档的独立资源边界：读取源文件与生成 ZIP 分别计量，不复用解压膨胀预算。</summary>
+/// <summary>创建归档的独立资源边界：读取源文件与生成归档分别计量，不复用解压膨胀预算。</summary>
 public sealed record PackLimits
 {
     public long MaxTotalBytes { get; init; } = 10L * 1024 * 1024 * 1024;

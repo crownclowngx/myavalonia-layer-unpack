@@ -1,0 +1,935 @@
+{
+  "stage": "G0013 / R07",
+  "status": "selected-units-implemented-local-verification-passed",
+  "verifiedAt": "2026-09-09T00:26:08.633004+00:00",
+  "baselineCommit": "366c5d6af2cc7a1bf436777338df45a46fc138e1",
+  "workingTreeIncluded": true,
+  "scope": {
+    "implemented": [
+      "operation-specific capabilities",
+      "directory/full checks and diagnostics",
+      "TAR/TAR.GZ creation"
+    ],
+    "sevenZipCreation": "not-opened-candidate-validation-failed",
+    "r07OverallComplete": false
+  },
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "architecture": "AMD64",
+    "dotnetSdk": "10.0.302",
+    "avalonia": "12.1.0",
+    "pluginSdk": "3.3.0",
+    "sharpCompress": "0.50.4",
+    "sharpZipLib": "1.4.2"
+  },
+  "tests": {
+    "headless": 379,
+    "plugin": 98,
+    "passed": 477,
+    "failed": 0,
+    "skipped": 0,
+    "addedHeadless": 47,
+    "addedPlugin": 7
+  },
+  "checks": [
+    {
+      "name": "locked-restore",
+      "exitCode": 0,
+      "seconds": 0.7970042,
+      "command": "dotnet restore LayerUnpackPlugin.slnx --locked-mode"
+    },
+    {
+      "name": "debug-build",
+      "exitCode": 0,
+      "seconds": 4.2582281,
+      "command": "dotnet build LayerUnpackPlugin.slnx -c Debug -warnaserror --no-restore"
+    },
+    {
+      "name": "debug-assets",
+      "exitCode": 0,
+      "seconds": 0.8348429,
+      "command": "dotnet msbuild src/LayerUnpackPlugin.Plugin/LayerUnpackPlugin.Plugin.csproj -t:ResolveReferences -p:Configuration=Debug -getItem:ManagedPluginAsset,ManagedPluginPrivatePackage,RuntimeCopyLocalItems"
+    },
+    {
+      "name": "headless-tests",
+      "exitCode": 0,
+      "seconds": 37.8324472,
+      "command": "dotnet test tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj -c Debug --no-build --logger trx;LogFileName=headless.trx --results-directory D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "plugin-tests",
+      "exitCode": 0,
+      "seconds": 15.6621502,
+      "command": "dotnet test tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj -c Debug --no-build --logger trx;LogFileName=plugin.trx --results-directory D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "format-interop",
+      "exitCode": 0,
+      "seconds": 0.1759276,
+      "command": "./tools/verify-format-interop.ps1"
+    },
+    {
+      "name": "format",
+      "exitCode": 0,
+      "seconds": 7.91849,
+      "command": "dotnet format LayerUnpackPlugin.slnx --verify-no-changes --no-restore"
+    },
+    {
+      "name": "docs",
+      "exitCode": 0,
+      "seconds": 0.119629,
+      "command": "./tools/check-docs.ps1"
+    },
+    {
+      "name": "diff-check",
+      "exitCode": 0,
+      "seconds": 0.0584136,
+      "command": "git diff --check"
+    }
+  ],
+  "performance": {
+    "r07-check-large-cancel": {
+      "manyEntries": false,
+      "ExpandedBytes": 1048576,
+      "Elapsed": "00:00:00.0224411",
+      "cancellationMilliseconds": 1.2983000000000011,
+      "processPeakWorkingSet": 382365696
+    },
+    "r07-check-many-cancel": {
+      "manyEntries": true,
+      "ExpandedBytes": 1966080,
+      "Elapsed": "00:00:00.0627039",
+      "cancellationMilliseconds": 4.200200000000002,
+      "processPeakWorkingSet": 382365696
+    },
+    "r07-check-many-complete": {
+      "FilesRead": 2000,
+      "ExpandedBytes": 2048000,
+      "milliseconds": 1683.7639,
+      "processPeakWorkingSet": 382365696
+    }
+  },
+  "interop": {
+    "date": "2026-09-09T00:24:35.8177334Z",
+    "tool": "bsdtar 3.8.4 - libarchive 3.8.4 zlib/1.2.13.1-motley liblzma/5.8.1 bz2lib/1.0.8 libzstd/1.5.7 cng/2.0 libb2/bundled ",
+    "results": [
+      {
+        "archive": "sample.zip",
+        "sha256": "1155702C11BABBB878118F508A13E22F7E1DB8D811AAC39BB5624672E0F7708D",
+        "accepted": true,
+        "entries": 6,
+        "exitCode": 0
+      },
+      {
+        "archive": "sample.tar",
+        "sha256": "8FE39D3D741CCB205592A7834A039EAC6010B418EFC46C269B0971B418ED95B4",
+        "accepted": true,
+        "entries": 6,
+        "exitCode": 0
+      },
+      {
+        "archive": "sample.tar.gz",
+        "sha256": "ADE944CE0A05E4126ED3E686F2C00D5D60A90F0ACB970FB2F4CA0553742FC46F",
+        "accepted": true,
+        "entries": 6,
+        "exitCode": 0
+      },
+      {
+        "archive": "candidate-header-True.7z",
+        "sha256": "1C80B7E93F28069AD95966AD66E22072D6B6F2E24BD18F6370A829C655049880",
+        "accepted": false,
+        "exitCode": 1
+      },
+      {
+        "archive": "candidate-header-False.7z",
+        "sha256": "BDA2353DA3198A1148EC4642CA5D0C198AEFE56ABB9B01867073C5ECBB0AB80F",
+        "accepted": false,
+        "exitCode": 1
+      }
+    ]
+  },
+  "sourceSnapshot": {
+    "algorithm": "SHA-256 over sorted path:SHA256 lines; raw working tree bytes",
+    "sha256": "C195D53B7A285632C746D59FAD132E413EA6B04D5383B1AD67A30DFBF1831932",
+    "files": [
+      {
+        "path": "Directory.Build.props",
+        "sha256": "5378AA0EAC80522F0B89FE18002C5ABA5096F4F6C59035D65683350FB98C32E3"
+      },
+      {
+        "path": "Directory.Packages.props",
+        "sha256": "BC848A597A5158F7F41EBA854263A0FCFD169E4CEC75B50D66A3A046A38E9E60"
+      },
+      {
+        "path": "LayerUnpackPlugin.slnx",
+        "sha256": "310249D6027B2F2DC94F3048EE52E9206B0F7845C6BD59931CF99A60437CAD56"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/ArchiveBrowseService.cs",
+        "sha256": "2D2BCABC30694BA95BD27DBF055D067D365EFF70424420C9DC6D6D1EACD249C0"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/ArchiveBrowseSession.cs",
+        "sha256": "2617C85B823DE48DE6FC9EFDD390BE136DF6FFAD964CD9F1A2BF5119170CF417"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/ArchiveCatalog.cs",
+        "sha256": "B781E3635A1CF1050FDA4BA6909FE5E7747657BDFA82FE6C30E88AF37FF871E1"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/ArchiveCheckService.cs",
+        "sha256": "BD2266B4D91B5F2021FE871B1A648BFE2A5844103355C44FEAADA126EC87F8E2"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/CommittedPackPlanner.cs",
+        "sha256": "F9D6AED47CE8C439D4B09D748C0470815CF987890537DEE17654EC4E37053088"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/IArchiveExtractor.cs",
+        "sha256": "BF86BBB38E60E988839F80C59E380B1BB560251679EEF1E1D85672EAD3394115"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/IArchiveWriter.cs",
+        "sha256": "D840B6D0CFD9F91EE6D3F922FF7227BFBCC7AE8B9BCE0C89619CA64E21948F98"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/InputDiscovery.cs",
+        "sha256": "718838A80E656317086C5248913B7CA8C46C56D47D2133395FDE0B62314C3378"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/OrganizationPlanner.cs",
+        "sha256": "F6D0D601A9705E2573CC16723ECF907DFCCA5274E5B41931705040F0DB9E2023"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/OrganizationService.cs",
+        "sha256": "BE9746CAEB8CB5F5E8E8EB162806C80A1EFDFE555DA4B05AC389876A7AE55541"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/PackBatchService.cs",
+        "sha256": "EE339C7504218B2E4A2DCFAAF169013FE1D374B181F84B689AAB912A5620D3A4"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/PackBatchSession.cs",
+        "sha256": "51DB2740709D752A04082E4E296672CC2D1B2A8F902183CAEECB1A9DA884D165"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/PackInputSelection.cs",
+        "sha256": "D10731E71FE5FA14EDCDD7738927AED18AC91AE28FD93127BB5EF38736EB673D"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/PackPlanner.cs",
+        "sha256": "23D18EC4294A8CBD6C08949BCD9C63A7E2DA2175B1EEAD225696C0D067E43F5E"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/PackService.cs",
+        "sha256": "2BBEFB89D909AEE219A02A03C1D289876446A1FB7498AA384920C6F7ACF83B6E"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/RepackService.cs",
+        "sha256": "5EF654E8DB65CEED6EC9797131CD6E9F9C4020FB499F854ABE4CD8AC461A31DB"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/RepackWriter.cs",
+        "sha256": "00DF9F786F7F3E5AB75691C0209A273B77F289ABDEC86890CB998300B252E086"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/UnpackService.cs",
+        "sha256": "F8E7FAF664A56722486D2ABF53CE4589757177FEA78FCC59A106C4FBCBD6D822"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/ArchiveCapabilities.cs",
+        "sha256": "9D9B6E672E23871D0FC9A674BE1DC17F3307CEDE086D204A1D27F5500166092B"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/ArchiveCheckContracts.cs",
+        "sha256": "4CBDA618A1C23293157B352E2469DAC87CA024EEB2846445AD27D78D0E386BBD"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/BrowseContracts.cs",
+        "sha256": "6E18D3705D4B5570961B75ECA14A4772B11E82458A659677A55866AB200362D5"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/OrganizationContracts.cs",
+        "sha256": "73FD3357169EEA1D38775A93C3EDDE5BB3DFB0867783DF586FAFF13E3B87BE42"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/PackBatchContracts.cs",
+        "sha256": "2B641F96EAF20492D8FB21775DD430E9EFB1613EE767608EA0681A32D16AA629"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/PackContracts.cs",
+        "sha256": "257E71D85BE5A0D1525AF9A5325A04B71DB5085648C3FA59D1AB858DBEBAE36E"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/PackOptions.cs",
+        "sha256": "60809C949C7B76F0DD7A2DD9D78E253FA88BF217A24C6F0729B9B7D3B74E23DB"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/RepackContracts.cs",
+        "sha256": "FF6559DCDFFFF43453E64EFA067BE39B115F785EBA871F12C2917C8A59E24816"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/UnpackContracts.cs",
+        "sha256": "49F71C8EBCC04D4A407C4782CBD75CE3144CB1FC911872BE72518F361D9BABA0"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Domain/ExecutionBudget.cs",
+        "sha256": "758AFE9F26879B03EFC652DCD49CB432BE1DA3B60F6BA9AF7B7AB58B8D64013E"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Domain/PasswordPool.cs",
+        "sha256": "5FEDCA16E6918043A7A8ED786F03241CF6E7DB027FA786C590A0834EB38FBDE9"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Domain/RepackBudget.cs",
+        "sha256": "1BC4FF724D7D757A0A04AE9DB37DBEFFB78F92502BE62A7F373D13A6246CB5A2"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/AesZipArchiveWriter.cs",
+        "sha256": "FA81707B75C852DCB2BBF2D9845952F2531ED8F6DCBF7AE08AAC242A342197AF"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ArchiveEntryPolicy.cs",
+        "sha256": "DDE1C2A50D1DA9F9D498079B4F4C59FA0BB895AD514DDAB08CD8648564C4381A"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ArchiveExtractor.cs",
+        "sha256": "AFB079DC2F58C04CAF05B304B6C532BCE3CAB0C0D648CF1920DAB5F987E81E2E"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ArchiveProbe.cs",
+        "sha256": "DE2FB820E2F2552B9DE952FD4AF4870E9904318F451DAF0EB48298A457BFCDAD"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ArchiveWriter.cs",
+        "sha256": "2EBB1286285973AEC52ED74C1080B08B624B50A6D7EA623D2B1C864592F5FB31"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/BrowseReadStream.cs",
+        "sha256": "E981C262E71942AF5DAD6852F415C6E4E4CA2ED32F3AAB0F9C03F41A92214306"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/CommittedManifest.cs",
+        "sha256": "9B7D0F0907C22997EBFB9C44DEEF0A65E9FF01A7C9883FC4F8B9145E5EE075E6"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/OrganizationCopier.cs",
+        "sha256": "4A73C962DFA7131EAE4DEFC93391B4382EBE8E5A72017D97C35549660577F105"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/OrganizationFiles.cs",
+        "sha256": "205BB0B868237AEF51B33889F418D5F2F03DEE052E314CB284655F9B8D640AF4"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/OutputTransaction.cs",
+        "sha256": "BFFDE120614405AB05865433E3AD41B8E4202D7F39C21EC01614AEA2D718149E"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PackEntryCopier.cs",
+        "sha256": "583E54016EBEB3F171A75200B5DD29AE3061CB6798E0EB72D2A13E82FEE423EE"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PackFileTransaction.cs",
+        "sha256": "7EE7D4FEA15B892E59C9328D87BBDCD5D430C2A08B1EE9D42D0EF8D475DE6E44"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PackOutputStream.cs",
+        "sha256": "809998DC4C83D27BB0C29BA4C7F2CB2D6934EF73D9F533281EED75B8E0124AC5"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PackPaths.cs",
+        "sha256": "5D7649A9C8C93F925DADC354B28A246DD41901C51659885849D7FC9D460ADD31"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PathPolicy.cs",
+        "sha256": "CB97C98CC731906D83886716D3A6B6FFF4CC44C2ECE23CFD3A92F52E311EF0DD"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/RepackVerifier.cs",
+        "sha256": "96C5D17E07D7A58E019772B9865E225FB102F399AFBF1C64D806385EF21164C5"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/StreamCopy.cs",
+        "sha256": "932F7CCA66D8A82B9BC7D4E9CF93F1B6BC2A387212F29DC4844641D143ECFB92"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/VerifiedPackReadStream.cs",
+        "sha256": "03DE50569E3224E02119F2CCA36B32D164527F6DACA7EDA07E7EB0DFB3FBBA06"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ZipArchiveExtractor.cs",
+        "sha256": "39D357DCD506AB12D6C7221A757015C1C84E02FD0D8FB9289EC15275556D0B0E"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ZipArchiveWriter.cs",
+        "sha256": "7651AF5ED3AD268ADA3ED959CCA90A1F5E895562F691AAF24DE6C75D34E891A6"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ZipBrowseCatalog.cs",
+        "sha256": "C1DAFA837D13375AAFF54511F6FF6D411B7C90DE0837FD0A1D33289A6341F8C2"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ZipDirectoryGuard.cs",
+        "sha256": "053EFEAE2A626AC87A75B719CD2CACBB27EFBE1AA3365E4E737C2CDADB41F55A"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/LayerUnpackPlugin.Headless.csproj",
+        "sha256": "A161FEE6191F020A6A2268A22D04B50065ECE629349253D22198F457538E8ADB"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/packages.lock.json",
+        "sha256": "4AE0417D31A54D88B2D116E748BFEA24DBFC50D5823A519DDFD5C05EFBA39B83"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Constants/PluginIds.cs",
+        "sha256": "CC6D4FBE384DB2207CCFE4E844ACAA6408B883D5CB3C31490605C95575A56B70"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseDocument.Check.cs",
+        "sha256": "30C6B96557CB33AC39E9FC29FEBE178F01E5AB01D0D751CEC206D58ABF690D83"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseDocument.Execution.cs",
+        "sha256": "0FFADD9263FC5784689C5870530719EFEA77FA216AC3DE0C35CD2A200CF48F28"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseDocument.Navigation.cs",
+        "sha256": "2311C6DE59F6545924D1A6167678C72FE8C1E131913158A4ADFB7A7CBABF5079"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseDocument.cs",
+        "sha256": "6AFB52005E9DEDC5654E6E4932C528ADB4B3571060B969F4513F66A5A05A0F08"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseView.axaml",
+        "sha256": "0963744B59F84189B3B96225345AFBC5B8DEC141BDBAFDC32EE4D48EAF6004B2"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseView.axaml.cs",
+        "sha256": "E2AC5F4C0B88325328CC7D654F9AF3981CD9B587A020981BCA88749570515180"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/OwnedUnpackTask.cs",
+        "sha256": "1BFD85A0C6956C95816471FBE86896C20A641F9034390F1904E00FAD0595C408"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Check/ArchiveCheckDocument.cs",
+        "sha256": "AD945BEA1C9DD281807369FE9EC789E6779F09FA218B26BEFD4D04A0679C2CB5"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Check/ArchiveCheckView.axaml",
+        "sha256": "9E28CCB72A9BF469F874C66D157E04C95C63C590E361B4850FC9AE2B82BBF185"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Check/ArchiveCheckView.axaml.cs",
+        "sha256": "69889E7D6EAA6F51E187E51DCD13D3509111B953913AEDC9282ABF4D3D247B3C"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Organize/OrganizationDocument.Repack.cs",
+        "sha256": "7AC76A123C907E60B690B2DDA508063343760B1D50D14899DDDE27005B0048C1"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Organize/OrganizationDocument.cs",
+        "sha256": "B165B6629D0B3358CE1A3EEFDADCF2625E9E2145B19EF7F7281314EEF9B9C0C2"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Organize/OrganizationView.axaml",
+        "sha256": "3CF35D7565D77F82AD93FA2714BC7D51CB3629EBA20B233303A255F43A42BB72"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Organize/OrganizationView.axaml.cs",
+        "sha256": "407DBB8D6B3FED23E5F870D8C691851188C61E4B6328A13A59441844B0213399"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackDocument.Execution.cs",
+        "sha256": "2FFABE1CAE88CFA869CCB899F97B4D34FFE09567EFD0F97C268BCEAA2EFF23D9"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackDocument.Options.cs",
+        "sha256": "757A85F70B73F6454C4B848D5995B4BD0F72B57B3FCEE5ABEEEEA156B8EE4D90"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackDocument.cs",
+        "sha256": "1A2D1E3736FEC41A59BC6DFF6DD68F4AE8FF31E3B1347613D345CE6F98B2B4E3"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackView.axaml",
+        "sha256": "31EAB59271050856EF0F7321CB4E299F72AD5B3069F0C6B795CAEC7E613D93DE"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackView.axaml.cs",
+        "sha256": "32E8156ABAE8CF1CBC03F7E6FBB611F526F1ED9736D18D34A96C734C75CB47A7"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Repack/RepackDocument.cs",
+        "sha256": "EA56C533A18C47318376D0AF389AB2AF991FA44F079A01758C6DFCEA4B35529A"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Repack/RepackView.axaml",
+        "sha256": "76D394610CEFAEB3B7B24D14CA294929C6163ACF1F1128C0A834A28A3B588D91"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Repack/RepackView.axaml.cs",
+        "sha256": "2107F7585C8280C8E8B1319D47B0A91309CEB2F6968D1122A76597D62FCC37CE"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/OutputDirectorySuggestion.cs",
+        "sha256": "B7B9C876738421D08F3B32E27A3CB121E34D85E5F43E53823B10D6D2824ECAE9"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.Check.cs",
+        "sha256": "6A272686087DB46E6B454E21B76A9C1F2722F9B65A023BC9673C147BF6A30296"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.Organization.cs",
+        "sha256": "680E8901BB58BF73B9D4FAAE1E6893FE69C8AABE74B039DBD75B7B0017B0BBBC"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.Presentation.cs",
+        "sha256": "F6CCC1331115B837A5E70A53EFBAEEA3D3B6A8AA7783750615B0B3131B9E0542"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.Repack.cs",
+        "sha256": "B1B65A47A593DB5AB08231D576BD28E19110E861C0D2FC3F7D863E97059617EF"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.cs",
+        "sha256": "207BD5A0282DABEE0E533F505FF68E40FE5A1A1E45174AA82083D3E092965E68"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackView.axaml",
+        "sha256": "1756C437C0D64A52982EBC31B590D13F30103B26679B4F820F1992AC4B7C84F5"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackView.axaml.cs",
+        "sha256": "BDBB2636266C5FA6C8424A36212ECE20250001732FD16222770813A9F5E2FE23"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/LayerUnpackPlugin.Plugin.csproj",
+        "sha256": "14BCF9263AE9DFFFEA7BC942606052D27E48B0D7E759921DC5FD07AC9A427F93"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Plugin/LayerUnpackPluginModule.cs",
+        "sha256": "DAF410BF383E4CC1D363411B918F2D73AF23E4296B612A47AE1B3E4725CF5C41"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Plugin/LayerUnpackPluginServices.cs",
+        "sha256": "A9B8288F4CECF65F9C86A81AAD9DB49AD39DE32D90A93B6CD4C34A1D163B765E"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/ThirdPartyNotices/SharpCompress.LICENSE.txt",
+        "sha256": "B7CA2B6174CEE11AFE41D78B48527E3D7659A4435C25019A4A5E072299A2F8ED"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/ThirdPartyNotices/SharpZipLib.LICENSE.txt",
+        "sha256": "D7FBBC16F871BF24FA5624C7EAF945054B778985F32676DCACBA41FDDCA61133"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/packages.lock.json",
+        "sha256": "836FB43D1DF8B7A79963786A81FFBC0521F03DC8FA93C6EEB953AA8215D2675F"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/App.axaml",
+        "sha256": "999351CEC21A388451D4476A43BE93944E7BF9C4DB6AA7FBC8AE98C5253D472F"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/App.axaml.cs",
+        "sha256": "83F7132423C835FBA2D49AF1626A47F5B05923EC482E743CB8AA74F269AEEC38"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/LayerUnpackPlugin.Standalone.csproj",
+        "sha256": "6CF642D31CC2B369CAAAD485238AD9C8F8C7718E3D847181F96A5455E6D92A4C"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/MainWindow.axaml",
+        "sha256": "E0B350530BE083A592066EA6DEA588B197D040454F388BB2E483C512DA0736AF"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/MainWindow.axaml.cs",
+        "sha256": "C1D7DCCFB5C373930A2A0BAB6588F3FC5DACE655853BB8EE2AD79426B9F52E6B"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/PreviewDocumentLifetime.cs",
+        "sha256": "AEC12BFB1477E355FFA936DFC42FFD074BEB723DA033C4C0006DC19DE7B059BD"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/Program.cs",
+        "sha256": "9D191416687190667F8909E4EEE0603C4E444CFFE0D981B8B80265E77BD2B278"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/StandaloneServices.cs",
+        "sha256": "79A7910AE6BF6A544E18C5AE0684EA0230919FB9C5FB1B46F4ECAC94E813E33B"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/packages.lock.json",
+        "sha256": "7877B56ABE52064463E8A6A7AC83FF9E4C351EF1188129A60D8E940C57F30F10"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/ArchiveCheckSafetyTests.cs",
+        "sha256": "73069F2CB43658AE277F6DA75D997CA82E9BBEAD9F82EEEBE3134E6E1EA1CA62"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/ArchiveCheckTests.cs",
+        "sha256": "C7AF81DFB400A93EC30E8244AE834BFFAF605416A307CA946701C3D0E7EAD324"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/BrowseEdgeTests.cs",
+        "sha256": "49A8C041B8FCDB5825266AC2262A158793E327E1E3202014E8C0FF875305B36F"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/BrowseTests.cs",
+        "sha256": "EACA1D36691717472042214525642D3EB72833DA7260DF61A6A85B64C3D25184"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/ConversionTests.cs",
+        "sha256": "8072DEF58BBC55DFF533C8CEC66A6786729F89C367BB73CB5C05C53E10AE1E19"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/DelegatingExtractor.cs",
+        "sha256": "F3725A9E17C40ACAAEE0F49E6DEA06B1AD3DCCDEA5A461DB66455927FE2DDE70"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/DiscoveryAndEdgeTests.cs",
+        "sha256": "389350B2DC112D43F847853B0C7BAD606619A53B248AA008EEDCD9F8079AED6B"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/DomainTests.cs",
+        "sha256": "20DB7A599499D71F57A87FE1A6124C9F9ACE6E2083D5385F510D1D677706B2AA"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/7Zip.BZip2.split.001",
+        "sha256": "D3D33730B94022077C33C24B91B19CC99C8662CB926F4616A7EFC7B889259676"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/7Zip.LZMA.7z",
+        "sha256": "CA67A51924796568B865CB8FA85B8DF0661BD2D4677E508B620C56032E511295"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/7Zip.LZMA.Aes.7z",
+        "sha256": "517331153899BE02EC41E03B9095E435701C2AF66AE40DB21081F0D77440B97A"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/7Zip.LZMA2.Aes.7z",
+        "sha256": "FA05B223E2BF44E404B6D3886DB1B9FD661C0D6AD2856EEE5D9C007A579EA8B4"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/7Zip.encryptedFiles.7z",
+        "sha256": "54DADA890893C9ABE8D8B06BC446D66C288FA667CB51DE919C2E3216D3C6DE34"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/7Zip.solid.7z",
+        "sha256": "3C336BF14BEF2DC998B548A304C0C07C9C9DA899F90E426A965A5F322E232B53"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.single.txt.bz2",
+        "sha256": "23B4122AB8F087EB3C57749BE8ED7BDD8F6062322964DD2723E66A8D1A429510"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.single.txt.gz",
+        "sha256": "56DAF7C78392199EEF420FDAEE5ADDFA56AEA278AC45D2BD34F9BB73349B2B64"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.single.txt.xz",
+        "sha256": "BE5A933F5EBC5B972B0699A8A6EFCC426C360228300D88D4CBEA5401B77C2964"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.utf8.tar",
+        "sha256": "8B47141682DE26CD4604AB70355A71793771EED02F4CEB8AA36237FE78DF908A"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.utf8.tar.bz2",
+        "sha256": "DCD5EACF74786E99FE894215518DE5EF71897D1673976FE09C5DB229A103C84C"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.utf8.tar.gz",
+        "sha256": "7B50636F7C1DD42D2FAE46F74EFEF5434177AACA1F1C3673CA4DE6886095D340"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.utf8.tar.xz",
+        "sha256": "E8A3FE80F40F690CA88A001234A5EFBD92DFAA37E3C3A8627B19905FD37373C5"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/LICENSE-SharpCompress.txt",
+        "sha256": "B7CA2B6174CEE11AFE41D78B48527E3D7659A4435C25019A4A5E072299A2F8ED"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/R07.candidate-header.7z",
+        "sha256": "1C80B7E93F28069AD95966AD66E22072D6B6F2E24BD18F6370A829C655049880"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/R07.candidate-plain-header.7z",
+        "sha256": "BDA2353DA3198A1148EC4642CA5D0C198AEFE56ABB9B01867073C5ECBB0AB80F"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/R07.created.tar",
+        "sha256": "781F2BFBE10C6A92D6D546EB15C7B8E1801F034F82B2FE50ABFCB7EEA529C99C"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/R07.created.tar.gz",
+        "sha256": "811EDF8DC8C47DC08C0EAC5330E77CA0B549B2F3A47C4FBAA1CB3DFD17343CDB"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/README.md",
+        "sha256": "20A2B2AE3C5FE2771D7BA8FC040DCDEC7D54C7782EB8AE70D1308326D1DF4B0E"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar.encrypted_filesAndHeader.rar",
+        "sha256": "3944A0CF36758D042C238DACAE56A4FA494B6F790C4F0DD719D9A47B7C845202"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar.encrypted_filesOnly.rar",
+        "sha256": "52C0D575E01750AE643C65866B5E06E67773A0AED5EDEA6B2B04E7DE14A784A2"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar.multi.solid.part01.rar",
+        "sha256": "B6FEC070A075FC244E8D35187B482CD6558A608E3CDA158153B85A59A68903B8"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar.solid.rar",
+        "sha256": "E7E62F24F22F195D21437BE09667C8956837D99BA48D7270090251A8E32BABC5"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar4.multi.part01.rar",
+        "sha256": "9401BCEB34A5267DF2C2C69466D899C1D754F63749D00F5313B717123DFC9C45"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar4.rar",
+        "sha256": "9D9C261E50D3A84AB11A3701C7A736057FC970E59CA365885A41F60270C1875E"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar5.encrypted_filesAndHeader.rar",
+        "sha256": "63FC4B5576F7482311E950155607E171696588881BDD277C8C099EFD2F98B6E2"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar5.encrypted_filesOnly.rar",
+        "sha256": "E5FB06AF812633B246430F029A051CC462D00180A0DF455A798644DECCDC7D07"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar5.multi.part01.rar",
+        "sha256": "AD9B6AC157E77BA2CC6B8BE7EEBA52A2C047A0EF2D06FA6FFA0C1D1CCCE3A651"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar5.rar",
+        "sha256": "3319DE3E8A91A58D08D8A83F48EBAE7E6B022C542B4A58775BAB64F4063988A9"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar5.solid.rar",
+        "sha256": "3043D68C5A81F46ADCBB5393632D243944EAD44EB383A677AC82E68AFDDE27CF"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Tar.tar.bz2",
+        "sha256": "AFD4F1CCDBB6E8D435D6B6FDF8B9F297107F8959267336FF12B632F4C0E90DE7"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Tar.tar.gz",
+        "sha256": "CE260029FC3B57E86D9D1F45F1349124F313BA55CED6DA101BCAC2B9ABD76DF5"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Tar.tar.xz",
+        "sha256": "952E14EA5178C43572EAF337CCE7A56F2495CC95C62561421397E3AB2E53FF09"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Zip.deflate.WinzipAES.zip",
+        "sha256": "DEB1D7C7E0F0A6BC78C41EE9FE3F9BF501695F7D01091987A4CE22A9963BE32B"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Zip.deflate.WinzipAES2.zip",
+        "sha256": "F483C724AD0192B52BDED9E729BC70512277847A3604F2C13B294B9DD39F2E40"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Zip.deflate.pkware.zip",
+        "sha256": "BF79DA6D95EAD6D7EB08C691306E89EBFB2A596B06F992305A8D14645EDAC9BA"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Zip.deflate.zip",
+        "sha256": "78720AF73FACE20069DCABDA43589095B439F236531C6268F8301028DBB65F9C"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/expected-content.json",
+        "sha256": "78042C4ED547C40E47F8AB06BA92BEE8F3AD47309FB9348C2B8C5F9624EF6069"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/fixture-hashes.json",
+        "sha256": "EE28CD011DB8B9A338043132277AFBC4903D7D59B7D9F891397B04D304115953"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/r07-fixtures.json",
+        "sha256": "097DBF75DC6B5C9F431E5F424729CA475F888A24A6783FFEE375313B4CD86E0F"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/FormatCreationTests.cs",
+        "sha256": "F22EF52C34DAFE41C3670E82FDF558AE2F5481D2F799875527FE96694D9D07E6"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/FormatTests.cs",
+        "sha256": "331B690D4801F2F0BD8E0602609F9238EB09E2D75D5D457A7E3AC1E1DEEE07BF"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/GeneratedFormatTests.cs",
+        "sha256": "B9932EF52A3A90C7661A30F6FF2D3E19E277104AAC4A34627BBCD99780F2CA96"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/IntegrityTests.cs",
+        "sha256": "572C565BE3C09AF8D8AB4ED75D976A98651EA8080C52F707F2C5C43D84F100F4"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj",
+        "sha256": "E571A3F02FF32A4B6251EF141A9A41F181F77D16490F437002BD2F2A4C2D67D5"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/LifecycleTests.cs",
+        "sha256": "B8F1E0C992FB7B663871CD40ACDD5980C5B10DB4F011A9BCA61C20972E8E8B95"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/OrganizationPerformanceTests.cs",
+        "sha256": "1C7CAA5B5A73FF419169D5F6BE9EFD624F7F869F1137823C1653F07F5C9244C4"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/OrganizationSafetyTests.cs",
+        "sha256": "819AD901369B4E2CFA604117C02C34E30A1BE391A3AC640B29E0C8DB28B93762"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/OrganizationTests.cs",
+        "sha256": "C24AE6D55FF1EB3EC7DC4CDEE6AC0F7F6C00279219F5EB21C546108053ABAE02"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/PackBatchTests.cs",
+        "sha256": "197B22EDEB97AA351D66D6D171B0F3610105B56EEAA794DEF4F06EBAB923337A"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/PackEncryptionTests.cs",
+        "sha256": "D7E4079B5ACECFDB4F80A6152D2422D61DA925BC4EF375340F0F832BCD96921A"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/PackTests.cs",
+        "sha256": "BE55D580E56D2416CEE3921AAFFD5401507DC6A040150BE26CD2726801A12036"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/PerformanceTests.cs",
+        "sha256": "AA460CDAA6B99A36F253488DFE4923FF1F9F9CB6EF8DC9345978FC656232E236"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/RecursiveTests.cs",
+        "sha256": "F3ED6449B7BD77FC12D81281DB3255A1772F66EBB6F7FC7AE14041FC834F1288"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/RepackPerformanceTests.cs",
+        "sha256": "73C7325E35A99C640D991FE68C7A2416E28F40CD76142A80B355FCCC6DB6B0D9"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/RepackSafetyTests.cs",
+        "sha256": "C3C174538D950E7CFE218E0406868896FDED1C30042E521436CD3931FD99E238"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/ResultRepackTests.cs",
+        "sha256": "A8744727DA3A2C0E38EF881B64CE628A39D6609969A3E7A00B186A7ABB693796"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/SafetyTests.cs",
+        "sha256": "8A82CB1589FBF549EF36728462B3C140CB0D66CB5E8CB04B8F747D1363B046F6"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/SevenZipCandidateTests.cs",
+        "sha256": "A19A50A5F9FFB5C15D46433BDFA7E368F2A66F3F0BC9600F7253DDB2B90D8A95"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/TestWorkspace.cs",
+        "sha256": "D93DB48AC1A5C5A5AD8982898C99C5231283B7A4DFFA527C6D22997A8C891365"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/packages.lock.json",
+        "sha256": "4C039000A0ED140A5E7C1414BC3859AC188618BF5C57AF9C32830B566E2D32B1"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/ArchiveCheckDocumentTests.cs",
+        "sha256": "68E6EB9CF10C33805FCD8A8E2FD2BEB2ADA4A21CD40809652D4CD02CB05F8F4E"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/BrowseDocumentTests.cs",
+        "sha256": "2CAD7322E009220967B9C8037D8DDF30479A4C96D7A9BDDD36A62B3616B8293E"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/CompositionTests.cs",
+        "sha256": "81BF471855AEC6A9C14E44B128950F9455D9E7C17CA565242A4ADF043D8DE480"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/DocumentTests.cs",
+        "sha256": "46B44A506065DC83C54C7AD77DD69FB0DDD76327B71064D0AE3653EBBD2088B1"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/ExperienceTests.cs",
+        "sha256": "7ED664826BC056E215B40CBB74BFD5E4FD8BB51ACF6772304FF28AE51120C6FF"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj",
+        "sha256": "96AA58F4CD15449634654966155B4D902AD1FB87EE622785FF7CB1999F184073"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/OrganizationDocumentTests.cs",
+        "sha256": "2C0895A7BD9DA34BFA95CDDC0A2FF25BF4F3D15D48ECE3689D15C68E7D8876E2"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/PackBatchDocumentTests.cs",
+        "sha256": "041F83B29D6BD5536225DC462C24585C640448A2C9C5C466574607C360F2311A"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/PackDocumentTests.cs",
+        "sha256": "86500BC906B9A04CC3B7481757D4FF99E77742530C7A7D9D45226162C76DE32B"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/RepackDocumentTests.cs",
+        "sha256": "92FD8C275832826D4B9744CE83527FD85422718198432FF4C304D3BF99D116C4"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/TestApp.cs",
+        "sha256": "1A5C0D5A318ECD63C26D1101C9A942DB77C2B01C92BF5C815851EFD0D61DA828"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/ViewTests.cs",
+        "sha256": "D9B41C59DE42B623454F86BB8D91A826D2188A6E02BBF22772FBF28226F3C2E3"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/WindowLifecycleTests.cs",
+        "sha256": "C3F921CAE8290A20DC08F1A3A8D5BE94EC6D605EEF828AFFCD5D503300307E46"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/packages.lock.json",
+        "sha256": "071E4345764C4EE044E1D0E43FBE10B32253366B58819F3211606468E070D507"
+      },
+      {
+        "path": "tools/check-docs.ps1",
+        "sha256": "638F9ACA8950685D134A445D2C514643786F8890C56559C7492C5341264E3170"
+      },
+      {
+        "path": "tools/generate-fixtures.py",
+        "sha256": "018211D4D5538DA677D2CB96511890FE69BFCF03C4C207FCAFDAABFD501FF6BF"
+      },
+      {
+        "path": "tools/verify-format-interop.ps1",
+        "sha256": "DFBAF8AC700826219C04B8B89A9A4BF19CD640C58B78BABC91A1235749B57710"
+      },
+      {
+        "path": "tools/verify-local.ps1",
+        "sha256": "D60782363C107582C93FB91369CB4D60A6B5B7E7B11E39A3DFA0E05ED6C5AC18"
+      }
+    ]
+  },
+  "visualReview": {
+    "files": [
+      "r07-check-False-460-False.png",
+      "r07-check-True-460-True.png",
+      "r07-check-False-900-True.png"
+    ],
+    "reviewed": true,
+    "scope": "headless theme/window/keyboard only"
+  },
+  "notRun": [
+    "AIFLOW",
+    "Windows CI",
+    "Release",
+    "formal plugin packaging",
+    "deployment",
+    "release gates",
+    "native dialogs/DPI/Host acceptance"
+  ]
+}
