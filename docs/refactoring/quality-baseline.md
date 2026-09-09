@@ -1,6 +1,6 @@
 # 质量基线与门禁
 
-版本 v1.7，2026-09-09。用户本轮规则优先：SOLID、朴素设计模式、详细中文注释、完整单元测试与本地检查、同步专项文档；不使用 AIFLOW，不新增 Windows CI，不执行 Release、正式 ZIP、部署或发布门禁。
+版本 v1.8，2026-09-09。用户本轮规则优先：SOLID、朴素设计模式、详细中文注释、完整单元测试与本地检查、同步专项文档；不使用 AIFLOW，不新增 Windows CI，不执行 Release、正式 ZIP、部署或发布门禁。
 
 ## 工程规则
 
@@ -11,7 +11,7 @@
 5. 路径和预算先于写入；解压先临时目录、创建 ZIP 先临时文件，再不覆盖提交。解压批次失败和重试不退款；压缩准备／执行各自受限，已成功产物不回滚。
 6. 密码不进入 JSON、日志、错误链、历史或配置；释放引用不承诺托管字符串物理清零。
 7. 中文注释说明契约与理由，特别是层数、组合归档、CRC/认证、取消、清理及源摘要。
-8. 只使用公开 SDK，保持 Plugin/现有解压 Document ID；解压、压缩与浏览三个普通 Document，零 Tool、零 Workflow/全局贡献。
+8. 只使用公开 SDK，保持 Plugin/现有解压 Document ID；解压、压缩与浏览三个普通 Document，两个无密码 Workflow Provider，零 Tool、Consumer/Gateway 和其他全局贡献。
 9. 依赖精确锁定，私有资产与许可显式声明，SDK/Avalonia 等共享程序集不声明为私有。
 
 ## 必要测试
@@ -34,14 +34,14 @@
 在仓库根执行 `./tools/verify-local.ps1`：
 
 ```powershell
-dotnet restore LayerUnpackPlugin.slnx --locked-mode
+dotnet restore LayerUnpackPlugin.slnx --locked-mode --source https://api.nuget.org/v3/index.json --packages artifacts/nuget-official
 dotnet build LayerUnpackPlugin.slnx -c Debug -warnaserror --no-restore
 dotnet test LayerUnpackPlugin.slnx -c Debug --no-build
 dotnet format LayerUnpackPlugin.slnx --verify-no-changes --no-restore
 ./tools/check-docs.ps1
 ```
 
-脚本分别运行两个测试项目并检查 TRX，要求测试总数大于零、全部通过、无跳过；任何命令失败立即停止。最终日志和数量见[G0013 结果](G0013/result.md)。新增依赖时先正常 restore 更新并核对锁文件，再执行 locked restore。
+脚本运行 Headless、Plugin、跨插件 Workflow 集成及 Studio 四组测试并检查 TRX，要求测试总数大于零、全部通过、无跳过；任何命令失败立即停止。最终日志和数量见[G0014 结果](G0014/result.md)。新增依赖时先正常 restore 更新并核对锁文件，再执行 locked restore。
 
 Markdown 变更检查相对路径和状态一致性；仅改文档不因此重跑业务测试。代码/依赖变化执行适用测试；所有必要检查通过后，不为了增加数字重复运行无关验证。
 
@@ -64,3 +64,5 @@ R05 增加提交文件清单、嵌套来源去重、四类扩展名筛选、完�
 R06 增加真实 RAR／7z 转 ZIP、内嵌包字节不变、有限递归规则对照、来源 A／目标 B、认证限制传递、提交清单打包、总体预算与每来源独立提交。必须覆盖写入器遗漏／篡改的回读拒绝、特殊条目、清理残留、取消／超时、源变化和父页关闭排空；2,002 文件复合样本记录累计资源，见[G0012 验收矩阵](G0012/acceptance-matrix.md)。
 
 R07 增加统一矩阵与拒绝组合、目录成功但正文损坏、真实 CRC/AES/长度证据、RAR5 MAC 限制、缺卷歧义、GZip 尾部截断、临时预算和清理残留、父页关闭／迟到进度、TAR/PAX 空目录长路径及独立 bsdtar/libarchive 互操作。7z 候选负向证据不能计作创建支持。统一脚本新增本地互操作步骤，需可用 bsdtar/libarchive；仍无 Windows CI 或发布步骤。详见[G0013 验收矩阵](G0013/acceptance-matrix.md)。
+
+R08 增加两个精确版本动作注册、SDK Schema、业务状态与成功清单、参数拒绝和缺密、GUI 与 Workflow 密码／关闭隔离、实际写入取消、重复与并发不覆盖、结果预算及源重新验证。真实 Fractal、Archive、Studio 分别加载到三个 ALC，公开 JSON 交接并验证 SHA-256。Studio 全量回归纳入同一本地脚本。依赖从官方源还原到 artifacts/nuget-official，严格比对锁文件，避免同版本本地 feed 污染全局缓存。见[G0014 验收矩阵](G0014/acceptance-matrix.md)。

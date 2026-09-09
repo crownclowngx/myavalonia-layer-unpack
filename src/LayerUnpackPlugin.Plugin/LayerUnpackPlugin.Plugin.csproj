@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="LayerUnpackPlugin.Tests" />
     <ProjectReference Include="../LayerUnpackPlugin.Headless/LayerUnpackPlugin.Headless.csproj" />
     <ManagedPluginPrivatePackage Include="SharpCompress" />
     <ManagedPluginPrivatePackage Include="SharpZipLib" />
@@ -21,6 +22,7 @@
     <PackageReference Include="MyAvaloniaManagement.Plugin.Build" PrivateAssets="all" />
     <PackageReference Include="MyAvaloniaManagement.PluginSdk" />
     <PackageReference Include="MyAvaloniaManagement.PluginSdk.UI" />
+    <PackageReference Include="MyAvaloniaManagement.PluginSdk.Workflow" />
   </ItemGroup>
 
   <!--

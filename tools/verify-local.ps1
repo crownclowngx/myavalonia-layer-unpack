@@ -6,6 +6,8 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $repoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $evidenceDirectory = Join-Path $repoRoot 'artifacts/local-verification'
+$packageDirectory = Join-Path $repoRoot 'artifacts/nuget-official'
+$studioTests = Join-Path $repoRoot '../myavalonia-workflow-studio/tests/WorkflowStudio.Tests/WorkflowStudio.Tests.csproj'
 New-Item -ItemType Directory -Path $evidenceDirectory -Force | Out-Null
 $checks = [Collections.Generic.List[object]]::new()
 
@@ -20,7 +22,10 @@ function Invoke-DotNetCheck([string] $Name, [string[]] $Arguments) {
 
 Push-Location -LiteralPath $repoRoot
 try {
-    Invoke-DotNetCheck 'locked-restore' @('restore', 'LayerUnpackPlugin.slnx', '--locked-mode')
+    # 曾有同版本本地 feed 包占用全局缓存；使用本仓库隔离缓存和官方源，继续严格验证既有锁文件。
+    # 此处不重写内容哈希，也不清空其他任务使用的全局缓存。
+    Invoke-DotNetCheck 'locked-restore' @('restore', 'LayerUnpackPlugin.slnx', '--locked-mode', '--source', 'https://api.nuget.org/v3/index.json', '--packages', $packageDirectory)
+    Invoke-DotNetCheck 'studio-locked-restore' @('restore', $studioTests, '--locked-mode', '--source', 'https://api.nuget.org/v3/index.json', '--packages', $packageDirectory)
     Invoke-DotNetCheck 'debug-build' @('build', 'LayerUnpackPlugin.slnx', '-c', 'Debug', '-warnaserror', '--no-restore')
     # 仅求值 Debug 引用和显式资产，避免项目引用在日后打包时被静默遗漏。
     # ResolveReferences 不执行 DeployManagedPlugin，也不创建正式插件目录或 ZIP。
@@ -55,6 +60,9 @@ try {
     }
     Invoke-DotNetCheck 'headless-tests' @('test', 'tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj', '-c', 'Debug', '--no-build', '--logger', 'trx;LogFileName=headless.trx', '--results-directory', $evidenceDirectory)
     Invoke-DotNetCheck 'plugin-tests' @('test', 'tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj', '-c', 'Debug', '--no-build', '--logger', 'trx;LogFileName=plugin.trx', '--results-directory', $evidenceDirectory)
+    Invoke-DotNetCheck 'workflow-integration-tests' @('test', 'tests/LayerUnpackPlugin.WorkflowIntegration.Tests/LayerUnpackPlugin.WorkflowIntegration.Tests.csproj', '-c', 'Debug', '--no-build', '--logger', 'trx;LogFileName=workflow-integration.trx', '--results-directory', $evidenceDirectory)
+    Invoke-DotNetCheck 'studio-debug-build' @('build', $studioTests, '-c', 'Debug', '-warnaserror', '--no-restore')
+    Invoke-DotNetCheck 'studio-tests' @('test', $studioTests, '-c', 'Debug', '--no-build', '--logger', 'trx;LogFileName=studio.trx', '--results-directory', $evidenceDirectory)
     $interopWatch = [Diagnostics.Stopwatch]::StartNew()
     $interopExit = 1
     try {
@@ -66,7 +74,7 @@ try {
         $checks.Add([pscustomobject]@{ name = 'format-interop'; exitCode = $interopExit; seconds = $interopWatch.Elapsed.TotalSeconds; command = './tools/verify-format-interop.ps1' })
     }
     # VSTest 在发现零测试时可能返回成功，因此结果数量和跳过数同样属于门禁。
-    foreach ($file in @('headless.trx', 'plugin.trx')) {
+    foreach ($file in @('headless.trx', 'plugin.trx', 'workflow-integration.trx', 'studio.trx')) {
         [xml]$trx = Get-Content -LiteralPath (Join-Path $evidenceDirectory $file) -Raw
         $counters = $trx.TestRun.ResultSummary.Counters
         if ([int]$counters.total -eq 0 -or $counters.total -ne $counters.passed -or [int]$counters.notExecuted -ne 0) {
@@ -74,6 +82,9 @@ try {
         }
     }
     Invoke-DotNetCheck 'format' @('format', 'LayerUnpackPlugin.slnx', '--verify-no-changes', '--no-restore')
+    $studioRoot = [IO.Path]::GetFullPath((Join-Path $repoRoot '../myavalonia-workflow-studio'))
+    $studioFiles = @('src/WorkflowStudio.Plugin/Workflows/WorkflowRunner.cs', 'src/WorkflowStudio.Plugin/Workflows/ArchiveWorkflowOutcome.cs', 'tests/WorkflowStudio.Tests/ArchiveWorkflowOutcomeTests.cs') | ForEach-Object { Join-Path $studioRoot $_ }
+    Invoke-DotNetCheck 'studio-format' (@('format', $studioTests, '--verify-no-changes', '--no-restore', '--include') + $studioFiles)
     $docsWatch = [Diagnostics.Stopwatch]::StartNew()
     $docsExitCode = 1
     try {

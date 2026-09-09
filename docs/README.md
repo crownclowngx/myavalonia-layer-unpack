@@ -1,5 +1,7 @@
 # 开发与使用快速开始
 
+R08 工作流入口使用现有 Workflow Studio。两个无密码动作、版本化参数与成功结果引用见[Workflow 动作](workflow-actions.md)；真实 Fractal 样例和清理责任见[G0014 流程](refactoring/G0014/integration-example.md)。普通页面不增加工作流设置。
+
 ## 开始一个解压批次
 
 1. 打开“解压任务”Document，或用下面的命令启动 Standalone。
@@ -38,7 +40,7 @@
 
 ## 本地开发环境
 
-依赖：.NET SDK 10 与用于本地互操作检查的 bsdtar/libarchive（本机由系统 tar 提供），当前验证环境为 Windows x64、Avalonia 12.1.0、Plugin SDK 3.3.0。Python 仅在重新生成标准样本时需要，正常构建和测试不依赖 Python。
+依赖：.NET SDK 10、bsdtar/libarchive（本机由系统 tar 提供），以及相邻目录的 `myavalonia-fractal-art` 和本轮更新的 `myavalonia-workflow-studio` 源码供真实集成测试构建。当前环境为 Windows x64、Avalonia 12.1.0、Plugin SDK 3.3.0、Workflow SDK 1.0.0。联合门禁使用 NuGet.org 和本仓库独立缓存；Python 仅在重新生成标准样本时需要。
 
 ```powershell
 ./tools/verify-local.ps1
@@ -101,9 +103,9 @@ var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken)
 
 ## 后续产品阶段规划
 
-[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01–R06 已实施，当前本地验证和遗留见[G0013 结果](refactoring/G0013/result.md)。R07 的能力矩阵、检查及 TAR/TAR.GZ 创建见[G0013](refactoring/G0013/result.md)；7z 创建与 R08 仍为未来目标。
+[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01–R06 已实施，当前本地验证和遗留见[G0014 结果](refactoring/G0014/result.md)。R07 的能力矩阵、检查及 TAR/TAR.GZ 创建见[G0013](refactoring/G0013/result.md)；R08 的两个无密码动作与真实流程见[G0014](refactoring/G0014/result.md)，7z 创建与加密 Workflow 仍待后续。
 
-生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008、R03 映射 G0009、R04 映射 G0010、R05 映射 G0011、R06 映射 G0012，R07 本轮映射 G0013；后续继续验证 7z 并复核各阶段原生交互遗留。
+生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008、R03 映射 G0009、R04 映射 G0010、R05 映射 G0011、R06 映射 G0012，R07 首批单元映射 G0013，R08 无密码最小范围映射 G0014；后续继续验证 7z 并复核各阶段原生交互遗留。
 
 ## 整理解压结果
 

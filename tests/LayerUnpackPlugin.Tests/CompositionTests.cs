@@ -6,6 +6,8 @@ using LayerUnpackPlugin.Features.Pack;
 using LayerUnpackPlugin.Features.Browse;
 using LayerUnpackPlugin.Headless.Application;
 using LayerUnpackPlugin.Plugin;
+using LayerUnpackPlugin.Workflow;
+using MyAvaloniaManagement.PluginSdk.Workflow;
 using Microsoft.Extensions.DependencyInjection;
 using MyAvaloniaManagement.PluginSdk;
 using MyAvaloniaManagement.PluginSdk.UI;
@@ -16,7 +18,7 @@ namespace LayerUnpackPlugin.Tests;
 public sealed class CompositionTests
 {
     [Fact]
-    public void 组合注册压缩解压浏览三个普通Document且无Tool历史命令或Workflow()
+    public void 组合注册三个普通Document和两个Workflow且无Tool历史命令或Gateway()
     {
         var registration = new Registration();
         new LayerUnpackPluginModule().Configure(registration);
@@ -35,6 +37,9 @@ public sealed class CompositionTests
         Assert.Equal(typeof(UnpackDocument), document.Model);
         Assert.Equal(typeof(UnpackView), document.View);
         Assert.Equal(0, registration.OtherContributions);
+        Assert.Equal(2, registration.Actions.Count);
+        Assert.Equal(new[] { ArchiveWorkflowActions.UnpackId, ArchiveWorkflowActions.CreateId }, registration.Actions.Select(a => a.Id.Value));
+        Assert.All(registration.Actions, action => Assert.True(new WorkflowSchemaValidator().ValidateDescriptor(action).IsValid));
         Assert.False(typeof(IPersistablePluginDocument).IsAssignableFrom(typeof(UnpackDocument)));
     }
 
@@ -66,6 +71,7 @@ public sealed class CompositionTests
         public IServiceCollection Services { get; } = new ServiceCollection();
         internal List<(DocumentDescriptor Descriptor, Type Model, Type View)> Documents { get; } = [];
         internal int OtherContributions { get; private set; }
+        internal List<WorkflowActionDescriptor> Actions { get; } = [];
         public void AddDocument<TDocument, TView>(DocumentDescriptor descriptor)
             where TDocument : class, IPluginDocument where TView : Control, new()
         { Documents.Add((descriptor, typeof(TDocument), typeof(TView))); Services.AddScoped<TDocument>(); Services.AddTransient<TView>(); }
@@ -73,7 +79,8 @@ public sealed class CompositionTests
             where TDocument : class, IPersistablePluginDocument where TView : Control, new() => OtherContributions++;
         public void AddTool<TTool, TView>(ToolDescriptor descriptor) where TTool : class where TView : Control, new() => OtherContributions++;
         public void UseLifecycle<TLifecycle>() where TLifecycle : class, IPluginLifecycle => OtherContributions++;
-        public void AddWorkflowAction<THandler>(WorkflowActionDescriptor descriptor) where THandler : class, IWorkflowActionHandler => OtherContributions++;
+        public void AddWorkflowAction<THandler>(WorkflowActionDescriptor descriptor) where THandler : class, IWorkflowActionHandler
+        { Actions.Add(descriptor); Services.AddScoped<THandler>(); }
         public void UseWorkflowActionGateway() => OtherContributions++;
         public void AddDocumentCommand(CommandDescriptor descriptor, DocumentTypeId targetDocumentTypeId) => OtherContributions++;
         public void AddMenuCommandContribution(MenuCommandContributionDescriptor descriptor) => OtherContributions++;

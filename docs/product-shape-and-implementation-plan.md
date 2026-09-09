@@ -1,8 +1,8 @@
 # Layer Unpack 插件形态、产品定位与闭环实施计划
 
-> 文档版本：v1.7，2026-09-08
+> 文档版本：v1.8，2026-09-09
 >
-> 文档状态：V1 加 R01–R06 与 R07 首批单元本地候选；当前验证见 G0013，人工与发布范围分别记录
+> 文档状态：V1 加 R01–R07 已选单元与 R08 无密码动作本地候选；当前验证见 G0014，人工与发布范围分别记录
 >
 > 项目名称：`myavalonia-layer-unpack`
 >
@@ -16,9 +16,13 @@
 
 > R03 已实施，分别打包、有限排除、四级偏好和 AES-256 见[G0009 结果](refactoring/G0009/result.md)及[契约](refactoring/G0009/batch-creation-contract.md)。默认普通合包路径保持，逐组失败、重试和重新准备未完成项均有 GUI 入口。目标秘密与解压候选池完全分开。R04 浏览增量见下节与[G0010 结果](refactoring/G0010/result.md)，R05 整理见[G0011 结果](refactoring/G0011/result.md)，当前 R06 转换与结果打包见[G0012 结果](refactoring/G0012/result.md)。
 >
-> 后续规划：[路线图](roadmap/README.md)中的 R02 已进入 G0008 本地候选，新增普通 ZIP 创建，见下述 R02 增量。下文首版范围与历史 G0001–G0006 路线仍用于说明解压基线，不表示当前没有压缩；ZIP 浏览已在 R04 实现，输出整理已在 R05 实现；转换与结果打包已在 R06 实现；Workflow 仍未实现。
+> 后续规划：[路线图](roadmap/README.md)中的 R02 已进入 G0008 本地候选，新增普通 ZIP 创建，见下述 R02 增量。下文首版范围与历史 G0001–G0006 路线仍用于说明解压基线，不表示当前没有压缩；ZIP 浏览已在 R04 实现，输出整理已在 R05 实现；转换与结果打包已在 R06 实现；R08 两个无密码 Workflow 动作与真实流程已实现，详见 G0014。
 
-## R07 当前增量：能力矩阵、检查与 TAR 创建
+## R08 当前增量：无密码 Workflow 动作
+
+注册版本化解压、创建两个 Provider，复用同一 Headless。结果只传已提交成功路径和逐项诊断，重复运行须显式接受新建与自动编号政策；不开放密码参数。真实 Fractal → 创建 → 解压流程通过三个 ALC 的 SDK JSON 边界，Studio 最终摘要区分业务失败。普通三个 Document 不新增工作流配置，完整范围和验收见[G0014 结果](refactoring/G0014/result.md)与[动作契约](refactoring/G0014/workflow-contract.md)。
+
+## R07 历史增量：能力矩阵、检查与 TAR 创建
 
 普通创建在默认 ZIP 外提供 TAR/TAR.GZ，沿用清单、分别、排除、预算与不覆盖事务；格式只显示可用选项。解压／浏览来源可显式进入检查子页，目录读取与完整正文检查分开，密码本次输入，私有临时内容检查后清理。实际校验、限制、失败歧义及下一步统一呈现。7z 独立候选失败，创建未开放；R07 仍有后续单元。详情见[G0013 结果](refactoring/G0013/result.md)、[矩阵](refactoring/G0013/format-support-matrix.md)、[检查契约](refactoring/G0013/checking-contract.md)。
 
@@ -58,7 +62,7 @@ Headless 提供 PackService.PrepareAsync / ExecuteAsync，来源摘要、有限�
 阶段档案与状态口径见[实施档案与文档治理](refactoring/README.md)，共同验收约束见[质量基线](refactoring/quality-baseline.md)。
 
 具体实施使用 [V1 执行计划](v1-execution-plan.md)：按 G0001–G0006 列出工作项、依赖、阶段出口和验收归属。
-V1 执行计划保留其历史记录；当前增量见 G0013。按用户最新约束，不使用 AIFLOW、不新增 Windows CI，不执行 Release、正式插件 ZIP、部署或发布门禁。
+V1 执行计划保留其历史记录；当前增量见 G0014。按用户最新约束，不使用 AIFLOW、不新增 Windows CI，不执行 Release、正式插件 ZIP、部署或发布门禁。
 
 ## 1. 已确认需求与本版设计建议
 
@@ -85,14 +89,14 @@ V1 执行计划保留其历史记录；当前增量见 G0013。按用户最新�
 
 ## 2. 当前工程事实
 
-以下为 R06 基线与 R07 增量的源码事实。实际本地检查见[G0013 结果](refactoring/G0013/result.md)，不代表真实 Host 或正式包已验收。
+以下为 R06 基线、R07 已选单元与 R08 无密码动作的源码事实。实际本地检查见[G0014 结果](refactoring/G0014/result.md)，不代表真实 Host 或正式包已验收。
 
 | 项目 | 当前事实 |
 | --- | --- |
 | 解决方案 | `LayerUnpackPlugin.slnx`，Headless、Plugin、Standalone 与两个测试项目 |
 | 正式入口 | `LayerUnpackPlugin.Plugin`，入口为 `LayerUnpackPluginModule` |
 | Document | `UnpackDocument/UnpackView`、`PackDocument/PackView`、`BrowseDocument/BrowseView`，通过 `AddDocument` 注册为“解压任务”“压缩任务”“浏览任务” |
-| 全局贡献 | 零 Tool、命令、菜单、快捷键、Workflow 和 Gateway 贡献 |
+| 全局贡献 | 两个无密码 Workflow Provider；零 Tool、命令、菜单、快捷键和 Gateway 贡献 |
 | 独立预览 | 独立 Scope，复用插件服务和界面，异步初始化及关闭排空 |
 | 测试 | 真实格式、内容摘要、密码、递归、输出、生命周期、UI 渲染和性能基线 |
 | 依赖 | 当前集中配置 Plugin SDK `3.3.0`，工程目标 `net10.0`，插件交付 RID 为 `win-x64` |

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 2,
+  "contractRevision": "__CURRENT_CONTRACT_REVISION__",
+  "presentationRevision": "__CURRENT_PRESENTATION_REVISION__",
+  "summary": "Fractal 生成图片，创建交付归档，按成功清单解压回读，最后释放生产者临时图片。业务状态另见动作结果。",
+  "steps": [
+    {
+      "id": "render",
+      "actionId": "myavalonia.plugin.fractal.art.workflow.render-artwork-file",
+      "arguments": { "recipePath": "__RECIPE_PATH__" }
+    },
+    {
+      "id": "pack",
+      "actionId": "myavalonia.plugin.layer.unpack.workflow.create-v1",
+      "arguments": {
+        "version": 1,
+        "inputs": ["${render.result.artifact.path}"],
+        "outputDirectory": "__ARCHIVE_DIRECTORY__",
+        "archiveName": "交付.zip",
+        "grouping": "combined",
+        "format": "zip",
+        "compression": "standard",
+        "repeatPolicy": "create-new"
+      }
+    },
+    {
+      "id": "unpack",
+      "forEach": "${pack.result.successfulOutputs}",
+      "actionId": "myavalonia.plugin.layer.unpack.workflow.unpack-v1",
+      "arguments": {
+        "version": 1,
+        "inputs": ["${item.path}"],
+        "outputDirectory": "__UNPACK_DIRECTORY__",
+        "maxDepth": 1,
+        "nameEncoding": "gb18030",
+        "repeatPolicy": "create-new"
+      }
+    },
+    {
+      "id": "release",
+      "actionId": "myavalonia.plugin.fractal.art.workflow.release-artifact",
+      "arguments": { "artifact": "${render.result.artifact}" }
+    }
+  ]
+}

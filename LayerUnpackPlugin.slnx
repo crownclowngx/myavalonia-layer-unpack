@@ -7,5 +7,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj" />
     <Project Path="tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj" />
+    <Project Path="tests/LayerUnpackPlugin.WorkflowIntegration.Tests/LayerUnpackPlugin.WorkflowIntegration.Tests.csproj" />
   </Folder>
 </Solution>

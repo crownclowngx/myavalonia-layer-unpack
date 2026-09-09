@@ -63,3 +63,7 @@ Headless DLL 在引用解析后显式纳入 ManagedPluginAsset，两个引擎通
 ## R07 职责增量
 
 `ArchiveCapabilities` 独立维护读取／创建；`IArchiveCheckService` 编排检查，证据由解码适配器实际产生；`ArchiveWriter` 分派原 ZIP 与运行时 TAR，`VerifiedPackReadStream` 负责拉取式源验证。解压／浏览父页拥有临时检查子页，关闭排空，顶级 Document 数量与 ID 不变。详见[G0013 方案](refactoring/G0013/implementation.md)。
+
+## R08 Workflow 的独立生命周期
+
+Module 登记两个 scoped Handler；每次动作拥有自己的 Headless 会话，调用令牌贯穿实际工作，await using 等待清理。它不依赖 IDocumentLifetime，不继承 GUI 密码；关闭普通页面不会取消独立 Workflow。契约目录、输入结构校验和结果白名单投影分责，无私有容器互访、单例会话或隐藏后台队列。详情见[G0014 方案](refactoring/G0014/implementation.md)。

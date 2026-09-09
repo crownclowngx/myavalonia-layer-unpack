@@ -1,0 +1,748 @@
+{
+  "stage": "G0014",
+  "roadmap": "R08",
+  "date": "2026-09-09",
+  "scope": "两个无密码归档动作、Studio 业务结果适配、三 ALC 真实 Fractal 流程",
+  "configuration": "Debug",
+  "dotnetSdk": "10.0.302",
+  "os": "Microsoft Windows NT 10.0.26200.0",
+  "tests": [
+    {
+      "name": "headless",
+      "total": 379,
+      "passed": 379,
+      "failed": 0,
+      "skipped": 0,
+      "trxSha256": "563656c9518b7087ad35c6517236712289d3edf3c60ce9850b85bf817bdceb02"
+    },
+    {
+      "name": "plugin",
+      "total": 127,
+      "passed": 127,
+      "failed": 0,
+      "skipped": 0,
+      "trxSha256": "d90e76b7df3675ddd755f8ac776466107a7a39f6a2de003e5f9405df4ce059ed"
+    },
+    {
+      "name": "workflow-integration",
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "trxSha256": "b8e5a517f6ed7ecf290e67cf6b77655d3d795cbf19786082f5a95de634bc6067"
+    },
+    {
+      "name": "studio",
+      "total": 86,
+      "passed": 86,
+      "failed": 0,
+      "skipped": 0,
+      "trxSha256": "25d7f71536ed5d4a6b184899023c5e18c032298b7153703f5a5c8defe5261776"
+    }
+  ],
+  "totalPassed": 597.0,
+  "checks": [
+    {
+      "name": "locked-restore",
+      "exitCode": 0,
+      "seconds": 1.473649,
+      "command": "dotnet restore LayerUnpackPlugin.slnx --locked-mode --source https://api.nuget.org/v3/index.json --packages D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\artifacts\\nuget-official"
+    },
+    {
+      "name": "studio-locked-restore",
+      "exitCode": 0,
+      "seconds": 0.7497244,
+      "command": "dotnet restore D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\..\\myavalonia-workflow-studio\\tests\\WorkflowStudio.Tests\\WorkflowStudio.Tests.csproj --locked-mode --source https://api.nuget.org/v3/index.json --packages D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\artifacts\\nuget-official"
+    },
+    {
+      "name": "debug-build",
+      "exitCode": 0,
+      "seconds": 7.5997896,
+      "command": "dotnet build LayerUnpackPlugin.slnx -c Debug -warnaserror --no-restore"
+    },
+    {
+      "name": "debug-assets",
+      "exitCode": 0,
+      "seconds": 0.9292375,
+      "command": "dotnet msbuild src/LayerUnpackPlugin.Plugin/LayerUnpackPlugin.Plugin.csproj -t:ResolveReferences -p:Configuration=Debug -getItem:ManagedPluginAsset,ManagedPluginPrivatePackage,RuntimeCopyLocalItems"
+    },
+    {
+      "name": "headless-tests",
+      "exitCode": 0,
+      "seconds": 84.5613874,
+      "command": "dotnet test tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj -c Debug --no-build --logger trx;LogFileName=headless.trx --results-directory D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "plugin-tests",
+      "exitCode": 0,
+      "seconds": 30.3412744,
+      "command": "dotnet test tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj -c Debug --no-build --logger trx;LogFileName=plugin.trx --results-directory D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "workflow-integration-tests",
+      "exitCode": 0,
+      "seconds": 2.7034856,
+      "command": "dotnet test tests/LayerUnpackPlugin.WorkflowIntegration.Tests/LayerUnpackPlugin.WorkflowIntegration.Tests.csproj -c Debug --no-build --logger trx;LogFileName=workflow-integration.trx --results-directory D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "studio-debug-build",
+      "exitCode": 0,
+      "seconds": 1.7111226,
+      "command": "dotnet build D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\..\\myavalonia-workflow-studio\\tests\\WorkflowStudio.Tests\\WorkflowStudio.Tests.csproj -c Debug -warnaserror --no-restore"
+    },
+    {
+      "name": "studio-tests",
+      "exitCode": 0,
+      "seconds": 1.7548113,
+      "command": "dotnet test D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\..\\myavalonia-workflow-studio\\tests\\WorkflowStudio.Tests\\WorkflowStudio.Tests.csproj -c Debug --no-build --logger trx;LogFileName=studio.trx --results-directory D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "format-interop",
+      "exitCode": 0,
+      "seconds": 0.2547767,
+      "command": "./tools/verify-format-interop.ps1"
+    },
+    {
+      "name": "format",
+      "exitCode": 0,
+      "seconds": 11.4912005,
+      "command": "dotnet format LayerUnpackPlugin.slnx --verify-no-changes --no-restore"
+    },
+    {
+      "name": "docs",
+      "exitCode": 0,
+      "seconds": 0.8263901,
+      "command": "./tools/check-docs.ps1"
+    },
+    {
+      "name": "diff-check",
+      "exitCode": 0,
+      "seconds": 0.0910686,
+      "command": "git diff --check"
+    },
+    {
+      "name": "studio-format",
+      "exitCode": 0,
+      "seconds": 2.3861839,
+      "command": "dotnet format D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-workflow-studio\\tests\\WorkflowStudio.Tests\\WorkflowStudio.Tests.csproj --verify-no-changes --no-restore --include D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-workflow-studio\\src\\WorkflowStudio.Plugin\\Workflows\\WorkflowRunner.cs D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-workflow-studio\\src\\WorkflowStudio.Plugin\\Workflows\\ArchiveWorkflowOutcome.cs D:\\code\\local\\avalonia_dock_plug_test\\myavalonia-workflow-studio\\tests\\WorkflowStudio.Tests\\ArchiveWorkflowOutcomeTests.cs"
+    }
+  ],
+  "workflowSdk": {
+    "source": "https://api.nuget.org/v3/index.json",
+    "contentHash": "L1JKn+MbFcs1VkE3QmhLlZhPTAA01PGIkl6mPB+5dPdkF8XL13Ud1AhiMhdCs9uyXdg1Q25a1jG+dSk/Wp+7uw==",
+    "version": "1.0.0"
+  },
+  "notRun": [
+    "AIFLOW",
+    "Windows CI",
+    "Release / 发布门禁",
+    "真实宿主原生授权窗口与退出",
+    "加密 Workflow 秘密通道"
+  ],
+  "sources": [
+    {
+      "path": "examples/workflow/fractal-archive.workflow.json",
+      "sha256": "1019b3b9925d940a8228025e0aa30e397a7eb6afd4a746c48ec8aa85d43b0808"
+    },
+    {
+      "path": "examples/workflow/sample.fractal-workflow.json",
+      "sha256": "b8da5d14b99709d945de3759d334a04abed82325fecd807ecab2be8164f6dbb3"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/ArchiveBrowseService.cs",
+      "sha256": "2d2bcabc30694ba95bd27dbf055d067d365eff70424420c9dc6d6d1eacd249c0"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/ArchiveBrowseSession.cs",
+      "sha256": "2617c85b823de48de6fc9efdd390be136df6ffad964cd9f1a2bf5119170cf417"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/ArchiveCatalog.cs",
+      "sha256": "b781e3635a1cf1050fda4ba6909fe5e7747657bdfa82fe6c30e88af37ff871e1"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/ArchiveCheckService.cs",
+      "sha256": "bd2266b4d91b5f2021fe871b1a648bfe2a5844103355c44feaada126ec87f8e2"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/CommittedPackPlanner.cs",
+      "sha256": "f9d6aed47ce8c439d4b09d748c0470815cf987890537dee17654ec4e37053088"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/IArchiveExtractor.cs",
+      "sha256": "bf86bbb38e60e988839f80c59e380b1bb560251679eef1e1d85672ead3394115"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/IArchiveWriter.cs",
+      "sha256": "d840b6d0cfd9f91ee6d3f922ff7227bfbcc7ae8b9bce0c89619ca64e21948f98"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/InputDiscovery.cs",
+      "sha256": "718838a80e656317086c5248913b7ca8c46c56d47d2133395fde0b62314c3378"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/OrganizationPlanner.cs",
+      "sha256": "f6d0d601a9705e2573cc16723ecf907dfcca5274e5b41931705040f0db9e2023"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/OrganizationService.cs",
+      "sha256": "be9746caeb8cb5f5e8e8eb162806c80a1efdfe555da4b05ac389876a7ae55541"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/PackBatchService.cs",
+      "sha256": "ee339c7504218b2e4a2dcfaaf169013fe1d374b181f84b689aab912a5620d3a4"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/PackBatchSession.cs",
+      "sha256": "51db2740709d752a04082e4e296672cc2d1b2a8f902183caeecb1a9da884d165"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/PackInputSelection.cs",
+      "sha256": "d10731e71fe5fa14edcdd7738927aed18ac91ae28fd93127bb5ef38736eb673d"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/PackPlanner.cs",
+      "sha256": "23d18ec4294a8cbd6c08949bcd9c63a7e2da2175b1eead225696c0d067e43f5e"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/PackService.cs",
+      "sha256": "2bbefb89d909aee219a02a03c1d289876446a1fb7498aa384920c6f7acf83b6e"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/RepackService.cs",
+      "sha256": "5ef654e8db65ceed6ec9797131cd6e9f9c4020fb499f854abe4cd8ac461a31db"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/RepackWriter.cs",
+      "sha256": "00df9f786f7f3e5ab75691c0209a273b77f289abdec86890cb998300b252e086"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Application/UnpackService.cs",
+      "sha256": "f8e7faf664a56722486d2abf53ce4589757177fea78fcc59a106c4fbcbd6d822"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Contracts/ArchiveCapabilities.cs",
+      "sha256": "9d9b6e672e23871d0fc9a674be1dc17f3307cede086d204a1d27f5500166092b"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Contracts/ArchiveCheckContracts.cs",
+      "sha256": "4cbda618a1c23293157b352e2469dac87ca024eeb2846445ad27d78d0e386bbd"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Contracts/BrowseContracts.cs",
+      "sha256": "6e18d3705d4b5570961b75eca14a4772b11e82458a659677a55866ab200362d5"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Contracts/OrganizationContracts.cs",
+      "sha256": "73fd3357169eea1d38775a93c3edde5bb3dfb0867783df586faff13e3b87be42"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Contracts/PackBatchContracts.cs",
+      "sha256": "2b641f96eaf20492d8fb21775dd430e9efb1613ee767608ea0681a32d16aa629"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Contracts/PackContracts.cs",
+      "sha256": "257e71d85be5a0d1525af9a5325a04b71db5085648c3fa59d1ab858dbebae36e"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Contracts/PackOptions.cs",
+      "sha256": "60809c949c7b76f0dd7a2dd9d78e253fa88bf217a24c6f0729b9b7d3b74e23db"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Contracts/RepackContracts.cs",
+      "sha256": "ff6559dcdffff43453e64efa067be39b115f785eba871f12c2917c8a59e24816"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Contracts/UnpackContracts.cs",
+      "sha256": "49f71c8ebcc04d4a407c4782cbd75ce3144cb1fc911872be72518f361d9baba0"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Domain/ExecutionBudget.cs",
+      "sha256": "758afe9f26879b03efc652dcd49cb432be1da3b60f6ba9af7b7ab58b8d64013e"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Domain/PasswordPool.cs",
+      "sha256": "5fedca16e6918043a7a8ed786f03241cf6e7db027fa786c590a0834eb38fbde9"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Domain/RepackBudget.cs",
+      "sha256": "1bc4ff724d7d757a0a04ae9db37dbeffb78f92502be62a7f373d13a6246cb5a2"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/AesZipArchiveWriter.cs",
+      "sha256": "fa81707b75c852dcb2bbf2d9845952f2531ed8f6dcbf7ae08aac242a342197af"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ArchiveEntryPolicy.cs",
+      "sha256": "dde1c2a50d1da9f9d498079b4f4c59fa0bb895ad514ddab08cd8648564c4381a"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ArchiveExtractor.cs",
+      "sha256": "afb079dc2f58c04caf05b304b6c532bce3cab0c0d648cf1920dab5f987e81e2e"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ArchiveProbe.cs",
+      "sha256": "de2fb820e2f2552b9de952fd4af4870e9904318f451daf0eb48298a457bfcdad"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ArchiveWriter.cs",
+      "sha256": "2ebb1286285973aec52ed74c1080b08b624b50a6d7ea623d2b1c864592f5fb31"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/BrowseReadStream.cs",
+      "sha256": "e981c262e71942af5dad6852f415c6e4e4ca2ed32f3aab0f9c03f41a92214306"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/CommittedManifest.cs",
+      "sha256": "9b7d0f0907c22997ebfb9c44deef0a65e9ff01a7c9883fc4f8b9145e5ee075e6"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/OrganizationCopier.cs",
+      "sha256": "4a73c962dfa7131eae4defc93391b4382ebe8e5a72017d97c35549660577f105"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/OrganizationFiles.cs",
+      "sha256": "205bb0b868237aef51b33889f418d5f2f03dee052e314cb284655f9b8d640af4"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/OutputTransaction.cs",
+      "sha256": "bffde120614405ab05865433e3ad41b8e4202d7f39c21ec01614aea2d718149e"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PackEntryCopier.cs",
+      "sha256": "583e54016ebeb3f171a75200b5dd29ae3061cb6798e0eb72d2a13e82fee423ee"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PackFileTransaction.cs",
+      "sha256": "7ee7d4fea15b892e59c9328d87bbdcd5d430c2a08b1ee9d42d0ef8d475de6e44"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PackOutputStream.cs",
+      "sha256": "809998dc4c83d27bb0c29ba4c7f2cb2d6934ef73d9f533281eed75b8e0124ac5"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PackPaths.cs",
+      "sha256": "5d7649a9c8c93f925dadc354b28a246dd41901c51659885849d7fc9d460add31"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PathPolicy.cs",
+      "sha256": "cb97c98cc731906d83886716d3a6b6fff4cc44c2ece23cfd3a92f52e311ef0dd"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/RepackVerifier.cs",
+      "sha256": "96c5d17e07d7a58e019772b9865e225fb102f399afbf1c64d806385ef21164c5"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/StreamCopy.cs",
+      "sha256": "932f7cca66d8a82b9bc7d4e9cf93f1b6bc2a387212f29dc4844641d143ecfb92"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/VerifiedPackReadStream.cs",
+      "sha256": "03de50569e3224e02119f2cca36b32d164527f6daca7eda07e7eb0dfb3fbba06"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ZipArchiveExtractor.cs",
+      "sha256": "39d357dcd506ab12d6c7221a757015c1c84e02fd0d8fb9289ec15275556d0b0e"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ZipArchiveWriter.cs",
+      "sha256": "7651af5ed3ad268ada3ed959cca90a1f5e895562f691aaf24de6c75d34e891a6"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ZipBrowseCatalog.cs",
+      "sha256": "c1dafa837d13375aaff54511f6ff6d411b7c90de0837fd0a1d33289a6341f8c2"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ZipDirectoryGuard.cs",
+      "sha256": "053efeae2a626ac87a75b719cd2cacbb27efbe1aa3365e4e737c2cdadb41f55a"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/LayerUnpackPlugin.Headless.csproj",
+      "sha256": "a161fee6191f020a6a2268a22d04b50065ece629349253d22198f457538e8adb"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Headless/packages.lock.json",
+      "sha256": "4ae0417d31a54d88b2d116e748bfea24dbfc50d5823a519ddfd5c05efba39b83"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Constants/PluginIds.cs",
+      "sha256": "cc6d4fbe384db2207ccfe4e844acaa6408b883d5cb3c31490605c95575a56b70"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseDocument.Check.cs",
+      "sha256": "30c6b96557cb33ac39e9fc29febe178f01e5ab01d0d751cec206d58abf690d83"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseDocument.cs",
+      "sha256": "6afb52005e9dedc5654e6e4932c528adb4b3571060b969f4513f66a5a05a0f08"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseDocument.Execution.cs",
+      "sha256": "0ffadd9263fc5784689c5870530719efea77fa216ac3de0c35cd2a200cf48f28"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseDocument.Navigation.cs",
+      "sha256": "2311c6de59f6545924d1a6167678c72fe8c1e131913158a4adfb7a7cbabf5079"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseView.axaml.cs",
+      "sha256": "e2ac5f4c0b88325328cc7d654f9af3981cd9b587a020981bca88749570515180"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/OwnedUnpackTask.cs",
+      "sha256": "1bfd85a0c6956c95816471fbe86896c20a641f9034390f1904e00fad0595c408"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Check/ArchiveCheckDocument.cs",
+      "sha256": "ad945bea1c9dd281807369fe9ec789e6779f09fa218b26befd4d04a0679c2cb5"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Check/ArchiveCheckView.axaml.cs",
+      "sha256": "69889e7d6eaa6f51e187e51dcd13d3509111b953913aedc9282abf4d3d247b3c"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Organize/OrganizationDocument.cs",
+      "sha256": "b165b6629d0b3358ce1a3eefdadcf2625e9e2145b19ef7f7281314eef9b9c0c2"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Organize/OrganizationDocument.Repack.cs",
+      "sha256": "7ac76a123c907e60b690b2dda508063343760b1d50d14899ddde27005b0048c1"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Organize/OrganizationView.axaml.cs",
+      "sha256": "407dbb8d6b3fed23e5f870d8c691851188c61e4b6328a13a59441844b0213399"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackDocument.cs",
+      "sha256": "1a2d1e3736fec41a59bc6dff6dd68f4ae8ff31e3b1347613d345ce6f98b2b4e3"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackDocument.Execution.cs",
+      "sha256": "2ffabe1cae88cfa869ccb899f97b4d34ffe09567efd0f97c268bceaa2eff23d9"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackDocument.Options.cs",
+      "sha256": "757a85f70b73f6454c4b848d5995b4bd0f72b57b3fcee5abeeeea156b8ee4d90"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackView.axaml.cs",
+      "sha256": "32e8156abae8cf1cbc03f7e6fbb611f526f1ed9736d18d34a96c734c75cb47a7"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Repack/RepackDocument.cs",
+      "sha256": "ea56c533a18c47318376d0af389ab2af991fa44f079a01758c6dfcea4b35529a"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Repack/RepackView.axaml.cs",
+      "sha256": "2107f7585c8280c8e8b1319d47b0a91309ceb2f6968d1122a76597d62fcc37ce"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/OutputDirectorySuggestion.cs",
+      "sha256": "b7b9c876738421d08f3b32e27a3cb121e34d85e5f43e53823b10d6d2824ecae9"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.Check.cs",
+      "sha256": "6a272686087db46e6b454e21b76a9c1f2722f9b65a023bc9673c147bf6a30296"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.cs",
+      "sha256": "207bd5a0282dabee0e533f505ff68e40fe5a1a1e45174aa82083d3e092965e68"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.Organization.cs",
+      "sha256": "680e8901bb58bf73b9d4faae1e6893fe69c8aabe74b039dbd75b7b0017b0bbbc"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.Presentation.cs",
+      "sha256": "f6ccc1331115b837a5e70a53efbaeea3d3b6a8aa7783750615b0b3131b9e0542"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.Repack.cs",
+      "sha256": "b1b65a47a593db5ab08231d576bd28e19110e861c0d2fc3f7d863e97059617ef"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackView.axaml.cs",
+      "sha256": "bdbb2636266c5fa6c8424a36212ece20250001732fd16222770813a9f5e2fe23"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/LayerUnpackPlugin.Plugin.csproj",
+      "sha256": "43d01b5cbc02f44f59fe4c6f79fbe5d63d5de46f836fa4b64f1f6eba775ee522"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/packages.lock.json",
+      "sha256": "94dc2294f690135381b963cc2c65ee6ff73584e1fee0b0c54934bb71f91a6ee2"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Plugin/LayerUnpackPluginModule.cs",
+      "sha256": "44c85cf16a1cd07eeba66af5869866c1d62f51bf3c579b523d3a01a13b5331b8"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Plugin/LayerUnpackPluginServices.cs",
+      "sha256": "a9b8288f4cecf65f9c86a81aad9db49ad39de32d90a93b6cd4c34a1d163b765e"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Workflow/ArchiveWorkflowActions.cs",
+      "sha256": "437929ee6bba3dc093d0c096383589d31fa4a918c0f29ff9f57e91bb06abf41a"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Workflow/ArchiveWorkflowInput.cs",
+      "sha256": "230aa085046e8239f2c5464884ade462b750816a4e22d0ca0f9dfe10157c1c71"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Workflow/ArchiveWorkflowResult.cs",
+      "sha256": "6307f9c4179abfe2004f57b5c0958dbdfde75f372ef9e54a3c449527e4d9bf7b"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Workflow/CreateArchiveWorkflowAction.cs",
+      "sha256": "766abc847256716b44517c163eece643aec109b2454a66383e0c2c6c03ddbbf0"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Plugin/Workflow/UnpackWorkflowAction.cs",
+      "sha256": "14c9cc7c13b399fbe72418e1ae0caddd306ba56b024173829e60d0187acb9227"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Standalone/App.axaml.cs",
+      "sha256": "83f7132423c835fba2d49af1626a47f5b05923ec482e743cb8aa74f269aeec38"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Standalone/LayerUnpackPlugin.Standalone.csproj",
+      "sha256": "6cf642d31cc2b369caaad485238ad9c8f8c7718e3d847181f96a5455e6d92a4c"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Standalone/MainWindow.axaml.cs",
+      "sha256": "c1d7dccfb5c373930a2a0bab6588f3fc5dace655853bb8ee2ad79426b9f52e6b"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Standalone/packages.lock.json",
+      "sha256": "1f1f50e2415a9ef73c1a733645163beec03c9c4958166b4a00bd53b654fcb194"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Standalone/PreviewDocumentLifetime.cs",
+      "sha256": "aec12bfb1477e355ffa936dfc42ffd074beb723da033c4c0006dc19de7b059bd"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Standalone/Program.cs",
+      "sha256": "9d191416687190667f8909e4eee0603c4e444cffe0d981b8b80265e77bd2b278"
+    },
+    {
+      "path": "src/LayerUnpackPlugin.Standalone/StandaloneServices.cs",
+      "sha256": "79a7910ae6bf6a544e18c5ae0684ea0230919fb9c5fb1b46f4ecac94e813e33b"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/ArchiveCheckSafetyTests.cs",
+      "sha256": "73069f2cb43658ae277f6da75d997ca82e9bbead9f82eeebe3134e6e1ea1ca62"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/ArchiveCheckTests.cs",
+      "sha256": "c7af81dfb400a93ec30e8244ae834bffaf605416a307ca946701c3d0e7ead324"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/BrowseEdgeTests.cs",
+      "sha256": "49a8c041b8fcdb5825266ac2262a158793e327e1e3202014e8c0ff875305b36f"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/BrowseTests.cs",
+      "sha256": "eaca1d36691717472042214525642d3eb72833da7260df61a6a85b64c3d25184"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/ConversionTests.cs",
+      "sha256": "8072def58bbc55dff533c8cec66a6786729f89c367bb73cb5c05c53e10ae1e19"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/DelegatingExtractor.cs",
+      "sha256": "f3725a9e17c40acaaee0f49e6dea06b1ad3dccdea5a461db66455927fe2dde70"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/DiscoveryAndEdgeTests.cs",
+      "sha256": "389350b2dc112d43f847853b0c7bad606619a53b248aa008eedcd9f8079aed6b"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/DomainTests.cs",
+      "sha256": "20db7a599499d71f57a87fe1a6124c9f9ace6e2083d5385f510d1d677706b2aa"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/FormatCreationTests.cs",
+      "sha256": "f22ef52c34dafe41c3670e82fdf558ae2f5481d2f799875527fe96694d9d07e6"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/FormatTests.cs",
+      "sha256": "331b690d4801f2f0bd8e0602609f9238eb09e2d75d5d457a7e3ac1e1deee07bf"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/GeneratedFormatTests.cs",
+      "sha256": "b9932ef52a3a90c7661a30f6ff2d3e19e277104aac4a34627bbcd99780f2ca96"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/IntegrityTests.cs",
+      "sha256": "572c565be3c09af8d8ab4ed75d976a98651ea8080c52f707f2c5c43d84f100f4"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj",
+      "sha256": "e571a3f02ff32a4b6251ef141a9a41f181f77d16490f437002bd2f2a4c2d67d5"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/LifecycleTests.cs",
+      "sha256": "b8f1e0c992fb7b663871cd40acdd5980c5b10db4f011a9bca61c20972e8e8b95"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/OrganizationPerformanceTests.cs",
+      "sha256": "1c7caa5b5a73ff419169d5f6be9efd624f7f869f1137823c1653f07f5c9244c4"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/OrganizationSafetyTests.cs",
+      "sha256": "819ad901369b4e2cfa604117c02c34e30a1be391a3ac640b29e0c8db28b93762"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/OrganizationTests.cs",
+      "sha256": "c24ae6d55ff1eb3ec7dc4cdee6ac0f7f6c00279219f5eb21c546108053abae02"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/packages.lock.json",
+      "sha256": "4c039000a0ed140a5e7c1414bc3859ac188618bf5c57af9c32830b566e2d32b1"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/PackBatchTests.cs",
+      "sha256": "197b22edeb97aa351d66d6d171b0f3610105b56eeaa794def4f06ebab923337a"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/PackEncryptionTests.cs",
+      "sha256": "d7e4079b5acecfdb4f80a6152d2422d61da925bc4ef375340f0f832bcd96921a"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/PackTests.cs",
+      "sha256": "be55d580e56d2416cee3921aaffd5401507dc6a040150be26cd2726801a12036"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/PerformanceTests.cs",
+      "sha256": "aa460cdaa6b99a36f253488dfe4923ff1f9f9cb6ef8dc9345978fc656232e236"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/RecursiveTests.cs",
+      "sha256": "f3ed6449b7bd77fc12d81281db3255a1772f66ebb6f7fc7ae14041fc834f1288"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/RepackPerformanceTests.cs",
+      "sha256": "73c7325e35a99c640d991fe68c7a2416e28f40cd76142a80b355fccc6db6b0d9"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/RepackSafetyTests.cs",
+      "sha256": "c3c174538d950e7cfe218e0406868896fded1c30042e521436cd3931fd99e238"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/ResultRepackTests.cs",
+      "sha256": "a8744727da3a2c0e38ef881b64ce628a39d6609969a3e7a00b186a7abb693796"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/SafetyTests.cs",
+      "sha256": "8a82cb1589fbf549ef36728462b3c140cb0d66cb5e8cb04b8f747d1363b046f6"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/SevenZipCandidateTests.cs",
+      "sha256": "a19a50a5f9ffb5c15d46433bdfa7e368f2a66f3f0bc9600f7253ddb2b90d8a95"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Headless.Tests/TestWorkspace.cs",
+      "sha256": "d93db48ac1a5c5a5ad8982898c99c5231283b7a4dffa527c6d22997a8c891365"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/ArchiveCheckDocumentTests.cs",
+      "sha256": "68e6eb9cf10c33805fcd8a8e2fd2beb2ada4a21cd40809652d4cd02cb05f8f4e"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/BrowseDocumentTests.cs",
+      "sha256": "2cad7322e009220967b9c8037d8ddf30479a4c96d7a9bddd36a62b3616b8293e"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/CompositionTests.cs",
+      "sha256": "683c88f6b80659b2cd5a713d3dced44f2e9b8187423ad022f5af55c2b2f391c5"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/DocumentTests.cs",
+      "sha256": "46b44a506065dc83c54c7ad77dd69fb0ddd76327b71064d0ae3653ebbd2088b1"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/ExperienceTests.cs",
+      "sha256": "7ed664826bc056e215b40cbb74bfd5e4fd8bb51acf6772304ff28ae51120c6ff"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj",
+      "sha256": "96aa58f4cd15449634654966155b4d902ad1fb87ee622785ff7cb1999f184073"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/OrganizationDocumentTests.cs",
+      "sha256": "2c0895a7bd9da34bfa95cddc0a2ff25bf4f3d15d48ece3689d15c68e7d8876e2"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/packages.lock.json",
+      "sha256": "563dd45ba7cad34779c51976d4e478c67ae44472324055ea6df133adb0a80985"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/PackBatchDocumentTests.cs",
+      "sha256": "041f83b29d6bd5536225dc462c24585c640448a2c9c5c466574607c360f2311a"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/PackDocumentTests.cs",
+      "sha256": "86500bc906b9a04cc3b7481757d4ff99e77742530c7a7d9d45226162c76de32b"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/RepackDocumentTests.cs",
+      "sha256": "92fd8c275832826d4b9744ce83527fd85422718198432ff4c304d3bf99d116c4"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/TestApp.cs",
+      "sha256": "1a5c0d5a318ecd63c26d1101c9a942db77c2b01c92bf5c815851efd0d61da828"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/ViewTests.cs",
+      "sha256": "d9b41c59de42b623454f86bb8d91a826d2188a6e02bbf22772fbf28226f3c2e3"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/WindowLifecycleTests.cs",
+      "sha256": "c3f921cae8290a20dc08f1a3a8d5be94ec6d605eef828affcd5d503300307e46"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.Tests/WorkflowActionTests.cs",
+      "sha256": "840c8eaa1b81f3b1a6757d421b0ef2c8f7083b0b2c738bdc55bccc8d4be6e1b7"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.WorkflowIntegration.Tests/LayerUnpackPlugin.WorkflowIntegration.Tests.csproj",
+      "sha256": "4f71fd2fcdb26fafd5b951646a6f7649ff3c17f762741f0106f5f3557b67c1f0"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.WorkflowIntegration.Tests/packages.lock.json",
+      "sha256": "37055215f1f6bc44e2547c2a171474a79021dc444219072f497db1c00048a666"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.WorkflowIntegration.Tests/WorkflowIntegrationHarness.cs",
+      "sha256": "5ffaa6e3a69e43ac30c47cda2d20760a3108c591de9fb32ddb7e1be6e65376b4"
+    },
+    {
+      "path": "tests/LayerUnpackPlugin.WorkflowIntegration.Tests/WorkflowIntegrationTests.cs",
+      "sha256": "3b1065adf53904b98da8bd4e718e6042e1184b14d27bcf5ac1268e1b96dcea55"
+    },
+    {
+      "path": "tools/check-docs.ps1",
+      "sha256": "638f9aca8950685d134a445d2c514643786f8890c56559c7492c5341264e3170"
+    },
+    {
+      "path": "tools/verify-format-interop.ps1",
+      "sha256": "dfbaf8ac700826219c04b8b89a9a4bf19cd640c58b78babc91a1235749b57710"
+    },
+    {
+      "path": "tools/verify-local.ps1",
+      "sha256": "48fa009137c530983a3f2b89ebf75c744c42f6cfc62b3d6d061f40126d130b99"
+    },
+    {
+      "path": "../myavalonia-workflow-studio/src/WorkflowStudio.Plugin/Workflows/WorkflowRunner.cs",
+      "sha256": "71076ef3815ffcc15f35895c881cc4efd4c1c918ad5d396ed44186ed7069c953"
+    },
+    {
+      "path": "../myavalonia-workflow-studio/src/WorkflowStudio.Plugin/Workflows/ArchiveWorkflowOutcome.cs",
+      "sha256": "b88de5b8e72c29d796daf6a64b86b081f51e974e2c7191fe4499e622426e0f5b"
+    },
+    {
+      "path": "../myavalonia-workflow-studio/tests/WorkflowStudio.Tests/ArchiveWorkflowOutcomeTests.cs",
+      "sha256": "2c616d465ca1f06f8e7ff768166007748c77f29cbe34af4c3310f3a1c6bcd7b6"
+    }
+  ]
+}

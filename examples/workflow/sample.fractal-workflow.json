@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "artworkSchemaVersion": 1,
+  "artwork": {
+    "formatVersion": 1,
+    "seed": 42,
+    "canvas": { "width": 64, "height": 64, "background": "#010203FF" },
+    "julia": { "centerX": -0.12, "centerY": 0.34, "scale": 1.5, "constantReal": -0.8, "constantImaginary": 0.156, "maxIterations": 64 },
+    "gradient": { "start": "#000000FF", "end": "#FFFFFFFF", "interior": "#010101FF" },
+    "presentation": { "selectedSection": "生成", "highQualityPreview": false }
+  }
+}

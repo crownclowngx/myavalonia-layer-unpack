@@ -35,6 +35,15 @@
           "Semi.Avalonia": "[12.1.0]"
         }
       },
+      "MyAvaloniaManagement.PluginSdk.Workflow": {
+        "type": "Direct",
+        "requested": "[1.0.0, 1.0.0]",
+        "resolved": "1.0.0",
+        "contentHash": "L1JKn+MbFcs1VkE3QmhLlZhPTAA01PGIkl6mPB+5dPdkF8XL13Ud1AhiMhdCs9uyXdg1Q25a1jG+dSk/Wp+7uw==",
+        "dependencies": {
+          "MyAvaloniaManagement.PluginSdk": "3.2.0"
+        }
+      },
       "Avalonia": {
         "type": "Transitive",
         "resolved": "12.1.0",

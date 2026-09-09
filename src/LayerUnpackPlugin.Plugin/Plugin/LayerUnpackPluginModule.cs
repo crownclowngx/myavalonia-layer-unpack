@@ -2,6 +2,7 @@ using LayerUnpackPlugin.Constants;
 using LayerUnpackPlugin.Features.Unpack;
 using LayerUnpackPlugin.Features.Pack;
 using LayerUnpackPlugin.Features.Browse;
+using LayerUnpackPlugin.Workflow;
 using MyAvaloniaManagement.PluginSdk.UI;
 
 namespace LayerUnpackPlugin.Plugin;
@@ -13,6 +14,8 @@ public sealed class LayerUnpackPluginModule : IPluginModule
     {
         ArgumentNullException.ThrowIfNull(registration);
         registration.Services.AddLayerUnpackPluginServices();
+        registration.AddWorkflowAction<UnpackWorkflowAction>(ArchiveWorkflowActions.Unpack);
+        registration.AddWorkflowAction<CreateArchiveWorkflowAction>(ArchiveWorkflowActions.Create);
         registration.AddDocument<UnpackDocument, UnpackView>(new DocumentDescriptor(
             PluginIds.UnpackDocument, "解压任务", "批量递归解压与本批次密码共享", "文件工具"));
         registration.AddDocument<PackDocument, PackView>(new DocumentDescriptor(

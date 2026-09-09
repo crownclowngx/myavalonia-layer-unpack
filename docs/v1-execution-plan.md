@@ -10,7 +10,7 @@
 >
 > 历史 V1 状态：108 个 Headless 测试、13 个 Plugin/UI 测试及 G0006 本地门禁通过。R06 历史增量见[G0012 结果](refactoring/G0012/result.md)，当前 R07 验证见[G0013 结果](refactoring/G0013/result.md)。
 >
-> 当前入口：先读 [G0013 结果](refactoring/G0013/result.md)；下文保留 V1 历史清单，新增工作项见本文 R07 附录。发布时恢复发布门禁。
+> 当前入口：先读 [G0014 结果](refactoring/G0014/result.md)；下文保留 V1 历史清单，新增工作项见本文 R08 附录。发布时恢复发布门禁。
 
 本计划将[产品基线](product-shape-and-implementation-plan.md)转化为可执行工作项。
 文档方式参考 `myavalonia-fractal-art`：产品目标、阶段计划、实施方案和实际结果分开维护；
@@ -444,3 +444,16 @@ Standalone 用 `dotnet run --project src/LayerUnpackPlugin.Standalone` 启动并
 - [ ] 原生/DPI/Host 及发布检查：本轮用户明确不运行发布门禁。
 
 本地验收、实际命令与数量见[G0013 结果](refactoring/G0013/result.md)，专用文档入口见[阶段档案](refactoring/README.md)。
+
+## R08 / G0014 实施附录
+
+- [x] 核实公开 SDK、Studio、秘密、取消和 Fractal 真实上游接口，选定无密码最小范围。
+- [x] 注册 unpack-v1/create-v1 两个 Provider；Headless 用例、命名和事务复用，零 Gateway。
+- [x] 版本化 Schema、结构化部分失败、成功清单、来源关系和显式 create-new 政策。
+- [x] 三 ALC 真实 Fractal → 创建 → 解压 → Release；Studio 最终业务摘要不误报整批成功。
+- [x] 单元、并发、取消、秘密隔离、真实格式及协议专项接入本地门禁。
+- [x] G0014 计划、方案、结果、契约、使用与验收文档同步。
+- [ ] 加密秘密通道、更多候选动作、通用补偿／幂等机制未选入本期。
+- [ ] 真实宿主原生授权／退出与发布另行验收；本轮不执行 Windows CI 或发布门禁。
+
+实际最终命令、数量及证据见[G0014 结果](refactoring/G0014/result.md)，历史 V1 与 G0013 检查不重写。
