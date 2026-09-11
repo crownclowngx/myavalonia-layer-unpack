@@ -1,5 +1,7 @@
 # 开发与使用快速开始
 
+- [V6.1 图标同步升级](plan-history/v6.1-plugin-icons.md)：入口映射、依赖边界和验证结果。
+
 R08 工作流入口使用现有 Workflow Studio。两个无密码动作、版本化参数与成功结果引用见[Workflow 动作](workflow-actions.md)；真实 Fractal 样例和清理责任见[G0014 流程](refactoring/G0014/integration-example.md)。普通页面不增加工作流设置。
 
 ## 开始一个解压批次
@@ -40,7 +42,7 @@ R08 工作流入口使用现有 Workflow Studio。两个无密码动作、版本
 
 ## 本地开发环境
 
-依赖：.NET SDK 10、bsdtar/libarchive（本机由系统 tar 提供），以及相邻目录的 `myavalonia-fractal-art` 和本轮更新的 `myavalonia-workflow-studio` 源码供真实集成测试构建。当前环境为 Windows x64、Avalonia 12.1.0、Plugin SDK 3.3.0、Workflow SDK 1.0.0。联合门禁使用 NuGet.org 和本仓库独立缓存；Python 仅在重新生成标准样本时需要。
+依赖：.NET SDK 10、bsdtar/libarchive（本机由系统 tar 提供），以及相邻目录的 `myavalonia-fractal-art` 和本轮更新的 `myavalonia-workflow-studio` 源码供真实集成测试构建。当前环境为 Windows x64、Avalonia 12.1.0、Plugin SDK 3.4.0、Workflow SDK 1.0.0。联合门禁使用 NuGet.org 和本仓库独立缓存；Python 仅在重新生成标准样本时需要。
 
 ```powershell
 ./tools/verify-local.ps1

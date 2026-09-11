@@ -1,5 +1,8 @@
 # 压缩包工作台 · Archive Workbench
 
+> V6.1 图标同步升级：插件 `1.0.1`，Core/UI SDK `3.4.0`，Build `1.1.3`。
+> 图标映射、兼容边界与验证命令见 [专用说明](docs/plan-history/v6.1-plugin-icons.md)。
+
 MyAvaloniaManagement 的压缩包工作台。提供独立 Headless 类库，以及“解压任务”“压缩任务”“浏览任务”三个临时 Document。解压支持指定深度和当前批次候选密码共享；压缩支持默认合成一个 ZIP，或按顶层来源分别打包，按需排除、调整压缩偏好和设置 AES-256 密码；浏览支持先查看 ZIP，再提取所需文件或目录。
 
 当前为 **R08 无密码 Workflow 动作本地候选**：新增解压、创建两个动作及真实 Fractal → 归档流程，Studio 如实显示业务失败。现有 R07 矩阵、检查与 TAR/TAR.GZ 保留，7z 创建未开放。最新边界见[G0014 结果](docs/refactoring/G0014/result.md)，历史 G0001–G0013 证据保持。本轮不使用 AIFLOW、Windows CI、Release、正式插件包、部署或发布门禁。

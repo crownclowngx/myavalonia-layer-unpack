@@ -1,3 +1,4 @@
+using MyAvaloniaManagement.Icons;
 using LayerUnpackPlugin.Constants;
 using LayerUnpackPlugin.Features.Unpack;
 using LayerUnpackPlugin.Features.Pack;
@@ -13,14 +14,18 @@ public sealed class LayerUnpackPluginModule : IPluginModule
     public void Configure(IPluginRegistration registration)
     {
         ArgumentNullException.ThrowIfNull(registration);
+
+        // 图形只在模块组合阶段声明；引用由当前注册上下文绑定所有者，业务入口不手写 plugin: 身份。
+        var archiveUnpackIcon = registration.AddIcon("archive-unpack", PluginIcons.ArchiveUnpack);
+        var archivePackIcon = registration.AddIcon("archive-pack", PluginIcons.ArchivePack);
         registration.Services.AddLayerUnpackPluginServices();
         registration.AddWorkflowAction<UnpackWorkflowAction>(ArchiveWorkflowActions.Unpack);
         registration.AddWorkflowAction<CreateArchiveWorkflowAction>(ArchiveWorkflowActions.Create);
         registration.AddDocument<UnpackDocument, UnpackView>(new DocumentDescriptor(
-            PluginIds.UnpackDocument, "解压任务", "批量递归解压与本批次密码共享", "文件工具"));
+            PluginIds.UnpackDocument, "解压任务", "批量递归解压与本批次密码共享", "文件工具", iconPath: archiveUnpackIcon));
         registration.AddDocument<PackDocument, PackView>(new DocumentDescriptor(
-            PluginIds.PackDocument, "压缩任务", "将文件和文件夹合成一个 ZIP", "文件工具"));
+            PluginIds.PackDocument, "压缩任务", "将文件和文件夹合成一个 ZIP", "文件工具", iconPath: archivePackIcon));
         registration.AddDocument<BrowseDocument, BrowseView>(new DocumentDescriptor(
-            PluginIds.BrowseDocument, "浏览任务", "查看 ZIP 目录、搜索并提取所选内容", "文件工具"));
+            PluginIds.BrowseDocument, "浏览任务", "查看 ZIP 目录、搜索并提取所选内容", "文件工具", iconPath: CommonIcons.Folder.Key));
     }
 }

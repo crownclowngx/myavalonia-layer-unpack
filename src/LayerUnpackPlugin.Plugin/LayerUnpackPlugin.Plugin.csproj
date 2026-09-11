@@ -4,10 +4,10 @@
     <ManagedPlugin>true</ManagedPlugin>
     <ManagedPluginId>myavalonia.plugin.layer.unpack</ManagedPluginId>
     <ManagedPluginDirectoryName>LayerUnpackPlugin</ManagedPluginDirectoryName>
-    <PluginVersion>1.0.0</PluginVersion>
+    <PluginVersion>1.0.1</PluginVersion>
     <ManagedPluginRuntimeIdentifier>win-x64</ManagedPluginRuntimeIdentifier>
     <ManagedPluginEntryType>LayerUnpackPlugin.Plugin.LayerUnpackPluginModule</ManagedPluginEntryType>
-    <ManagedPluginSdkMinInclusive>3.3.0</ManagedPluginSdkMinInclusive>
+    <ManagedPluginSdkMinInclusive>3.4.0</ManagedPluginSdkMinInclusive>
     <ManagedPluginSdkMaxExclusive>4.0.0</ManagedPluginSdkMaxExclusive>
   </PropertyGroup>
 
@@ -22,11 +22,14 @@
     <PackageReference Include="MyAvaloniaManagement.Plugin.Build" PrivateAssets="all" />
     <PackageReference Include="MyAvaloniaManagement.PluginSdk" />
     <PackageReference Include="MyAvaloniaManagement.PluginSdk.UI" />
+    <!-- 公共图形为普通私有资源，随插件 ZIP 部署，不进入 Host 共享程序集闭包。 -->
+    <PackageReference Include="MyAvaloniaManagement.Icons" />
+    <ManagedPluginPrivatePackage Include="MyAvaloniaManagement.Icons" />
     <PackageReference Include="MyAvaloniaManagement.PluginSdk.Workflow" />
   </ItemGroup>
 
   <!--
-    Build 1.1.2 只收集显式私有包和 ManagedPluginAsset，不会自动部署项目引用。
+    Build 1.1.3 只收集显式私有包和 ManagedPluginAsset，不会自动部署项目引用。
     等引用解析完成再从真实复制路径声明 Headless，避免硬编码 bin 路径、配置或框架。
     此处只建立资产归属；普通 Debug 构建不触发部署或发布。
   -->
