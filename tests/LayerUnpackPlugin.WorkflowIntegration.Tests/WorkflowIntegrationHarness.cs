@@ -34,9 +34,10 @@ internal sealed class WorkflowIntegrationHarness : IAsyncDisposable
     internal WorkflowIntegrationHarness()
     {
         var repository = FindRepository();
-        Register(Path.Combine(repository, "src/LayerUnpackPlugin.Plugin/bin/Debug/net10.0/LayerUnpackPlugin.Plugin.dll"), "LayerUnpackPlugin.Plugin.LayerUnpackPluginModule", "myavalonia.plugin.layer.unpack");
-        Register(Path.Combine(repository, "../myavalonia-fractal-art/src/FractalArtPlugin.Plugin/bin/Debug/net10.0/FractalArtPlugin.Plugin.dll"), "FractalArtPlugin.Plugin.FractalArtPluginModule", "myavalonia.plugin.fractal.art");
-        var studio = Register(Path.Combine(repository, "../myavalonia-workflow-studio/src/WorkflowStudio.Plugin/bin/Debug/net10.0/WorkflowStudio.Plugin.dll"), "WorkflowStudio.Plugin.WorkflowStudioModule", "myavalonia.plugin.workflow-studio");
+        var configuration = typeof(WorkflowIntegrationHarness).Assembly.GetCustomAttribute<AssemblyConfigurationAttribute>()!.Configuration;
+        Register(Path.Combine(repository, $"src/LayerUnpackPlugin.Plugin/bin/{configuration}/net10.0/LayerUnpackPlugin.Plugin.dll"), "LayerUnpackPlugin.Plugin.LayerUnpackPluginModule", "myavalonia.plugin.layer.unpack");
+        Register(Path.Combine(repository, $"../myavalonia-fractal-art/src/FractalArtPlugin.Plugin/bin/{configuration}/net10.0/FractalArtPlugin.Plugin.dll"), "FractalArtPlugin.Plugin.FractalArtPluginModule", "myavalonia.plugin.fractal.art");
+        var studio = Register(Path.Combine(repository, $"../myavalonia-workflow-studio/src/WorkflowStudio.Plugin/bin/{configuration}/net10.0/WorkflowStudio.Plugin.dll"), "WorkflowStudio.Plugin.WorkflowStudioModule", "myavalonia.plugin.workflow-studio");
         _studio = studio.Assembly;
         _studioScope = studio.Provider.CreateScope();
     }
@@ -45,7 +46,7 @@ internal sealed class WorkflowIntegrationHarness : IAsyncDisposable
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "LayerUnpackPlugin.slnx"))) directory = directory.Parent;
-        return directory?.FullName ?? throw new InvalidOperationException("未找到本地归档仓库，专项必须从本仓库的 Debug 目录运行。");
+        return directory?.FullName ?? throw new InvalidOperationException("未找到本地归档仓库，专项必须从本仓库的构建目录运行。");
     }
 
     private Registration Register(string path, string moduleName, string id)
