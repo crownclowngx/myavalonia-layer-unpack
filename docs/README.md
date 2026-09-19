@@ -136,3 +136,9 @@ var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken)
 普通压缩页可从默认 ZIP 改选 TAR/TAR.GZ，名称后缀随之更新。TAR 固定仅打包，TAR.GZ 可调三个压缩偏好，都不支持密码；格式切换清除密码和旧预览。7z 真实候选未通过验证，未开放。R06 转换与结果打包仍只输出 ZIP。
 
 Headless 使用 `ArchiveCheckService.CheckAsync`；创建使用 `PackOptions.Format`。完整示例、资源与秘密边界见[G0013 检查契约](refactoring/G0013/checking-contract.md)，支持范围见[矩阵](refactoring/G0013/format-support-matrix.md)。
+
+## 7z 分卷与层序调度规划
+
+当前 `.7z.001` 等文件没有联合读取支持；同一外层包会完整提交后再处理后代，但多分支仍是深度优先。针对“同一外层包解出同目录多卷”的场景，已归档[G0015 方案](refactoring/G0015/plan.md)，拟增加同目录归组和按层串行解压，状态为待实施。
+
+方案包括任意卷添加、整组去重、缺卷诊断、真实内容校验、重试及跨入口兼容。普通用户不增加分卷或调度配置；资源上限先保持，实际体量仍待确认。专项见[卷组契约](refactoring/G0015/split-volume-contract.md)、[调度设计](refactoring/G0015/layered-scheduling-design.md)与[验收计划](refactoring/G0015/acceptance-matrix.md)。

@@ -28,6 +28,8 @@ dotnet run --project src/LayerUnpackPlugin.Standalone -c Debug
 
 后续发展见[压缩包工作台路线图](docs/roadmap/README.md)：R01 对应 G0007，R02 对应 G0008，R03 对应 G0009，R04 对应 G0010，R05 对应 G0011，R06 对应 G0012，R07 的矩阵、检查与 TAR 创建对应 G0013；R08 最小无密码动作与流程对应 G0014，7z 创建和加密 Workflow 仍为后续目标。
 
+标准 `.7z.001` 分卷与“本层结束后再处理下一层”的改进已形成[G0015 详细方案](docs/refactoring/G0015/plan.md)，**待实施**。当前仍不联合读取分卷，递归仍为深度优先；该方案不表示已支持，也不包含 7z 创建。
+
 Plugin ID 保持 `myavalonia.plugin.layer.unpack`，解压 Document ID 保持 `myavalonia.plugin.layer.unpack.document.main`，压缩 Document ID 为 `myavalonia.plugin.layer.unpack.document.pack`，浏览 Document ID 为 `myavalonia.plugin.layer.unpack.document.browse`。Standalone 用独立 Scope 预览三类真实任务；正式插件包仅由 Plugin Build 生成，后续发布流程见[部署说明](docs/deployment-and-release.md)。
 
 解压或浏览页点击“检查压缩包…”：默认完整内容检查，密码本次输入；仅目录检查只支持 ZIP。结果明确列出实际校验和限制，结束后清理临时内容。压缩页可选择 TAR/TAR.GZ，默认 ZIP；新格式不支持密码，转换与结果打包仍输出 ZIP。详见[检查契约](docs/refactoring/G0013/checking-contract.md)与[按操作矩阵](docs/refactoring/G0013/format-support-matrix.md)。

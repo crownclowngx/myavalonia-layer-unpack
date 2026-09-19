@@ -1,6 +1,8 @@
 # 实施档案与文档治理
 
-日期：2026-09-09。当前为 R08 无密码 Workflow 本地候选：两个动作与真实 Fractal 流程对应 G0014，当前证据见[G0014 结果](G0014/result.md)。G0001–G0013 保留历史记录；7z 创建、加密 Workflow、原生与发布项仍待后续。
+日期：2026-09-19。当前已实施基线仍为 R08 无密码 Workflow 本地候选：两个动作与真实 Fractal 流程对应 G0014，当前证据见[G0014 结果](G0014/result.md)。G0001–G0013 保留历史记录；7z 创建、加密 Workflow、原生与发布项仍待后续。
+
+G0015 的标准 7z 分卷与按层串行解压已生成[详细方案](G0015/plan.md)，状态为待实施；本轮仅交付文档，不改变现有分卷支持和 DFS 调度事实。
 
 沿用 `myavalonia-fractal-art` 的“产品主文档 + G 编号阶段三件套 + 质量基线 + 专项证据”方式，不复制参考项目的功能、进度、测试数量或临时规则。本轮以用户明确规则为准：SOLID 优先、朴素模式、详细中文注释、单元测试与本地门禁齐全、同步文档；不使用 AIFLOW、Windows CI 或发布门禁。
 
@@ -35,6 +37,7 @@
 | G0012 / R06 | 格式转换与重新打包；已实施，本地 423 项测试与门禁通过，部分原生交互待验收 | [计划](G0012/plan.md) · [方案](G0012/implementation.md) · [结果](G0012/result.md) · [转换契约](G0012/conversion-contract.md) · [保留矩阵](G0012/preservation-matrix.md) · [交互](G0012/interaction-design.md) · [验收](G0012/acceptance-matrix.md) |
 | G0013 / R07 | 统一能力、按需检查与 TAR/TAR.GZ 创建；本地 477 项测试与门禁通过，7z 候选失败未开放 | [计划](G0013/plan.md) · [方案](G0013/implementation.md) · [结果](G0013/result.md) · [检查契约](G0013/checking-contract.md) · [格式矩阵](G0013/format-support-matrix.md) · [7z 评估](G0013/sevenzip-evaluation.md) · [交互](G0013/interaction-design.md) · [验收](G0013/acceptance-matrix.md) |
 | G0014 / R08 | 最小两个无密码动作及真实跨插件流程；本地验证见结果 | [计划](G0014/plan.md) · [方案](G0014/implementation.md) · [结果](G0014/result.md) · [契约](G0014/workflow-contract.md) · [真实流程](G0014/integration-example.md) · [验收](G0014/acceptance-matrix.md) |
+| G0015 / R07 后续 | 标准 7z 分卷与按层串行解压；方案已归档，功能待实施 | [计划](G0015/plan.md) · [拟定方案](G0015/implementation.md) · [当前记录](G0015/result.md) · [卷组契约](G0015/split-volume-contract.md) · [调度专项](G0015/layered-scheduling-design.md) · [验收计划](G0015/acceptance-matrix.md) |
 
 ## 状态与维护规则
 
