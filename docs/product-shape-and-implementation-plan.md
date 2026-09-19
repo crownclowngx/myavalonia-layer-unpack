@@ -4,7 +4,7 @@
 >
 > 文档状态：V1 加 R01–R07 已选单元与 R08 无密码动作本地候选；当前验证见 G0014，人工与发布范围分别记录
 >
-> 后续方案：G0015 标准 7z 分卷与按层串行解压已归档、待实施，见[执行计划](refactoring/G0015/plan.md)。当前仍是单文件读取和 DFS，不能将计划当作已支持能力；本轮只更新文档。
+> 当前增量：G0015 已实现标准 7z 分卷联合读取与按层串行解压，见 [结果](refactoring/G0015/result.md) 和 [当前矩阵](refactoring/G0015/format-support-matrix.md)。下文首版描述作为历史基线保留。
 >
 > 项目名称：`myavalonia-layer-unpack`
 >

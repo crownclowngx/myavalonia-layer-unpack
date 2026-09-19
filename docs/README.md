@@ -49,7 +49,7 @@ R08 工作流入口使用现有 Workflow Studio。两个无密码动作、版本
 dotnet run --project src/LayerUnpackPlugin.Standalone -c Debug
 ```
 
-统一脚本执行 locked restore、Debug 零警告构建、两个测试项目、libarchive 独立互操作、格式及 Markdown 路径检查；测试必须非零且全部通过，不允许跳过。日志和 TRX 位于 `artifacts/local-verification/`，渲染图位于 `artifacts/ui/`，性能原始数据位于 `artifacts/performance/`。
+统一脚本执行 locked restore、Debug 零警告构建、Headless／Plugin／Workflow 集成／相邻 Studio 四组测试、libarchive 独立互操作、格式及 Markdown 路径检查；测试必须非零且全部通过，不允许跳过。日志和 TRX 位于 `artifacts/local-verification/`，渲染图位于 `artifacts/ui/`，性能原始数据位于 `artifacts/performance/`。
 
 这些是本地开发检查。Release、正式 ZIP、安装部署、真实 Host 加载与发布门禁本轮均未执行，也没有新增 CI。
 
@@ -99,13 +99,13 @@ var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken)
 | `LayerUnpackPlugin.Headless.Tests` | 无 UI 的真实格式、递归、错误、预算与性能测试 |
 | `LayerUnpackPlugin.Tests` | 注册、Scope、Document、键盘/绑定/渲染与窗口关闭测试 |
 
-后续阅读：[产品形态](product-shape-and-implementation-plan.md)、[V1 工作项](v1-execution-plan.md)、[文档治理](refactoring/README.md)、[质量基线](refactoring/quality-baseline.md)、[工程职责](project-and-window-responsibilities.md)、[格式矩阵](refactoring/G0003/format-support-matrix.md)、[验收矩阵](refactoring/G0006/acceptance-matrix.md)。
+后续阅读：[产品形态](product-shape-and-implementation-plan.md)、[V1 工作项](v1-execution-plan.md)、[文档治理](refactoring/README.md)、[质量基线](refactoring/quality-baseline.md)、[工程职责](project-and-window-responsibilities.md)、[当前格式矩阵](refactoring/G0015/format-support-matrix.md)、[验收矩阵](refactoring/G0006/acceptance-matrix.md)。
 
-没有自动删除源文件、覆盖已有目录、分卷拼接、压缩修复、密码破解、无限深度或历史恢复。更详细的范围和可信度见格式矩阵与[发布说明](release-notes-v1.md)。
+没有自动删除源文件、覆盖已有目录、通用或跨目录分卷拼接、压缩修复、密码破解、无限深度或历史恢复。更详细的范围和可信度见格式矩阵与[发布说明](release-notes-v1.md)。
 
 ## 后续产品阶段规划
 
-[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01–R06 已实施，当前本地验证和遗留见[G0014 结果](refactoring/G0014/result.md)。R07 的能力矩阵、检查及 TAR/TAR.GZ 创建见[G0013](refactoring/G0013/result.md)；R08 的两个无密码动作与真实流程见[G0014](refactoring/G0014/result.md)，7z 创建与加密 Workflow 仍待后续。
+[压缩包工作台路线图](roadmap/README.md)规划 R01–R08。R01–R06 已实施，当前本地验证和遗留见 [G0015 结果](refactoring/G0015/result.md)。R07 的能力矩阵、检查及 TAR/TAR.GZ 创建见[G0013](refactoring/G0013/result.md)；R08 的两个无密码动作与真实流程见[G0014](refactoring/G0014/result.md)，7z 创建与加密 Workflow 仍待后续。
 
 生成下一阶段执行计划前，读取[共同产品原则](roadmap/product-principles.md)、所选阶段文档和[执行计划生成模板](roadmap/stage-execution-plan-template.md)。R01 映射 G0007、R02 映射 G0008、R03 映射 G0009、R04 映射 G0010、R05 映射 G0011、R06 映射 G0012，R07 首批单元映射 G0013，R08 无密码最小范围映射 G0014；后续继续验证 7z 并复核各阶段原生交互遗留。
 
@@ -137,8 +137,10 @@ var packed = await pack.ExecuteAsync(plan, cancellationToken: cancellationToken)
 
 Headless 使用 `ArchiveCheckService.CheckAsync`；创建使用 `PackOptions.Format`。完整示例、资源与秘密边界见[G0013 检查契约](refactoring/G0013/checking-contract.md)，支持范围见[矩阵](refactoring/G0013/format-support-matrix.md)。
 
-## 7z 分卷与层序调度规划
+## 标准 7z 分卷与按层解压
 
-当前 `.7z.001` 等文件没有联合读取支持；同一外层包会完整提交后再处理后代，但多分支仍是深度优先。针对“同一外层包解出同目录多卷”的场景，已归档[G0015 方案](refactoring/G0015/plan.md)，拟增加同目录归组和按层串行解压，状态为待实施。
+标准同目录 `.7z.001`、`.7z.002` 等卷已支持联合读取；任意卷添加和扫描都只形成一个逻辑包。本层所有节点结束后，再从成功提交清单发现下一层。默认只解一层，处理“外层包 → 同目录 7z 多卷 → 文件”时开启两层。
 
-方案包括任意卷添加、整组去重、缺卷诊断、真实内容校验、重试及跨入口兼容。普通用户不增加分卷或调度配置；资源上限先保持，实际体量仍待确认。专项见[卷组契约](refactoring/G0015/split-volume-contract.md)、[调度设计](refactoring/G0015/layered-scheduling-design.md)与[验收计划](refactoring/G0015/acceptance-matrix.md)。
+输入和结果只显示一行组名与卷数，详情按需展开。缺卷补齐后选择“重新识别此组…”，在独立新任务中确认输出和剩余层数后开始；原结果保留，不自动重解成功外层，不复制密码。只有来源未变化的补密才重试旧节点。
+
+支持边界见 [当前格式矩阵](refactoring/G0015/format-support-matrix.md)，设计与实现见 [G0015 计划](refactoring/G0015/plan.md)、[卷组契约](refactoring/G0015/split-volume-contract.md)、[调度专项](refactoring/G0015/layered-scheduling-design.md)，最终本地验证和未测范围见 [结果](refactoring/G0015/result.md)。

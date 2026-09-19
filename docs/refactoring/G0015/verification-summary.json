@@ -1,0 +1,1992 @@
+{
+  "stage": "G0015",
+  "date": "2026-09-19T02:03:59.939298+00:00",
+  "scope": "标准 7z 分卷、会话按层串行、整组安全与独立重新识别；本地开发验收",
+  "configuration": "Debug",
+  "dotnetSdk": "10.0.302",
+  "os": "Windows-11-10.0.26200-SP0",
+  "tests": [
+    {
+      "name": "headless",
+      "total": 428,
+      "passed": 428,
+      "failed": 0,
+      "skipped": 0,
+      "trxSha256": "30156856cbf2360169697f9f03d82002b79e3085b87deee6053fccf379366d85"
+    },
+    {
+      "name": "plugin",
+      "total": 138,
+      "passed": 138,
+      "failed": 0,
+      "skipped": 0,
+      "trxSha256": "8240b486e2f6fff67a82b626b4cd3a87be7d3f1e593229c20c0feac5a66fb37f"
+    },
+    {
+      "name": "workflow-integration",
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "trxSha256": "6b5333e3a14a2cbe1e2ceaff04c74d3c3fd6534db8713e18c8d14b0dc7622ab9"
+    },
+    {
+      "name": "studio",
+      "total": 88,
+      "passed": 88,
+      "failed": 0,
+      "skipped": 0,
+      "trxSha256": "0ebc5e5d3edae27741fb3cfa2b30b54cbc0d75106d809e10a4165f65b33f9c2e"
+    }
+  ],
+  "totalPassed": 659,
+  "checks": [
+    {
+      "name": "locked-restore",
+      "exitCode": 0,
+      "seconds": 0.7808904,
+      "command": "dotnet restore LayerUnpackPlugin.slnx --locked-mode --source https://api.nuget.org/v3/index.json --packages D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\artifacts\\nuget-official"
+    },
+    {
+      "name": "studio-locked-restore",
+      "exitCode": 0,
+      "seconds": 0.6827353,
+      "command": "dotnet restore D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\..\\myavalonia-workflow-studio\\tests\\WorkflowStudio.Tests\\WorkflowStudio.Tests.csproj --locked-mode --source https://api.nuget.org/v3/index.json --packages D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\artifacts\\nuget-official"
+    },
+    {
+      "name": "debug-build",
+      "exitCode": 0,
+      "seconds": 4.2058777,
+      "command": "dotnet build LayerUnpackPlugin.slnx -c Debug -warnaserror --no-restore"
+    },
+    {
+      "name": "debug-assets",
+      "exitCode": 0,
+      "seconds": 0.7301238,
+      "command": "dotnet msbuild src/LayerUnpackPlugin.Plugin/LayerUnpackPlugin.Plugin.csproj -t:ResolveReferences -p:Configuration=Debug -getItem:ManagedPluginAsset,ManagedPluginPrivatePackage,RuntimeCopyLocalItems"
+    },
+    {
+      "name": "headless-tests",
+      "exitCode": 0,
+      "seconds": 37.6014992,
+      "command": "dotnet test tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj -c Debug --no-build --logger trx;LogFileName=headless.trx --results-directory D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "plugin-tests",
+      "exitCode": 0,
+      "seconds": 15.1875623,
+      "command": "dotnet test tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj -c Debug --no-build --logger trx;LogFileName=plugin.trx --results-directory D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "workflow-integration-tests",
+      "exitCode": 0,
+      "seconds": 2.4186727,
+      "command": "dotnet test tests/LayerUnpackPlugin.WorkflowIntegration.Tests/LayerUnpackPlugin.WorkflowIntegration.Tests.csproj -c Debug --no-build --logger trx;LogFileName=workflow-integration.trx --results-directory D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "studio-debug-build",
+      "exitCode": 0,
+      "seconds": 1.4278808,
+      "command": "dotnet build D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\..\\myavalonia-workflow-studio\\tests\\WorkflowStudio.Tests\\WorkflowStudio.Tests.csproj -c Debug -warnaserror --no-restore"
+    },
+    {
+      "name": "studio-tests",
+      "exitCode": 0,
+      "seconds": 1.3252239,
+      "command": "dotnet test D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\..\\myavalonia-workflow-studio\\tests\\WorkflowStudio.Tests\\WorkflowStudio.Tests.csproj -c Debug --no-build --logger trx;LogFileName=studio.trx --results-directory D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\artifacts\\local-verification"
+    },
+    {
+      "name": "format-interop",
+      "exitCode": 0,
+      "seconds": 0.149735,
+      "command": "./tools/verify-format-interop.ps1"
+    },
+    {
+      "name": "format",
+      "exitCode": 0,
+      "seconds": 10.2625812,
+      "command": "dotnet format LayerUnpackPlugin.slnx --verify-no-changes --no-restore"
+    },
+    {
+      "name": "studio-format",
+      "exitCode": 0,
+      "seconds": 2.1593325,
+      "command": "dotnet format D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-layer-unpack\\..\\myavalonia-workflow-studio\\tests\\WorkflowStudio.Tests\\WorkflowStudio.Tests.csproj --verify-no-changes --no-restore --include D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-workflow-studio\\src\\WorkflowStudio.Plugin\\Workflows\\WorkflowRunner.cs D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-workflow-studio\\src\\WorkflowStudio.Plugin\\Workflows\\ArchiveWorkflowOutcome.cs D:\\code\\bishe\\common\\avalonia_management_plug\\myavalonia-workflow-studio\\tests\\WorkflowStudio.Tests\\ArchiveWorkflowOutcomeTests.cs"
+    },
+    {
+      "name": "docs",
+      "exitCode": 0,
+      "seconds": 0.1340152,
+      "command": "./tools/check-docs.ps1"
+    },
+    {
+      "name": "diff-check",
+      "exitCode": 0,
+      "seconds": 0.0426657,
+      "command": "git -c core.autocrlf=input -c core.safecrlf=false diff --check"
+    }
+  ],
+  "splitInterop": {
+    "date": "2026-09-19T01:45:23.6364795Z",
+    "tool": "7-Zip (r) 26.03 (x86), public domain",
+    "toolSha256": "AD4C82FADCBDF93C03B4FC440F300509C7D60C5C2F4D183E35D9D70D6957037D",
+    "results": [
+      {
+        "name": "plain",
+        "volumes": 5,
+        "entries": 5,
+        "passed": true
+      },
+      {
+        "name": "solid",
+        "volumes": 5,
+        "entries": 5,
+        "passed": true
+      },
+      {
+        "name": "content-encrypted",
+        "volumes": 5,
+        "entries": 5,
+        "passed": true
+      },
+      {
+        "name": "header-encrypted",
+        "volumes": 5,
+        "entries": 5,
+        "passed": true
+      },
+      {
+        "name": "performance/load",
+        "volumes": 18,
+        "entries": 258,
+        "passed": true
+      }
+    ]
+  },
+  "formatInterop": {
+    "date": "2026-09-19T02:02:56.8898871Z",
+    "tool": "bsdtar 3.8.8 - libarchive 3.8.8 zlib/1.2.13.1-motley liblzma/5.8.1 bz2lib/1.0.8 libzstd/1.5.7 cng/2.0 libb2/bundled ",
+    "results": [
+      {
+        "archive": "sample.zip",
+        "sha256": "8B77376A3D216D34C0E181F5E03E0BC61F70AA1C7401F91B06D4CF9FA1B3A911",
+        "accepted": true,
+        "entries": 6,
+        "exitCode": 0
+      },
+      {
+        "archive": "sample.tar",
+        "sha256": "44FBEE8692E2C4884693161352E16A7FB39B0D2FD4BC53F9CFFD782FE42F051D",
+        "accepted": true,
+        "entries": 6,
+        "exitCode": 0
+      },
+      {
+        "archive": "sample.tar.gz",
+        "sha256": "179712CB7C0753431E2FA2A8953148859D96E1E984AD2B5D7224BAE73E1B440A",
+        "accepted": true,
+        "entries": 6,
+        "exitCode": 0
+      },
+      {
+        "archive": "candidate-header-True.7z",
+        "sha256": "1C80B7E93F28069AD95966AD66E22072D6B6F2E24BD18F6370A829C655049880",
+        "accepted": false,
+        "exitCode": 1
+      },
+      {
+        "archive": "candidate-header-False.7z",
+        "sha256": "BDA2353DA3198A1148EC4642CA5D0C198AEFE56ABB9B01867073C5ECBB0AB80F",
+        "accepted": false,
+        "exitCode": 1
+      }
+    ]
+  },
+  "resources": [
+    {
+      "date": "2026-09-19T02:02:36.2137026Z",
+      "sourceVolumes": 18,
+      "sourceBytes": 72891,
+      "TotalWrittenBytes": 33560210,
+      "milliseconds": 779.8417,
+      "cancelledAt": null,
+      "cancellationDrainMilliseconds": null,
+      "beforeMemory": 111673344,
+      "peakMemory": 209838080,
+      "afterMemory": 244391936,
+      "beforeHandles": 366,
+      "peakHandles": 404,
+      "afterHandles": 367,
+      "note": "进程私有内存/句柄每 5ms 采样，可能漏掉瞬时峰值；合成重复数据压缩率高，未覆盖 GiB 级随机内容"
+    },
+    {
+      "date": "2026-09-19T02:02:35.3749526Z",
+      "sourceVolumes": 18,
+      "sourceBytes": 72891,
+      "TotalWrittenBytes": 1048576,
+      "milliseconds": 57.8204,
+      "cancelledAt": 45.3902,
+      "cancellationDrainMilliseconds": 12.4302,
+      "beforeMemory": 77520896,
+      "peakMemory": 111673344,
+      "afterMemory": 111673344,
+      "beforeHandles": 366,
+      "peakHandles": 403,
+      "afterHandles": 366,
+      "note": "进程私有内存/句柄每 5ms 采样，可能漏掉瞬时峰值；合成重复数据压缩率高，未覆盖 GiB 级随机内容"
+    }
+  ],
+  "sourceSnapshot": {
+    "baseCommit": "a1e2a70fdb2e95a98814ada25858697feaa9dfab",
+    "testedImplementationCommit": "e965a490d3a1180a44e340f6752c64df72384c41",
+    "sha256": "e044495ec68300b8db05082c22e99fb412d383b3d841f56423c6316d0d61e61e",
+    "algorithm": "SHA256(ordinal-sorted UTF-8 path + NUL + raw-file-SHA256 + LF); build inputs only, excludes docs/artifacts/bin/obj",
+    "fileCount": 255,
+    "files": [
+      {
+        "path": "Directory.Build.props",
+        "sha256": "8e1afffc21b0ff64571f431067cfe34dfa304f980b662d364eb2e3a0c205b99f"
+      },
+      {
+        "path": "Directory.Packages.props",
+        "sha256": "c8214c02cce8204274cfca627bb0eff9038bfa9a03005b08c716517017e02025"
+      },
+      {
+        "path": "LayerUnpackPlugin.slnx",
+        "sha256": "640d2e739127004f16705b162a92fc48514cb7a93f68919ce2373ff9559ffb82"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/ArchiveBrowseService.cs",
+        "sha256": "4096a1f6fc0551f3d69927d269cbe546808ce89adad693e7ffdc9237b520090c"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/ArchiveBrowseSession.cs",
+        "sha256": "3c91412bf1c2672dc7ea19dd88193b93b0155020bb1d0370c4bf9be5278a77e1"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/ArchiveCatalog.cs",
+        "sha256": "813cf4bab117da0bf6373904a8e882acefb4caad1ff7babe99706f7b9cc9657d"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/ArchiveCheckService.cs",
+        "sha256": "7a3bfe601a919b24805c6dfb68766c5331d757358e604f4d6965c6f25accf00e"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/ArchiveSourceResolver.cs",
+        "sha256": "456a973074a51cd0ed3c8787d1d667c812dd5db4909f72e6e96e54e354e896ad"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/CommittedPackPlanner.cs",
+        "sha256": "d49b11cd5933d75626ded19bfa922fe6150722c7db6d82c80c700aa2daa76ea4"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/IArchiveExtractor.cs",
+        "sha256": "092fb8c2acf90964fa3e15f181756270f63a460c79199b8cbc85b2ecf2114dfa"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/IArchiveWriter.cs",
+        "sha256": "d840b6d0cfd9f91ee6d3f922ff7227bfbcc7ae8b9bce0c89619ca64e21948f98"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/InputDiscovery.cs",
+        "sha256": "412475f16f0001cf39bfa452b11d448c562882bac29b31a4f1da5f7122714547"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/OrganizationPlanner.cs",
+        "sha256": "66010bddfd10fb25daa95bfe85d461f326da18301040b5d5f1e17476bcdb83be"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/OrganizationService.cs",
+        "sha256": "7561b8a17687be5ffd8a33d990236499c35b70603ed7803da6ec43e93147701f"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/PackBatchService.cs",
+        "sha256": "ee339c7504218b2e4a2dcfaaf169013fe1d374b181f84b689aab912a5620d3a4"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/PackBatchSession.cs",
+        "sha256": "5f1cd060c6aa0239dce3d33569bf44bf926fec5c7af5588a0284362aea85243d"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/PackInputSelection.cs",
+        "sha256": "668e934afde6666bce96f1512ae6ae3704e6847b9ca23075efb3edb461a8279c"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/PackPlanner.cs",
+        "sha256": "23d18ec4294a8cbd6c08949bcd9c63a7e2da2175b1eead225696c0d067e43f5e"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/PackService.cs",
+        "sha256": "2bbefb89d909aee219a02a03c1d289876446a1fb7498aa384920c6f7acf83b6e"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/RepackService.cs",
+        "sha256": "a67bf45524050005166d0abcfe0b9f62f2f8e757a25b3a60d72237558682d269"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/RepackWriter.cs",
+        "sha256": "7f697a29eb78d67c68df19960f6b22fd0d1b693a2be69be51fe6e21d56853c49"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Application/UnpackService.cs",
+        "sha256": "3079b33a621a595e2d691cb89c50a964df05273ba50e55abd968d1ff0efc9e4d"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/ArchiveCapabilities.cs",
+        "sha256": "3ec5fffb4d04e1b8e26c25ff07c7c33f89bd1c178cec60bc0d30403d06b035fc"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/ArchiveCheckContracts.cs",
+        "sha256": "ac5c1535fbf3de8d219eed241b4e249ffe872411bf1f78e1e0c835e741b28751"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/ArchiveSource.cs",
+        "sha256": "6e02d3c4275177d44177a46ea122f84f74d75dab127fd54cef7b13851d467bc5"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/BrowseContracts.cs",
+        "sha256": "6b1705ff041d0ee6881ec0bf68e1695ab0d56e403d94e7bf6d13972e1952ea36"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/OrganizationContracts.cs",
+        "sha256": "95bb7c0dbcaf0e33e47df61c44eb135cecc9ae66dea90f899a37eb6e141f3c21"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/PackBatchContracts.cs",
+        "sha256": "dd9b0ab254877d624596bca7f1cd3b345aceb9188ea68290e5def08a9030dd77"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/PackContracts.cs",
+        "sha256": "257e71d85be5a0d1525af9a5325a04b71db5085648c3fa59d1ab858dbebae36e"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/PackOptions.cs",
+        "sha256": "570b2f916e3e889171dcc3792803786373184bc51befb1f9f4c7f0d200139832"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/RepackContracts.cs",
+        "sha256": "b42df3cd9a267c14ce1d30153de2e9a1f1d15f896dc51a69c908a0c9593cca8a"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Contracts/UnpackContracts.cs",
+        "sha256": "38dc769b97a0eee1b1757e23630440dc2a9957bb2537f9f53bc814e3926c0e0e"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Domain/ExecutionBudget.cs",
+        "sha256": "8a6e76808b2eb95a66806154f719a0df6a043f2c0e5a606d2400622682937039"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Domain/PasswordPool.cs",
+        "sha256": "4f71cea37ed875e04ce61e6747fa63a30b54193ecb36c13edd0c466951c0aeba"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Domain/RepackBudget.cs",
+        "sha256": "4bd582fd4dba269ee8be10c15a5c6fcb1e4581ff81bbc4183aa1569360985778"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/AesZipArchiveWriter.cs",
+        "sha256": "44d2a2872fae64144ca13430f001bea3bdd119a1e6b194e29a51b8b0378e6f86"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ArchiveEntryPolicy.cs",
+        "sha256": "4fb6fc532b9bc32bbf0e6599088474de39cce359dca38e62063f911b3026d0de"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ArchiveExtractor.cs",
+        "sha256": "100e31351b048cac053708e2e0a2b0e7789bddf823cf50d14048a494ca93c8a9"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ArchiveProbe.cs",
+        "sha256": "7afd7d2778d3c8d68f6ce659e43143f60f304fca7906ee2b82d192a2316b049d"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ArchiveSourceReader.cs",
+        "sha256": "7bc8a65a30cb8ddbd481b28ec535821743d5a5e363c404896fa498c2abc54e49"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ArchiveWriter.cs",
+        "sha256": "2ebb1286285973aec52ed74c1080b08b624b50a6d7ea623d2b1c864592f5fb31"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/BrowseReadStream.cs",
+        "sha256": "be4b30ef30c98f652523c21c1d6c6825869e7bc68d33046db2cb9a48746f3d03"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/CommittedManifest.cs",
+        "sha256": "abc18ce3f0cd2687b6c239b58093a57f34e651e0cc2cec32cbb368af32751b81"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/OrganizationCopier.cs",
+        "sha256": "636d5ab699bf9260a07fdfa0ffe498d6e6793ffe18487e6dc39b2cd91cebf916"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/OrganizationFiles.cs",
+        "sha256": "5003db54fb7ad3f2b7fd28db87a237f7cbb2b44a7f0d142e067144d3791d1d54"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/OutputTransaction.cs",
+        "sha256": "1622a8b3b46f79a5cd8113fa04495798283af8008485a9c892068376c5773196"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PackEntryCopier.cs",
+        "sha256": "f6c67a419f3e5e02627a45ee531672e8b6e8202fa3b7d78a26e094caec0ec97d"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PackFileTransaction.cs",
+        "sha256": "7ee7d4fea15b892e59c9328d87bbdcd5d430c2a08b1ee9d42d0ef8d475de6e44"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PackOutputStream.cs",
+        "sha256": "809998dc4c83d27bb0c29ba4c7f2cb2d6934ef73d9f533281eed75b8e0124ac5"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PackPaths.cs",
+        "sha256": "331b338cc8c6f1513099028683f16dfea05b9794f43655ee21946cac7eae72e7"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/PathPolicy.cs",
+        "sha256": "41c808c21b2b5b5d6d72251da1c1b13937cfb8f0e41faf1ddbfdc5080a0b49e7"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/RepackVerifier.cs",
+        "sha256": "ff1823e0a1cfd5120db694de4d413443dcac8da125a6ecc0687b1c47c4390646"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/StreamCopy.cs",
+        "sha256": "afd9122e4ce3ed80bbc33e7bd230d96357a3d37daa7d5f39a824b78d9a8ebb28"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/VerifiedPackReadStream.cs",
+        "sha256": "69a4a398adf5e56c1fb9ee79d343a2bf1c1b1c75a067f98a101771bfc5d1803d"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ZipArchiveExtractor.cs",
+        "sha256": "5fa089eb3894a1f97bda9f70666d323533a363321929672eb915a33ccd96bec3"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ZipArchiveWriter.cs",
+        "sha256": "7ca09b9f1ed7182acb1cb751b198fa257a59370c6796a010799530edc466c423"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ZipBrowseCatalog.cs",
+        "sha256": "c9a394d725701cbfaf72af500933ff3f4750a30f7e50ed5071d779d52bcb4a58"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/Infrastructure/ZipDirectoryGuard.cs",
+        "sha256": "9c9422084ad19a5231fb2b7326df49ef375b2647b0a226d379ae83dbe7d0c9d3"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/LayerUnpackPlugin.Headless.csproj",
+        "sha256": "b12d13ae9bbb8bc917ad0031a352a4bafa3fc625cd87404c1cab73a10b51986a"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Headless/packages.lock.json",
+        "sha256": "4ae0417d31a54d88b2d116e748bfea24dbfc50d5823a519ddfd5c05efba39b83"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Constants/PluginIds.cs",
+        "sha256": "26c73ec55eaa3a43f86f08a08146b8c783fd8e995d34921e3e32c5afa7006737"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseDocument.Check.cs",
+        "sha256": "38aee64fa93c556108debe053a79d8053aab9c81bd030eb7d9209c629329f503"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseDocument.Execution.cs",
+        "sha256": "20fa45bcd144e7f59702a7286712e154886756a11a238a35422561765444ad6b"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseDocument.Navigation.cs",
+        "sha256": "2311c6de59f6545924d1a6167678c72fe8c1e131913158a4adfb7a7cbabf5079"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseDocument.cs",
+        "sha256": "6afb52005e9dedc5654e6e4932c528adb4b3571060b969f4513f66a5a05a0f08"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseView.axaml",
+        "sha256": "0963744b59f84189b3b96225345afbc5b8dec141bdbafdc32ee4d48eaf6004b2"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Browse/BrowseView.axaml.cs",
+        "sha256": "e3cbe51126f1b24dd8c5ffd162d892e1475a1f4b118acd702f5b036c842fbace"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Check/ArchiveCheckDocument.cs",
+        "sha256": "5b63c931771a1b1c33de0668961e43f9e9d51ccc1548f86744516bf82d32f512"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Check/ArchiveCheckView.axaml",
+        "sha256": "a764be2fbb7f4af26e40bc55d945b7d6798e7ea00223c319176bdfac92ebfbfd"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Check/ArchiveCheckView.axaml.cs",
+        "sha256": "6cd49d1a074730473e10da89705e905acd13bc06ac81afd9883cd9bcb10a58ef"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Organize/OrganizationDocument.Repack.cs",
+        "sha256": "91890bc6f38d80adda724a61ec7fb6a54b72a2b3d1ccb4902966b974bf8ac726"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Organize/OrganizationDocument.cs",
+        "sha256": "a38986e48445ec73ae5f77981fc8549a3d61fe6f4c586ca6bf11baf22df5e923"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Organize/OrganizationView.axaml",
+        "sha256": "79f545afca72fdfe41910996b4e8bcaf2f5c26a7370430818f70a6bd5c06ba0e"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Organize/OrganizationView.axaml.cs",
+        "sha256": "aea93c6dcf4fde97acae3962abb25699e49673dc80d55c16a22c6e71d850e06c"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackDocument.Execution.cs",
+        "sha256": "2ffabe1cae88cfa869ccb899f97b4d34ffe09567efd0f97c268bceaa2eff23d9"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackDocument.Options.cs",
+        "sha256": "1ef00889f9cec8076d6e06c7998839058f92a975de6bac86769e1f18a163755e"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackDocument.cs",
+        "sha256": "09d38a6ae8cc1c3ba413a2e4a2b0a8d23ab4bb085f8a3ec19933667628e4fb6b"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackView.axaml",
+        "sha256": "31eab59271050856ef0f7321cb4e299f72ad5b3069f0c6b795caec7e613d93de"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Pack/PackView.axaml.cs",
+        "sha256": "ba88c258297c62d35397b977cd9418fd301fbcdba5838603cba50b40b2045a6f"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Repack/RepackDocument.cs",
+        "sha256": "c81eaf77cce413e0f54e464133705e1f386bd785a0872a108431efeca70b5e93"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Repack/RepackView.axaml",
+        "sha256": "e2d9628aae60dc5782633ef74a13214a01bf99ded1166c2089f70fc39ae163c4"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Repack/RepackView.axaml.cs",
+        "sha256": "4110ef6dca4c01e2605e64678ba7341cf3dee2b8610b37760b025a1f0ede3ad3"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/OutputDirectorySuggestion.cs",
+        "sha256": "5194e9ab19c5fefdbeddb45a55e7dd6d99627522e12620dbdf790d35afe757ef"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/OwnedUnpackTask.cs",
+        "sha256": "65a612be8a273b77152f22f4fedc1b735af6e715786e8fdb94558f1a61c7a386"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.Check.cs",
+        "sha256": "e341faf7e3c7aa67077ed356930d54feadc43a457ec447f9eb26ade848d2b431"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.Organization.cs",
+        "sha256": "fd9d4fb7cb9cc8288e9a100df9fdcf1b5ed37519772cb5bc866e18b566c1f5a0"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.Presentation.cs",
+        "sha256": "bbb881801176b966838d314c63893461851dcbe7bb09073d620d58c02b824444"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.Rediscovery.cs",
+        "sha256": "fa620a57ed74a4cd38c84a81368892a26f1dca0b6b6d8727642e1df94d91aa3a"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.Repack.cs",
+        "sha256": "26fcd7082d0a00f00137d7e0e4797ddcc1d53124758ac1036b4dd20c3d03bc44"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackDocument.cs",
+        "sha256": "0ded8425ca2815d43f7605d25a562aa3e307a91f23398554f499ba1857843cfc"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackView.axaml",
+        "sha256": "c4cb94b1c18d03a5b47970a3396318b1d5951c0470a8db5b0b20513d8bca61f1"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Features/Unpack/UnpackView.axaml.cs",
+        "sha256": "319ee1babe5353590836d83d901abd5612fd8d9a84bd8c20727c501c4c59bc0b"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/LayerUnpackPlugin.Plugin.csproj",
+        "sha256": "fd4e5108ae7996053b076f472baf3b44651b57b00f27411a80dc22551486f2d3"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Plugin/LayerUnpackPluginModule.cs",
+        "sha256": "b36d93cc5dff50be6ab48de3d56057fa2975a26f2b669591ccfacdbf344c0ecb"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Plugin/LayerUnpackPluginServices.cs",
+        "sha256": "a828856a9ec05d1cdf871921236ebdc791fc35a57bef2125cf82e8323ae9b713"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Plugin/PluginIcons.cs",
+        "sha256": "9eeec609c2148c5bb974b621219e5063e8e4c5fe95f47489a593432ceb1f2584"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/ThirdPartyNotices/SharpCompress.LICENSE.txt",
+        "sha256": "23d697851a5d7d3f062a546446b0fd92f8961b65a087d255563540fadc7c6c68"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/ThirdPartyNotices/SharpZipLib.LICENSE.txt",
+        "sha256": "388e38853d88b24b4e2a65bd4a7ac316cc2cf088d08b4a25508205daa62a15a7"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Workflow/ArchiveWorkflowActions.cs",
+        "sha256": "4a829de94cc8e0a1cdc374dc40420571b4ec01fba0493702597bfe0f0ca4ee3e"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Workflow/ArchiveWorkflowInput.cs",
+        "sha256": "fe7ede21a8c79b98222ea1b6f33fc1a5de5c0cc7f7c14d5a40d77cf6c69dc35b"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Workflow/ArchiveWorkflowResult.cs",
+        "sha256": "4d424fa80e3b9c168e232f51a3a8d11a1e4027cc39d1d8518688564ba364b9b9"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Workflow/CreateArchiveWorkflowAction.cs",
+        "sha256": "eed968b6ec23d95a197de2f6515099bedca9f74a3d34d1c9fef97004bb3da436"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/Workflow/UnpackWorkflowAction.cs",
+        "sha256": "742bbc87efbf15241c8ca7f0fc237a9e5d2842d57fd1fb64210a6f0065ac5ef8"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Plugin/packages.lock.json",
+        "sha256": "dc4ae82e11f094f68467ad7733e9083701d51d0541986b375836677b645f5c7a"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/App.axaml",
+        "sha256": "928e2175a7e1d41d8bb5ee2a040da790f3676ea480e4e708c57a49ae48ce9ef5"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/App.axaml.cs",
+        "sha256": "2bac7872434f5cc727864883c6e250057cf69f4569d470d01d872175f2b91d5b"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/LayerUnpackPlugin.Standalone.csproj",
+        "sha256": "63c5e90b7350ac2cd41eec58b2c16cc9adb9f659beae8b02ff80be352124050f"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/MainWindow.axaml",
+        "sha256": "5b293de00eb5fc036a31048c147fefdd156c7920abcb0f8d878fceda8430feb4"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/MainWindow.axaml.cs",
+        "sha256": "6b6de65572d639f8624ccb077057d8bffc6f5c66c4c11641488d6815e830c455"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/PreviewDocumentLifetime.cs",
+        "sha256": "2cf0519146893b36baec72ce37a0cfe5fd15e6d7ee02d52960ac3c9e6ee1bdcb"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/Program.cs",
+        "sha256": "8defcaedc51f6f4c7213bd256d2830c3b7e43671e2de71117adbce24951fb320"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/StandaloneServices.cs",
+        "sha256": "fe2c98838e621d73508246fa2eaf9ac03abc57a44b14139753b563c5852fd804"
+      },
+      {
+        "path": "src/LayerUnpackPlugin.Standalone/packages.lock.json",
+        "sha256": "f3425a17402f9736863692161c2fe00f1ca88059689776a7ce63f5aede74322c"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/ArchiveCheckSafetyTests.cs",
+        "sha256": "7ab5311a8d8247e1a47b0dd949a527faea5292dcda1d00d905495185909dbbe0"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/ArchiveCheckTests.cs",
+        "sha256": "2de6a906d1839690823303ba071a4c8e505e4f5f28ae7e438911589b852f85fe"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/BrowseEdgeTests.cs",
+        "sha256": "043d2fb66a6216cce8a73bf1a91b5b068f277e3797703c6a14a8bbd28ca70c6e"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/BrowseTests.cs",
+        "sha256": "b1974706cc74a2dd9aecc59a568c9d56f270c71104f1db212e9ad4a98074bbd3"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/ConversionTests.cs",
+        "sha256": "1bc12f30b9587560c84dc927be9ad7ed27e67351176628c3092f0e3a6a5ecb06"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/DelegatingExtractor.cs",
+        "sha256": "18eff249cba6069278a32d2cdc001f8431fc37f5c8feb0c9ee19258e86ffbb79"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/DiscoveryAndEdgeTests.cs",
+        "sha256": "4ccd3b561baecb6a9c65ad8cc087e451d7bbf42e09b0476cbe43d92665c4d810"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/DomainTests.cs",
+        "sha256": "d35fd720f0f7b5ce006fe20c44b501055a90256bb8392f0d10d3f90ebfa94d6a"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/7Zip.BZip2.split.001",
+        "sha256": "d3d33730b94022077c33c24b91b19cc99c8662cb926f4616a7efc7b889259676"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/7Zip.LZMA.7z",
+        "sha256": "ca67a51924796568b865cb8fa85b8df0661bd2d4677e508b620c56032e511295"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/7Zip.LZMA.Aes.7z",
+        "sha256": "517331153899be02ec41e03b9095e435701c2af66ae40db21081f0d77440b97a"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/7Zip.LZMA2.Aes.7z",
+        "sha256": "fa05b223e2bf44e404b6d3886db1b9fd661c0d6ad2856eee5d9c007a579ea8b4"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/7Zip.encryptedFiles.7z",
+        "sha256": "54dada890893c9abe8d8b06bc446d66c288fa667cb51de919c2e3216d3c6de34"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/7Zip.solid.7z",
+        "sha256": "3c336bf14bef2dc998b548a304c0c07c9c9da899f90e426a965a5f322e232b53"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/README.md",
+        "sha256": "83d3088951fc30b638a707c80b210bde0e6631903b7dd485d5c22d2a2b8b0667"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/content-encrypted.7z.001",
+        "sha256": "88b9843b1330ed9c450cfdc9ba1ed63f9bf49accf9dd5c5059b409872154461d"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/content-encrypted.7z.002",
+        "sha256": "ce468d4015f0e8c049b33e4d9cad963c419e51e2455f9de8552d846d3a677ec6"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/content-encrypted.7z.003",
+        "sha256": "12eeeb5d59d57e697d82169021564d59954e0ade0620d41aef22a7d94e76e17c"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/content-encrypted.7z.004",
+        "sha256": "a9f10622a3a29aa7cda1e1a63b9a243f9de9cac1aa80d7e387e3d99b85c20b68"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/content-encrypted.7z.005",
+        "sha256": "c187b1a604d7138f4946bdb3933d55719a4990d6052764b290a502411c5507d7"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/header-encrypted.7z.001",
+        "sha256": "67f1e74fb20de0b07770cff1454e1346a1d82bffd04a71d92d5e7d7947e269cc"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/header-encrypted.7z.002",
+        "sha256": "d256afca2999e6d2f49e3ca184c8d932ca74b9904430428487095065735d292b"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/header-encrypted.7z.003",
+        "sha256": "5e9b4b0b8a1b430de424d8d4e2bf42207355e2e4bc315b9ccdac2ec5e5bc3b70"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/header-encrypted.7z.004",
+        "sha256": "febe78d2914135545e0941f0b3c5c7e6d436efe34f2f3191c06977f6916addf5"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/header-encrypted.7z.005",
+        "sha256": "c42a443b6475dffcb0d6c3183605516ae6a523434ad85d5dd2d665fd3ba63990"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/manifest.json",
+        "sha256": "ac7e2fea9b68c8ce2dfc5bbed653f594ede929263be242937fef5b67e09cf6d3"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.001",
+        "sha256": "6819d3862e3687b78ed8c228df767ddd390cdcd154bcafb345c57f75997cca03"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.002",
+        "sha256": "b5c7aabf7da21aadbbdac436e9775a463577461793b259f395a4b1f7ca4388db"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.003",
+        "sha256": "cbe5829894d0e41519cb67f1bebe4facc524b9d30695008bcca84ea3c0e9fd9d"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.004",
+        "sha256": "538646ccbcaf7cd1bfafe8e36fd2efd36c9656ce849c8e5163cd7304fc001d40"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.005",
+        "sha256": "5eb5cbc1e6e551065cb986924a68a1efa508f57b591965dd191b7bfc46664da0"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.006",
+        "sha256": "33cc965413457c0741f7883cb3bde8207cda1bdb50ee7391ea10742772c9cf92"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.007",
+        "sha256": "6bd64f9488099666a7042c89c87f37d277200b698afdfa0f6cf47f8f41a14081"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.008",
+        "sha256": "355901d11ff04e6eabd9ff867ccbe0013f49d88c836e4dd241d2dd56ae2d8e97"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.009",
+        "sha256": "ef051eba8aaaf643c6fca7f99f58740550e3baf80fae44d69859d4d9ac69084e"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.010",
+        "sha256": "db2f0acdfe5f36c08003824e22df60837e1d166b07b6d88abc9c03c047d3ebf4"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.011",
+        "sha256": "f2aa2b93412fbdd7d54adb555c783a4c702356b467ebb1e4dd092c6403f13a49"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.012",
+        "sha256": "e103eef02bafe97932a014c79e604d653ad07856b474a85595f35cb6bd0802eb"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.013",
+        "sha256": "0302ea3afaad29cc83a4e2d62c33168d40885d11e2b02170d9b6b09a416e53ee"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.014",
+        "sha256": "91ce2fa401cee12c78aad7d859e746666c4ff02ae9e22383f997225d210b0aac"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.015",
+        "sha256": "3a49953aa9972d365cfc7c8624512bdefcbeb9200dcfd211046a4b4116d73fa0"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.016",
+        "sha256": "f15ff2ce5ced00d4b4e7fdbf981f20798c279ff644d6e9a0f3297309e295d181"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.017",
+        "sha256": "daca164d2563b8c44877be247451c2a4ffda0f92e010ca1288dd0811886b6966"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/load.7z.018",
+        "sha256": "8bfd64395714bf96e947ccbb771866966eca05eb8bfd92221be9ff0c03ab11a6"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/performance/manifest.json",
+        "sha256": "47215521f14bd78c53f82675d36c4b63eed9e4df42481408a5b70347c4a67a50"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/plain.7z.001",
+        "sha256": "5aac0098e9002772ca0d97b020300cb3ce331aac95972ac49c821d6b9490f7f8"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/plain.7z.002",
+        "sha256": "6119d278f9ecc9f206e4cf80aa2740d68638e144caa4cf99c5d23393c96dd3e5"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/plain.7z.003",
+        "sha256": "33e24cb73c9e7684e1cb854edc5079fdd2315d669693b9af71e0cd30d838e651"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/plain.7z.004",
+        "sha256": "23cb4f8324e1220769d13499c9e32ce6d12f086085e1637ae34768676a616cb9"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/plain.7z.005",
+        "sha256": "cbbfcd6ca4bac3d53a7dd34ccfc5533df43dc5875a81a7de36e5d4eb2118dfec"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/solid.7z.001",
+        "sha256": "3fdfba408f970b5ca4b39ee1410bdaf46064b77e4e7db54e0ab4bf81d308a1a5"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/solid.7z.002",
+        "sha256": "6119d278f9ecc9f206e4cf80aa2740d68638e144caa4cf99c5d23393c96dd3e5"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/solid.7z.003",
+        "sha256": "eb999c5ef07c55279ec5ad002c7b62e3f9decb0c6e4564186b0d20dfe88bbc8a"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/solid.7z.004",
+        "sha256": "23cb4f8324e1220769d13499c9e32ce6d12f086085e1637ae34768676a616cb9"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/solid.7z.005",
+        "sha256": "46005ccfff45a4f44ff3cc6eb9cff2f076e385ebdf6bd81ca3d1cf5616de422f"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.single.txt.bz2",
+        "sha256": "23b4122ab8f087eb3c57749be8ed7bdd8f6062322964dd2723e66a8d1a429510"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.single.txt.gz",
+        "sha256": "56daf7c78392199eef420fdaee5addfa56aea278ac45d2bd34f9bb73349b2b64"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.single.txt.xz",
+        "sha256": "be5a933f5ebc5b972b0699a8a6efcc426c360228300d88d4cbea5401b77c2964"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.utf8.tar",
+        "sha256": "8b47141682de26cd4604ab70355a71793771eed02f4ceb8aa36237fe78df908a"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.utf8.tar.bz2",
+        "sha256": "dcd5eacf74786e99fe894215518de5ef71897d1673976fe09c5db229a103c84c"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.utf8.tar.gz",
+        "sha256": "7b50636f7c1dd42d2fae46f74efef5434177aaca1f1c3673ca4de6886095d340"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Generated.utf8.tar.xz",
+        "sha256": "e8a3fe80f40f690ca88a001234a5efbd92dfaa37e3c3a8627b19905fd37373c5"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/LICENSE-SharpCompress.txt",
+        "sha256": "23d697851a5d7d3f062a546446b0fd92f8961b65a087d255563540fadc7c6c68"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/R07.candidate-header.7z",
+        "sha256": "1c80b7e93f28069ad95966ad66e22072d6b6f2e24bd18f6370a829c655049880"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/R07.candidate-plain-header.7z",
+        "sha256": "bda2353da3198a1148ec4642ca5d0c198aefe56abb9b01867073c5ecbb0ab80f"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/R07.created.tar",
+        "sha256": "781f2bfbe10c6a92d6d546eb15c7b8e1801f034f82b2fe50abfcb7eea529c99c"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/R07.created.tar.gz",
+        "sha256": "811edf8dc8c47dc08c0eac5330e77ca0b549b2f3a47c4fbaa1cb3dfd17343cdb"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/README.md",
+        "sha256": "20a2b2ae3c5fe2771d7ba8fc040dcdec7d54c7782eb8ae70d1308326d1df4b0e"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar.encrypted_filesAndHeader.rar",
+        "sha256": "3944a0cf36758d042c238dacae56a4fa494b6f790c4f0dd719d9a47b7c845202"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar.encrypted_filesOnly.rar",
+        "sha256": "52c0d575e01750ae643c65866b5e06e67773a0aed5edea6b2b04e7de14a784a2"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar.multi.solid.part01.rar",
+        "sha256": "b6fec070a075fc244e8d35187b482cd6558a608e3cda158153b85a59a68903b8"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar.solid.rar",
+        "sha256": "e7e62f24f22f195d21437be09667c8956837d99ba48d7270090251a8e32babc5"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar4.multi.part01.rar",
+        "sha256": "9401bceb34a5267df2c2c69466d899c1d754f63749d00f5313b717123dfc9c45"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar4.rar",
+        "sha256": "9d9c261e50d3a84ab11a3701c7a736057fc970e59ca365885a41f60270c1875e"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar5.encrypted_filesAndHeader.rar",
+        "sha256": "63fc4b5576f7482311e950155607e171696588881bdd277c8c099efd2f98b6e2"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar5.encrypted_filesOnly.rar",
+        "sha256": "e5fb06af812633b246430f029a051cc462d00180a0df455a798644deccdc7d07"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar5.multi.part01.rar",
+        "sha256": "ad9b6ac157e77ba2cc6b8be7eeba52a2c047a0ef2d06fa6ffa0c1d1ccce3a651"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar5.rar",
+        "sha256": "3319de3e8a91a58d08d8a83f48ebae7e6b022c542b4a58775bab64f4063988a9"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Rar5.solid.rar",
+        "sha256": "3043d68c5a81f46adcbb5393632d243944ead44eb383a677ac82e68afdde27cf"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Tar.tar.bz2",
+        "sha256": "afd4f1ccdbb6e8d435d6b6fdf8b9f297107f8959267336ff12b632f4c0e90de7"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Tar.tar.gz",
+        "sha256": "ce260029fc3b57e86d9d1f45f1349124f313ba55ced6da101bcac2b9abd76df5"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Tar.tar.xz",
+        "sha256": "952e14ea5178c43572eaf337cce7a56f2495cc95c62561421397e3ab2e53ff09"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Zip.deflate.WinzipAES.zip",
+        "sha256": "deb1d7c7e0f0a6bc78c41ee9fe3f9bf501695f7d01091987a4ce22a9963be32b"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Zip.deflate.WinzipAES2.zip",
+        "sha256": "f483c724ad0192b52bded9e729bc70512277847a3604f2c13b294b9dd39f2e40"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Zip.deflate.pkware.zip",
+        "sha256": "bf79da6d95ead6d7eb08c691306e89ebfb2a596b06f992305a8d14645edac9ba"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/Zip.deflate.zip",
+        "sha256": "78720af73face20069dcabda43589095b439f236531c6268f8301028dbb65f9c"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/expected-content.json",
+        "sha256": "9196ed0806ac9f5ff65be75d91f30d29615f72f3c30786e7e0e9c7f9d964b581"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/fixture-hashes.json",
+        "sha256": "ee28cd011db8b9a338043132277afbc4903d7d59b7d9f891397b04d304115953"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/Fixtures/r07-fixtures.json",
+        "sha256": "097dbf75dc6b5c9f431e5f424729ca475f888a24a6783ffee375313b4cd86e0f"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/FormatCreationTests.cs",
+        "sha256": "ae0d49d966d7d3db68cc2974450d32fa8947a28e1bc99bc0285a5f1bc0d11765"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/FormatTests.cs",
+        "sha256": "d59c0b9a16d0704835feac33379f99d9a27ffd71962a177d6c1ba41f666d4c8a"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/GeneratedFormatTests.cs",
+        "sha256": "535e54475fbdb4f04e537bdb33b92b0d6fe5550693728481e25ad8fa6af0b9a2"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/IntegrityTests.cs",
+        "sha256": "c36818bc54ae6d2c974541b865e665cfa6428db8f3df668913a09ecd71f76899"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/LayerUnpackPlugin.Headless.Tests.csproj",
+        "sha256": "a2af307a438497360d45778fc05a1b4a08f3156be1a9a5a0c1d8d1961ec99816"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/LayeredSchedulingTests.cs",
+        "sha256": "eed309118f2a0990d482a2aa470930a7f324be4ec50936779f5276f1ce8e5af9"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/LifecycleTests.cs",
+        "sha256": "73e6a0de70bfb054861483521492729983f32f2fadfa204d0927feb363f88919"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/OrganizationPerformanceTests.cs",
+        "sha256": "1e2a096f10f8b5299a623e6222155a3034be1c75d29a7ed550d40db662fa241e"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/OrganizationSafetyTests.cs",
+        "sha256": "ee82cb992112a57a188a8de4fcd26688033c7bef612e45a9fb7f6d87db6eab44"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/OrganizationTests.cs",
+        "sha256": "034d97c85246439ec377dfe09f7a2eb392c0584ffacc8781d9cc87ceacc8fb1e"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/PackBatchTests.cs",
+        "sha256": "0f504fde69e5dc44d2afbc8824da1ddc75f712e53bb268cc28eea4a80397ed80"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/PackEncryptionTests.cs",
+        "sha256": "c6d02698f9bac88fdc835b5286165ec95f5326e51eb72d05cbcc5da6462fb186"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/PackTests.cs",
+        "sha256": "be55d580e56d2416cee3921aaffd5401507dc6a040150be26cd2726801a12036"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/PerformanceTests.cs",
+        "sha256": "a99756515201207324215c63ccef8dc6ea181c90eb848b1bc87fb8dcec92c1a5"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/RecursiveTests.cs",
+        "sha256": "15d0f7cdb9c70f9a8a110251e51d4868e375412c8fa4bc484657e187638461fb"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/RepackPerformanceTests.cs",
+        "sha256": "e37c9d08a045ba7e2923b901d58dbb9e096c7d9bd1923e5efa33c9f03c02b36a"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/RepackSafetyTests.cs",
+        "sha256": "9c9b560e3c8b1ade2918f38fa7f43ee40d9d1a504ce2904bbb1d1cd892880095"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/ResultRepackTests.cs",
+        "sha256": "3a304370213f9bc22693afec5ef80a0805fa700021c0e1b6476ab22c606ed92a"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/SafetyTests.cs",
+        "sha256": "f490dcf00c2ccf8458b52e30e73139a29da5ac0339c673c26b5004e267ccdc7e"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/SevenZipCandidateTests.cs",
+        "sha256": "1d238820231310b25b477ab9640f646f60adb904930bcb2738b2946abf753d22"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/SplitArchiveEngineTests.cs",
+        "sha256": "e8e13750dfdbd9848feb5a5a3a8ab0667634f0a43f1360df1f5296b2b9e271b6"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/SplitArchiveTests.cs",
+        "sha256": "e25bab4c19c2179c8be83a24773fab003699f4a3ba7ff121dff4dd6088debca5"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/SplitResourceTests.cs",
+        "sha256": "e9922c806d74a864da8a6fe310812dda721acfca5bfbdb6a690dfe74517d1b98"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/SplitSafetyTests.cs",
+        "sha256": "95f99e7e2223742daea5e96d41472f74b4c81e243aa7dc2c2ed799a76279b73e"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/SplitTestData.cs",
+        "sha256": "d550021a6d2804d9a3643ced8424cfef7b6d4c9716be38f32de0f1dd148857a4"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/TestWorkspace.cs",
+        "sha256": "68ef6cf31810663fe9493cacbf2fd7f4914164824611c1e16ddb61ee666c46c2"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Headless.Tests/packages.lock.json",
+        "sha256": "4c039000a0ed140a5e7c1414bc3859ac188618bf5c57af9c32830b566e2d32b1"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/ArchiveCheckDocumentTests.cs",
+        "sha256": "9bafd0ab7e514bd21fd89e9828b2f2f15a23327ada3b42a7ff503d4544c0c623"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/BrowseDocumentTests.cs",
+        "sha256": "825a13bef127901dfb2db982fa4dcd426c6e92e395bb6075090c1c31001e0d41"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/CompositionTests.cs",
+        "sha256": "2f78b1f5b547431754cd658caf50c60d81db3a2581f345fa80302450cbf97d18"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/DocumentTests.cs",
+        "sha256": "b3d7481e56dab0a409710ef213c4bd7d693ae6aadce475b8d3e8269d0d54f586"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/ExperienceTests.cs",
+        "sha256": "f112f5d9fb0e944a5a3d2ee69b81905089618e7da638ed89812887ab7e3e4001"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/LayerUnpackPlugin.Tests.csproj",
+        "sha256": "c56e7bc1cc09af8395707710a860222235491432a29d5b6a80d27b465a0997ae"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/OrganizationDocumentTests.cs",
+        "sha256": "8f3480c0e6f33cdf83eb23e67f6c0bafc2fb47bf14f86e966a42672787b36659"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/PackBatchDocumentTests.cs",
+        "sha256": "3009e864c34731830818af3dadf71d280aef084ed46c5640239ab127589906a9"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/PackDocumentTests.cs",
+        "sha256": "86500bc906b9a04cc3b7481757d4ff99e77742530c7a7d9d45226162c76de32b"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/PluginIconContractTests.cs",
+        "sha256": "9e276fdbdaed03d4bed778984132d47120686ca8dbad097423972a3c83310ee1"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/RepackDocumentTests.cs",
+        "sha256": "13fc307ac402c3419a66f47954b403820cfec7131507ec3a27f7d0e7808a7b9e"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/SplitDocumentTests.cs",
+        "sha256": "1aba9fab9ea4f85653330151f6532b31d144a51227358739114a3ecf5c3c911b"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/TestApp.cs",
+        "sha256": "6abb668e22d40d957da888ce5d3c89ae0a3f6c4696988c41bd00c220820f3df2"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/ViewTests.cs",
+        "sha256": "744719132f50473b0f8d86c20a59cb2de12fc9c39103548489c5a31d3ec79129"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/WindowLifecycleTests.cs",
+        "sha256": "0c5b795fd87ef3abae0b4d41c519894d7b22ec398d54d847e3303785dd05eeb1"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/WorkflowActionTests.cs",
+        "sha256": "b5ae32a0682f63e5d966a9a361eacf444c5fd202a6dc29ef36a6a4c59361fb95"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.Tests/packages.lock.json",
+        "sha256": "95282f94016b0fe1927cdf6e72007356c78178d4781892df3bc4e28bba388b33"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.WorkflowIntegration.Tests/LayerUnpackPlugin.WorkflowIntegration.Tests.csproj",
+        "sha256": "9f2d9807941184ad88aa0f770743715c646dd19b2cec2cf23925a4e1cce5087d"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.WorkflowIntegration.Tests/WorkflowIntegrationHarness.cs",
+        "sha256": "f99dc50b31118ba4ba4352755f274a5cb5f44dd605e9b2ba438880df01e66bd9"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.WorkflowIntegration.Tests/WorkflowIntegrationTests.cs",
+        "sha256": "3389b6cd7020ea8e49e44676bf321d873502e3ab4fd88d40998d4ac8cc9b475c"
+      },
+      {
+        "path": "tests/LayerUnpackPlugin.WorkflowIntegration.Tests/packages.lock.json",
+        "sha256": "6cda746f6969977a8eaa34a44713bda7148f4eb02b4b70db64f7d774bfb20cc6"
+      },
+      {
+        "path": "tools/check-docs.ps1",
+        "sha256": "24fb15d43196a89e8c4b964e6eecc61e91cca132cd026f2c8d8ca05031c1258b"
+      },
+      {
+        "path": "tools/generate-fixtures.py",
+        "sha256": "4a671bb005e7dd81fdd7eeb385d523079c9fe65fb6f7d7177185529cbcec8a42"
+      },
+      {
+        "path": "tools/verify-format-interop.ps1",
+        "sha256": "77ed198cf40e8b3af3f5bc477676f6be7bf40e987e0231fd3d67410310eeff6b"
+      },
+      {
+        "path": "tools/verify-local.ps1",
+        "sha256": "539ac551a605c0b69d131db24a789d313383a121935c71fcdfc24bca5634b66e"
+      },
+      {
+        "path": "tools/verify-split-interop.ps1",
+        "sha256": "d21e4fff74faea75a62c0d0e70d9e4019c89e360dcfadf2d7d6668b2f5b9b687"
+      }
+    ]
+  },
+  "screenshots": [
+    {
+      "path": "artifacts/ui/G0015/input-False-900.png",
+      "sha256": "0c833b9f6bbc6e380aab1c3401d0bb5872a6916b3d63489b703b8d85f022f98f"
+    },
+    {
+      "path": "artifacts/ui/G0015/input-True-640.png",
+      "sha256": "aeda7cca61c510895b2042da7a66a9176a81ddd5fd797ceaab90420e80a3a05f"
+    },
+    {
+      "path": "artifacts/ui/G0015/missing-False-900.png",
+      "sha256": "6fe1a56dddde39752b180d44a14eda39d89ff5597a58dd1e7e5f198e2ff9243a"
+    },
+    {
+      "path": "artifacts/ui/G0015/missing-True-640.png",
+      "sha256": "08de861c58212e2f8b3626218630d9c3d884e038d4c45619b9f0ddab3f349434"
+    },
+    {
+      "path": "artifacts/ui/G0015/rediscovered-False-900.png",
+      "sha256": "ef2791239ce11372421a5d6356757692fb9df8a54fb92fe44f4c7a0a2537fe97"
+    },
+    {
+      "path": "artifacts/ui/G0015/rediscovered-True-640.png",
+      "sha256": "89a0abed21d3719c2e4d6c33d7c30323956f85fa039eb4a42aaecab3d8b97a16"
+    }
+  ],
+  "unverified": [
+    "用户真实 GiB 级分卷",
+    "OS 原生文件选择与拖放",
+    "125%/150%/200% 原生 DPI 与辅助功能",
+    "Windows CI、Release、正式打包、安装部署及发布门禁未执行"
+  ],
+  "relatedRepositories": [
+    {
+      "name": "myavalonia-workflow-studio",
+      "head": "8dd1a508a48fff8136c59fc0d5f717c90431af1a",
+      "worktreeDirty": false,
+      "sourceManifestSha256": "b84c4c2adb532e44f46f3e03a0ca3a54a0e9e0da43852180a6f27404280e7e6c",
+      "files": [
+        {
+          "path": "Directory.Build.props",
+          "sha256": "66e7826b83398718dff38ef82134eef4d108e02f558a6f1fa2134ef9784385ff"
+        },
+        {
+          "path": "Directory.Packages.props",
+          "sha256": "ba2801a0485543d863ad18f58b1e809701f0040231883635e86ef024fca83e04"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Constants/PluginIds.cs",
+          "sha256": "83ec84871029c483ae1b32c88d2a86e71995cf4a0d014bd8b9ba90a31531f5e3"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Features/Main/ArtWorkflowFilePicker.cs",
+          "sha256": "b924261d5102dff522eeacb108e1573d22610349b6fcfcdef528c499f14cc21c"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Features/Main/ArtWorkflowPanel.cs",
+          "sha256": "140214fa9c1c776e4e1b0d51194c3051de3457174e8704fd178ea44dd8ab0be1"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Features/Main/ArtWorkflowView.axaml",
+          "sha256": "85e05045e2792369d6f4f0eef220c5fc9ec41fa215b226b889dfa3fdbcbd42b6"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Features/Main/ArtWorkflowView.axaml.cs",
+          "sha256": "f36bf2454c3051e522fa10833de5e2b1c6f1234a70d3f9aeed93cd97756941a4"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Features/Main/MainDocument.cs",
+          "sha256": "64f0ef01eecb7aaf5ac54f18908090de749af25cd5305ad2118c6215cc72b27f"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Features/Main/MainView.axaml",
+          "sha256": "fae5778a51cb2ee62e10d8145a6f48f545e3ea46475ccfc2c07ce40e598bde06"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Features/Main/MainView.axaml.cs",
+          "sha256": "6c5ed9aae65df4e15c183a9748473d6c649291812d603ed41de28b98198caac8"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Features/Main/WorkflowEditorCoordinator.cs",
+          "sha256": "f2f558d80c0fcf2d9039f36256af8911ed4df12937bdd13cadba14f468f9cc2a"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Features/Main/WorkflowRunSession.cs",
+          "sha256": "28e2f3ff1d76a62a0d929ff65248b63f730fb7b0b089705205063c7d697c6c58"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Features/Main/WorkflowStepEditor.cs",
+          "sha256": "966904d825b9d7a3e3a3397f6894a3d4873b05af0ab196bb8f05c0aba516d3ed"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Plugin/PluginIcons.cs",
+          "sha256": "97842861ee06e3f58dac2896fb8a9914420362ed9fd83809f06161dfa021e441"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Plugin/WorkflowStudioModule.cs",
+          "sha256": "ff9f47aacb335fc331426db7536f7bc2efbcc2c7591ebd3bff0689e9a01586e3"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Plugin/WorkflowStudioServices.cs",
+          "sha256": "0441eeda75332642fee2872fcdf842a768abd304dff81b3522bd18e4116e7d95"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/WorkflowStudio.Plugin.csproj",
+          "sha256": "c1a5bc2b170c03b367ff49419699fa38c285455885d98dac600dd928f1dbcdf0"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Workflows/ArchiveWorkflowOutcome.cs",
+          "sha256": "23737a0faabed4f8456da716cd2d52c6d2b8d3e816cc8996b100497fde09e1d6"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Workflows/ArtWorkflow/ArtWorkflowArtifact.cs",
+          "sha256": "1bd8f26d20781e1971e92bc14eb0863d19b671ca1e70d2502a564182786065eb"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Workflows/ArtWorkflow/ArtWorkflowDefinitionBuilder.cs",
+          "sha256": "5eb13ae5a8a11ea69ff988b9b5e07d1dac67d8b72c54a1bafd295dbaa0418a66"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Workflows/ArtWorkflow/ArtWorkflowRecoverySession.cs",
+          "sha256": "b297dbec953db260797d06632270f521b9e8370b9ca412b7714921378e050c3f"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Workflows/SessionSecretStore.cs",
+          "sha256": "c2392ed9e0aa48cb1b7cc87006ff0ecf0c3e8156289783949e6b9611caf059ad"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Workflows/WorkflowActionCatalog.cs",
+          "sha256": "b38dc0dfe5db58f8c5a5c9cf8382c0d3b19d816db5bf0fe1f655c4f3655e80ed"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Workflows/WorkflowDefinitionCodec.cs",
+          "sha256": "55968fec5d5c997bcba591433b6a46ad0eaa490edd487deb77ebe93b5732a4ed"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Workflows/WorkflowDefinitionValidator.cs",
+          "sha256": "385ea23f146f5a8988d408e314af373413978b9a5d80980c72aae82d5474a2b8"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Workflows/WorkflowInvocationObserver.cs",
+          "sha256": "47a2fa85405b496ef18d58857c0bb186563310a8f1e4806871b968a8eb14f81d"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Workflows/WorkflowJsonSchemaValidator.cs",
+          "sha256": "3203aed1ec29f463d154d93762ab6cf3d7392c5d0dda95d28414fc02617e62c7"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Workflows/WorkflowModels.cs",
+          "sha256": "93be6c9742052ef9a3d43164291aa6066ca12cdbd62327c71a4ab566d1578730"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Workflows/WorkflowReferenceResolver.cs",
+          "sha256": "7996ea8a88fbe4a22ed2daf1fcfb2ce4b8e1ebe687a401c5d84bb2c0219bce11"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/Workflows/WorkflowRunner.cs",
+          "sha256": "2d9a3df1417728887c6b47d8c9922750be1f29dae11d8290a6ec8e4864e2ccd8"
+        },
+        {
+          "path": "src/WorkflowStudio.Plugin/packages.lock.json",
+          "sha256": "1e57386cfb4b66752660030afc604e3bdf7d7dc9092e29f7c40770da1d761df1"
+        },
+        {
+          "path": "src/WorkflowStudio.Standalone/App.axaml",
+          "sha256": "38673518674eb755408cbf803554d44e6fd4c104ebe327afea262953b2e5226a"
+        },
+        {
+          "path": "src/WorkflowStudio.Standalone/App.axaml.cs",
+          "sha256": "6ac830b1b9f0ce4cf33410b4d0ef019bca988757e25a1ae78c27246110e5eecc"
+        },
+        {
+          "path": "src/WorkflowStudio.Standalone/FakeWorkflowActionGateway.cs",
+          "sha256": "4479aaa186d226530db896c4224082348b9a5aca00755a5374fe835ba0c31010"
+        },
+        {
+          "path": "src/WorkflowStudio.Standalone/MainWindow.axaml",
+          "sha256": "8c5063473ad2b910522661186f53e549002dfc45cdb9198245c14ba4b6769e50"
+        },
+        {
+          "path": "src/WorkflowStudio.Standalone/MainWindow.axaml.cs",
+          "sha256": "619c0b01eb3cd21c2cf40a6996c02f43b09123ef70514dca640859c033691354"
+        },
+        {
+          "path": "src/WorkflowStudio.Standalone/Program.cs",
+          "sha256": "502741a7c33e467d9a7c383cf84a439397c359e819a6778ee8d42ae5f337217f"
+        },
+        {
+          "path": "src/WorkflowStudio.Standalone/StandaloneComposition.cs",
+          "sha256": "25d53426c848cc1022ea7f690a74631a2869a403f9a292be71944da4ee456ca1"
+        },
+        {
+          "path": "src/WorkflowStudio.Standalone/WorkflowStudio.Standalone.csproj",
+          "sha256": "421059ab45706e050a7adc2994bf00256ce722d68586aa013c30d5e7d2978050"
+        },
+        {
+          "path": "src/WorkflowStudio.Standalone/packages.lock.json",
+          "sha256": "634ac7a27f3c477b383a700ce2ecdc3792f75d2d72a1212dc28b8051368e1834"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/ArchiveWorkflowOutcomeTests.cs",
+          "sha256": "1a9be02923b44d2dc95bfb6d80db72bcca5fae652f2c9e58cd89e72ee8ab7e09"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/Fixtures/g0013-actions.json",
+          "sha256": "2abe486ff33cee4a09e8253c434f95520a2969e1d8963f6496e7cce177a20fa6"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/G0013ArtWorkflowTests.cs",
+          "sha256": "113bfede0dfc56265f45b597f7b3c495f5bb34c6ffece4cdbc1ad1f1964b68ca"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/MainDocumentTests.cs",
+          "sha256": "1ef37881a6fc6633d13299608ca14e44207bd339467d52be41047d14ea11ed1a"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/PluginCompositionTests.cs",
+          "sha256": "1cacf2dc7f6feebd7d945d5b1b238353e68bfe7b50fdb7ea9fdf39ba5f3393d6"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/PluginIconContractTests.cs",
+          "sha256": "66fd96b49b4fd9b3d08ca50844f849af0841f28c3e2a210c7fdaf3d6cbaaa370"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/SecretAndSchemaTests.cs",
+          "sha256": "1e27ee6f2fba4c4f22eeda942cae5264c7eed3a9c4c686fc48aeed7dec1be75f"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/TestSupport.cs",
+          "sha256": "11b6147a5208c7aad40cca881e05b20facc05eb0e256d6fc4ca59456f9c03ced"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/WorkflowCatalogTests.cs",
+          "sha256": "3f637b331504774a5b9a2e56976b60d5bde86f46e8f626976c7b873844da5bae"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/WorkflowDefinitionCodecTests.cs",
+          "sha256": "7cca7e75dd7377395d227740c0d5b85cb1c471acec21fcb66881e3cf4e01c45a"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/WorkflowDefinitionValidatorTests.cs",
+          "sha256": "345eaf9b8c0e2d3a1873ff46a583f46c5169500d2f39bfe1fc6fa26341dd7d14"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/WorkflowRunnerTests.cs",
+          "sha256": "7af01c258239e8343ba81dadcac0bbe84472857a0fc94be98d322a35a8eb1d43"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/WorkflowStudio.Tests.csproj",
+          "sha256": "3809afd6ccfe4777f0c187cb4f552165386e206bc45326b6e5eb5d26ab393a17"
+        },
+        {
+          "path": "tests/WorkflowStudio.Tests/packages.lock.json",
+          "sha256": "f3cc5cd4045f536b87724f51280b3eb0bd80cf7910cbbe5b54bcbe8164b2282c"
+        }
+      ],
+      "note": "只读使用当前工作区执行现有集成，保留他人修改；Studio 另有本任务的两个锁文件摘要修复提交"
+    },
+    {
+      "name": "myavalonia-fractal-art",
+      "head": "c5b314be0dc0058072059d64387beac845b91f64",
+      "worktreeDirty": true,
+      "sourceManifestSha256": "c315bdb05db004f81eea4b2d7ad163373e5306708c223b74477952b79ef2b929",
+      "files": [
+        {
+          "path": "Directory.Build.props",
+          "sha256": "8e1afffc21b0ff64571f431067cfe34dfa304f980b662d364eb2e3a0c205b99f"
+        },
+        {
+          "path": "Directory.Packages.props",
+          "sha256": "40bafb78b00e5705b8c1e20d1bf78a20ab4e356c89f734709ce8fb333330f44f"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Application/ArtworkCompatibility.cs",
+          "sha256": "34bd05636eb1870b693dccbcfbdae9fe65f64d403f266c0b893f6d41986cc1ab"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Application/ArtworkExportPlanning.cs",
+          "sha256": "849690bc5cb88ddd7908b08229f7cf5f4f2ad4bcd33e297bc66c353e4c433127"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Application/ArtworkGraphNodeExecutors.cs",
+          "sha256": "27b63554c71d091d6565c053c9521f35574c8f4599e98daa3f346a0504c3e016"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Application/ArtworkGraphRuntime.cs",
+          "sha256": "10e5f370378138167a62aad9feabc6740932f86e6c22e072e8e20a4a64f72720"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Application/ArtworkLayerEditor.cs",
+          "sha256": "8e1a709508b58ea619a176a7241e0402241c766f9d26928e89d90fb25cbd7d93"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Application/ArtworkServices.cs",
+          "sha256": "e78f20e0bfee3f24d515b4f84f53c45304bf4c3f21562a8f22ea652d6bfa1baa"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Application/ArtworkSnapshotCodec.cs",
+          "sha256": "cfb1d711a7aedb392b455b7d452a5a2e3a61ea3bbe92f28f2e43a904da73a1da"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Application/MathLensService.cs",
+          "sha256": "53cd45963fd7e938794e765a7636386837ce7bfe6f3c20e1cf07b325c1a4c380"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Application/UniformImageProjection.cs",
+          "sha256": "993be495d7992dd3ffba75e0fd1eb7ff8e3ded7a2820f7b6dab05799b0d777bf"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Application/VariationExplorer.cs",
+          "sha256": "d49cee637d89a428b9e86abed4e782c25f22b49fc93a419248855ac371dea394"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Application/Workflow/FractalWorkflowContracts.cs",
+          "sha256": "8e593c96feaba7cebbfb4a5c8c12c3123e8390c1118bdb41fdac6f9fbbff4904"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Application/Workflow/WorkflowBatchExporter.cs",
+          "sha256": "db0f63dbabae5cff413dc76dc4d3f246adccb63defddb8cfdbff6157de87a9a6"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Constants/PluginIds.cs",
+          "sha256": "191944698cdfe6e3a2eb97cd402e7b07743b432d594aaf7d29520f2090454fc9"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Artwork/ArtworkDefinition.cs",
+          "sha256": "2adbe2b7967064f3f306a31b3392009779a3e92bc8226b1e017fa44e0e970b7d"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Artwork/ArtworkExploration.cs",
+          "sha256": "74f40abc4261a70b0b63b7610712c6789bc23029b333d7c563b6b363301611e8"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Artwork/ArtworkGraph.cs",
+          "sha256": "9f6ed465c375cdd233c4ff9324549fa90cf5f448dbb049908205718f84d041b6"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Artwork/ArtworkGraphValidation.cs",
+          "sha256": "293829ae13b91c09156ab6461c04c64f7a34d42c394aac2cbb0efcd250b41e02"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Artwork/ArtworkValidator.cs",
+          "sha256": "22be4e852a7b0a95fc7734b2e189c71583459b332e8fa5b4a2c7842939f1f3bc"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/Attractor/StrangeAttractorPointGenerator.cs",
+          "sha256": "a43fc70bdf215d1b53bb3c2c07c89af3f79f98aef50cc91410daacd9baad39d0"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/EscapeOrbitMath.cs",
+          "sha256": "9a5b9b188b155efd7e69e00a2673b32aeea04c8cb0720a2adfb94a5e1191e3d2"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/Julia/ArbitraryJuliaKernel.cs",
+          "sha256": "f42378f4772f58d962e9b483bb448bbec6a06daf9aff005da828302f281e29f3"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/Julia/DoubleJuliaKernel.cs",
+          "sha256": "c2d06bbdde7c6009756b19dbd3ff6dd2545fd2b940f953c5d252299c2cb172b7"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/Julia/IJuliaKernel.cs",
+          "sha256": "398a0e4263e5c5a50a991f82ad305f1d22348da5b7d6779ba08e0cd714917f92"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/Julia/JuliaFieldGenerator.cs",
+          "sha256": "11b31ba630be83029587c1d0a71b2b217e5e0ffefe4f4d001313b8c0cae89842"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/Julia/PerturbationJuliaKernel.cs",
+          "sha256": "a78715a8ef859167839f7cb009fe9843201b9d3c68b6750c8e26bbc2cf916220"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/LSystem/LSystemExpander.cs",
+          "sha256": "6e1ef1bfd09988f3bedc9770238f5e9a669557fdc2143ff7d3f8582ea9b59dfc"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/LSystem/LSystemValidator.cs",
+          "sha256": "24ab4bc17e1b907f60daef9f77fdaf03bd5af2290cf925b57cbc9d8ab372a854"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/LSystem/TurtlePathInterpreter.cs",
+          "sha256": "5bbefe8addb115336536784c823648c5f54b1420a947e8d4a144e9dbf11a6eae"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/Mandelbrot/ArbitraryMandelbrotKernel.cs",
+          "sha256": "a765055c00b0e611e505322272be39b1f8351371bd620c5610226bdfb5107ce6"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/Mandelbrot/DoubleMandelbrotKernel.cs",
+          "sha256": "c556f11744ee7230addbd18191a305fa8c4406757cf727d2506c7a3b1d05f602"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/Mandelbrot/MandelbrotFieldGenerator.cs",
+          "sha256": "ae80c88ab3b6d82b23cb7e6e4b99dd23c0ef4460381e4dc1b338b71450b7f746"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Fractals/RecursiveTree/RecursiveTreePathGenerator.cs",
+          "sha256": "546d15cf990e9fcc57724eee0ba16d054a5b999cbef58e90e0db5f4be20d23ff"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Rendering/LayerComposition.cs",
+          "sha256": "60180b77eeca1371f4dc17aac8cd4a9f2c93784be5080b63a062ad5662d20c52"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Rendering/LayerCoordinateProjection.cs",
+          "sha256": "7d0b53b87915126cbbfdc715798fb366dd22ba403777ae4a75a00d7105bd7722"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Rendering/LinearGradientMapper.cs",
+          "sha256": "01c3d7df3e49e47a50f7f5787ed158a1696f3b691feda34f431df976939d7688"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Rendering/PathGeometry.cs",
+          "sha256": "1caa074445895cd9c348218454a0e3c7a0c6f1ce98d2348b27ae6dcf760845e3"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Rendering/PathStrokeRenderer.cs",
+          "sha256": "20480ed0090a73768ec96bb3e107de865b928af92bf3da9c15e6c96b84c21a2b"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Rendering/PointCloud.cs",
+          "sha256": "59cc64f228af0456c683f35d1ae3a56a9baf0ca28f8d8b2a582bb4544818fdd1"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Rendering/PointDensityRendering.cs",
+          "sha256": "fe1ee0c487a6afa389f38c48287a09592371031fc4cdb4ca14b96a968bb18e32"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Rendering/RenderContext.cs",
+          "sha256": "fed114ad48ccc5ed876504fd73e5871842a9b831a6dbc2679b2237e4eb462a92"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Rendering/RenderingContracts.cs",
+          "sha256": "795cdaf3d01eae852ccdee201de1cf65bf4659dd8082570a323f235921b73897"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Rendering/ScalarField.cs",
+          "sha256": "4502d6992a904ae4dbc7f7c25d103524938be4fb021a4e10d37565847b04a929"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Domain/Viewport/HighPrecisionViewport.cs",
+          "sha256": "f839a2d473e1f736e9b02147aabc25e7736d9437ac7e97a2c8c4fd132beba3ad"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Features/Artwork/ArtworkLayerItem.cs",
+          "sha256": "6d485c032213a40c332a3efdc08dcd39570d21f40d5811b18a94423896c6ff4f"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Features/Artwork/ArtworkWorkspacePhase.cs",
+          "sha256": "3da9d6d2db99d70e3c2b11cd04c942b6ac7e70542af227f3e41984043d543718"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Features/Artwork/FractalArtworkDocument.cs",
+          "sha256": "f22d1d5bf640915027c38c6d2582c38708c9fe28976f6d0fdc832d8aab42293b"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Features/Artwork/FractalArtworkView.axaml",
+          "sha256": "b90c3570441a49226f75b0d91c20e680c62741a2e01fec1b92705db355fa48c6"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Features/Artwork/FractalArtworkView.axaml.cs",
+          "sha256": "a71c37baa656dee14219ea12714a7a7b77cec4a4314a71b69bf07d757627f985"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Features/Artwork/MathLensSession.cs",
+          "sha256": "b88ad537db635d219fe04741119036984ec91d090ea81175c3ac08c96e5fe08f"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Features/Artwork/TransientPreviewTransform.cs",
+          "sha256": "3a0409d99591912ca839130f2d72072cbc2660c551dcbf720d6ab7e1a411f244"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Features/Artwork/VariationCandidateItem.cs",
+          "sha256": "e04d1075266faaaafe266cb341f1ebd87df6f8688f3f76483c29d748849e5a47"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/FractalArtPlugin.Plugin.csproj",
+          "sha256": "ac551bb7c97739eed85e4b993fd22eb11d9ceef445a07636bfe1635a107ebb70"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/GlobalUsings.cs",
+          "sha256": "72289c00ac326e06edb7662780eb8da9fcc2c042f85fd85b6b9ef88d60e3fcc4"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Infrastructure/PngInfrastructure.cs",
+          "sha256": "0fb6dc599407611c4e0b67a8bba4ad9ad90494aba02b20b71d5bed59e95f0909"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Infrastructure/Workflow/ExportArtworkBatchWorkflowAction.cs",
+          "sha256": "3f9dfc617dc9e286f30a9dad75576f5c68b9c1a1163886c59a79f6bb1ab46180"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Infrastructure/Workflow/FractalWorkflowActions.cs",
+          "sha256": "aa04a5ba1ab9c65294045fdeeefada8740e18559e0cb8c3fa7d690ac4943899d"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Infrastructure/Workflow/FractalWorkflowInfrastructure.cs",
+          "sha256": "20f939f909e73a38e352d2a95d9dd6e1fa12c50e77bb86d302ec61d3ffbef634"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Numerics/ArbitraryDecimal.cs",
+          "sha256": "114ce01bc2957d2ce0f582f645b2ea0be04d28b101aabfe57717820e40259b47"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Numerics/BinaryFixedPoint.cs",
+          "sha256": "501595270858a96a9e31e57292ec2cd097da1df3f23d9f9710a5fe0b6ee82430"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Numerics/PrecisionDescriptor.cs",
+          "sha256": "bbed33133f9f68173d0678e1060651501164d59ba9bc4e7c247b36eec6cc9d47"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Numerics/PrecisionPolicy.cs",
+          "sha256": "744c35e50249a59af457ff8acd2a3f194d60f3fccb0031f273b2b837d8e777d1"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Plugin/FractalArtPluginModule.cs",
+          "sha256": "8de6bf15172075c6279b44861d722ede7e59f8a5e1715fb51769a16079a6ac39"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Plugin/FractalArtPluginServices.cs",
+          "sha256": "98fe74a2f6ec5b774098142926060d043e9d31b06a76f9b0002206f98933cf97"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Plugin/PluginIcons.cs",
+          "sha256": "971acd33e80ddc61658b49d2cf33ce31f0319e8632380cde51385d267f48b608"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/Properties/AssemblyInfo.cs",
+          "sha256": "d6ebc3255b09cd7b201707f91bfbf301cdffeadab8dabb6e6eec5b070ec9a00a"
+        },
+        {
+          "path": "src/FractalArtPlugin.Plugin/packages.lock.json",
+          "sha256": "aef2b7363465bf1ca479daf7b052b6bd392ff03c2b2e373a3df6776fba7f7f3b"
+        },
+        {
+          "path": "src/FractalArtPlugin.Standalone/App.axaml",
+          "sha256": "0722a73f40ee957c0aa269d85abd7cfeb044cc66a21941995c9c8664baa33acc"
+        },
+        {
+          "path": "src/FractalArtPlugin.Standalone/App.axaml.cs",
+          "sha256": "8cd01de91c867db282d64424d7d5f05f58b403d9279bc278022077bcc1c3183d"
+        },
+        {
+          "path": "src/FractalArtPlugin.Standalone/FractalArtPlugin.Standalone.csproj",
+          "sha256": "72a0e7816c29d091a42ae6bb8d8fc0e61f853da1d65577bb9e96ad5b29fb9ea0"
+        },
+        {
+          "path": "src/FractalArtPlugin.Standalone/MainWindow.axaml",
+          "sha256": "7484eae6024c92ae170b566a1e8716912a324a341bf2014f4085b3042a3f2801"
+        },
+        {
+          "path": "src/FractalArtPlugin.Standalone/MainWindow.axaml.cs",
+          "sha256": "92f34beacdd8cb95d1142611a9045c9913b47eef54c985efe8ab2aa13bf759f9"
+        },
+        {
+          "path": "src/FractalArtPlugin.Standalone/PreviewDocumentLifetime.cs",
+          "sha256": "5c71044af4081b5500eae16bd207c628299e075fc9a960ca6f4eccb9d4a2fd1d"
+        },
+        {
+          "path": "src/FractalArtPlugin.Standalone/Program.cs",
+          "sha256": "03baeb6c7057805e6222e66dadd6a2f2dbfe0a5cdae825b4afb225f641445ca8"
+        },
+        {
+          "path": "src/FractalArtPlugin.Standalone/StandaloneWindowInteraction.cs",
+          "sha256": "b1c2eba6b53edfc267850f2ed5fb3ce50d228665ed71578a05f601c9bb630437"
+        },
+        {
+          "path": "src/FractalArtPlugin.Standalone/UnavailableWorkflowActionGateway.cs",
+          "sha256": "50b2f7e6bff004b4ca9ba68b2092944b1141b1520abe5acde57013bae801f3ed"
+        },
+        {
+          "path": "src/FractalArtPlugin.Standalone/packages.lock.json",
+          "sha256": "d118aa7be22ec4fa75b85bb63f3c34b34739c31910ae0c85b73d320ca1e062d9"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Application/ArtworkGraphCacheTests.cs",
+          "sha256": "8d535b424aeea5b71caa86be932a62776d26d050c0e3062ebda057888f983cb5"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Application/ExportTests.cs",
+          "sha256": "cdb7642f30a7b41ed760a65bd1629b8a3bcea5e40ccee04ee8b67d4cd44b1fb4"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Application/G0007WorkflowTests.cs",
+          "sha256": "39f6cd829c8f167eb80b3abdd18b214dfafe586439e8d21cca802db93426d8ff"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Application/G0008LayerEditorTests.cs",
+          "sha256": "35a0f59c085d6991573caea78490ca1d77ee0cf8aca65f5e9091572532e59093"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Application/G0008RenderPipelineTests.cs",
+          "sha256": "9a3189a70aabc10e02f550a29fa8d45dfdb1c85b91f8fab838b7e0140b01d847"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Application/G0010MathLensTests.cs",
+          "sha256": "a65894aa63a29bcfedc7cf56b67fd4f9d6f5ebada5164a352062087a0bddfa23"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Application/G0011StaticClosureTests.cs",
+          "sha256": "81281714e304c678a14613367f2adf1e955da9e586b04ae653cf2135f096f89e"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Application/G0012WorkflowBatchTests.cs",
+          "sha256": "b79310d394cb3835a2a134a6d9fdd8ba3f4d0c3dfc1689367990692893c2040e"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Application/G0012WorkflowFileTests.cs",
+          "sha256": "79062e8b6b8ce7b9e40c5d56703dab014d1619ca6f45ea415446b52b1ca140b4"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Application/PersistenceTests.cs",
+          "sha256": "a1a5a0d32e0842869a16b44594495a72475c75c0b85fd27518b09f8995a23aa0"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Architecture/DomainDependencyTests.cs",
+          "sha256": "ea3847cb601ddb8abec286bdd5e625dd632681e87263c85c27e424512b80279e"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Domain/Artwork/ArtworkGraphTests.cs",
+          "sha256": "eccbd29978a73500f3a774b317ef93d7f1522d255026df1a470a3b8a086a3870"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Domain/Artwork/G0008ArtworkValidatorTests.cs",
+          "sha256": "117996f71cc38afe5ee8e6f356afea5d46a311ee8dae3fa0600aedc1f63d1e81"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Domain/Artwork/VariationTests.cs",
+          "sha256": "810cace2b54b2926377951eabc84b9ded16f8828625dd62c1b37a22de90faacf"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Domain/Fractals/Julia/JuliaKernelOptimizationTests.cs",
+          "sha256": "00cac190bc77906019ef9caaf40be071cdd03d271c4e6dc97ab2c7a247301da6"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Domain/Rendering/G0008CompositionTests.cs",
+          "sha256": "35ee8ee46407246e1140c89fbb496df1e54a6264b96c4051aed3c189d27dcfa9"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Domain/Rendering/G0009AttractorTests.cs",
+          "sha256": "10ed33c8cbda2cd60c8fa3f3f9dd59b6a11075dbd14487a9f05fb9cdfafaf595"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Domain/Rendering/GraphOutputCompatibilityTests.cs",
+          "sha256": "617acbc3cbc1a928faf6604455b58f432cb3db6f95bd590db802570e41d0926e"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Domain/Rendering/LSystemTests.cs",
+          "sha256": "dae0ad59ec5fb02c73b8dc91e86d49a624823e9b2c699e5d842a708a1af0d88e"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Domain/Rendering/MandelbrotTests.cs",
+          "sha256": "8f27aaa2ec3fc25eb383b210afa45927cf0a2b1fa27df16b494f63dc9ef64ef9"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Domain/Rendering/RecursivePathTests.cs",
+          "sha256": "4b3fc5abc482a3a507cbd2dfb79aad598be3760945f25ce9d4f8e7d58dcfc328"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Domain/Rendering/RenderingTests.cs",
+          "sha256": "b091928a7e2709f3851f26c54bb812f291334aa609d227bc35f741fbba2a444f"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Features/Artwork/DocumentTests.cs",
+          "sha256": "96aec572d2824ff59644ddbd8313600c65a8d2e72d95cc14896d208697a25074"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Fixtures/artwork-migrations.json",
+          "sha256": "88944ce2abfd70013cb0ee688bbae5c7b7e59ca10c8bb094754188914ad0d040"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/FractalArtPlugin.Tests.csproj",
+          "sha256": "5fc76dd8e9f9e8c3f1d4984170e0010c0ff913dfd609d242a25e92391ef3fe2b"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/GlobalUsings.cs",
+          "sha256": "e3c265a41319b42a346ccb7383215a4688c7bfd215147a27df9c064f49eec527"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Numerics/ArbitraryPrecisionTests.cs",
+          "sha256": "3d18b9ec014498825a6f303e4fa41e7d7aeaedc48fd913c2a63bc1199c2eec99"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Numerics/PrecisionPolicyTests.cs",
+          "sha256": "c4d3822c3d5983c5ca8d1289c47907e1926a016beb5419e91aa9b41264f074ff"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/Plugin/PluginCompositionTests.cs",
+          "sha256": "57d4c5df9fcea28488b195e0e572e1d7158676188f2c9f8529ff23575465dd37"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/PluginIconContractTests.cs",
+          "sha256": "ff22d5092d258e4991b4be936d31152b15209b5aa5f1d85cdec93860c8f2a00f"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/TestArtworkPipeline.cs",
+          "sha256": "e63487dccf0f948268e852642b191b615e49c89e701f089f4fcf057102913c8b"
+        },
+        {
+          "path": "tests/FractalArtPlugin.Tests/packages.lock.json",
+          "sha256": "239da28bf270aa06024114b0c1b0b70c1e236919403268f1012584933438c02b"
+        },
+        {
+          "path": "tests/FractalArtPlugin.WorkflowIntegration.Tests/FractalArtPlugin.WorkflowIntegration.Tests.csproj",
+          "sha256": "3fd5a0519c89577274239ecb022c4cf083fa67068b2dc02f79015cf51bcb7a69"
+        },
+        {
+          "path": "tests/FractalArtPlugin.WorkflowIntegration.Tests/G0013IntegrationTests.cs",
+          "sha256": "7d4c18fbd347ddd6b93f895bf607c8da988a687a29d41a0260dbf1c99fad8892"
+        },
+        {
+          "path": "tests/FractalArtPlugin.WorkflowIntegration.Tests/IntegrationHarness.cs",
+          "sha256": "1de4fe9495c99fdee0f09516ea6a979b514f6660c8ec4dbc6955175d9e5c351b"
+        },
+        {
+          "path": "tests/FractalArtPlugin.WorkflowIntegration.Tests/packages.lock.json",
+          "sha256": "3ac4d0db9678d7623f2ff6d4b3ee7db5f3b64ad34ce58ce6d3ecd57b8a30a9dc"
+        }
+      ],
+      "note": "只读使用当前工作区；该仓库已有变更未纳入本任务提交"
+    }
+  ]
+}
