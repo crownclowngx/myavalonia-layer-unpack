@@ -166,7 +166,7 @@ public sealed class RepackSafetyTests
     private sealed class PausingExtractor : IArchiveExtractor
     {
         public bool Stopped { get; private set; }
-        public async Task<ExtractedArchive> ExtractAsync(string source, string destination, string? password, LegacyNameEncoding legacyNameEncoding,
+        public async Task<ExtractedArchive> ExtractAsync(ArchiveSource logicalSource, string destination, string? password, LegacyNameEncoding legacyNameEncoding,
             ExecutionBudget budget, Action<long> progress, CancellationToken cancellationToken)
         {
             try { await Task.Delay(Timeout.Infinite, cancellationToken); throw new InvalidOperationException(); }

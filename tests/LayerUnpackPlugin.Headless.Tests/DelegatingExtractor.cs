@@ -7,9 +7,9 @@ namespace LayerUnpackPlugin.Headless.Tests;
 /// <summary>只用于注入可控失败/阻塞，验证调度行为；真实格式测试始终使用实际引擎。</summary>
 internal sealed class DelegatingExtractor(Func<ExtractionCall, Task<ExtractedArchive>> execute) : IArchiveExtractor
 {
-    public Task<ExtractedArchive> ExtractAsync(string source, string destination, string? password, LegacyNameEncoding encoding,
+    public Task<ExtractedArchive> ExtractAsync(ArchiveSource logicalSource, string destination, string? password, LegacyNameEncoding encoding,
         ExecutionBudget budget, Action<long> progress, CancellationToken cancellationToken) =>
-        execute(new(source, destination, password, encoding, budget, progress, cancellationToken));
+        execute(new(logicalSource.PrimaryPath, destination, password, encoding, budget, progress, cancellationToken));
 }
 
 internal sealed record ExtractionCall(string Source, string Destination, string? Password, LegacyNameEncoding Encoding,

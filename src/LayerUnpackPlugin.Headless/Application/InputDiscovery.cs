@@ -3,7 +3,10 @@ using LayerUnpackPlugin.Headless.Infrastructure;
 
 namespace LayerUnpackPlugin.Headless.Application;
 
-public sealed record DiscoveryResult(IReadOnlyList<string> Files, IReadOnlyList<string> Warnings);
+public sealed record DiscoveryResult(IReadOnlyList<string> Files, IReadOnlyList<string> Warnings)
+{
+    public IReadOnlyList<ArchiveSource> Sources { get; init; } = [];
+}
 
 /// <summary>输入发现与归档嵌套分开。只扫描普通目录，不跟随链接，且排除明确选择的输出目录。</summary>
 public static class InputDiscovery
@@ -14,7 +17,11 @@ public static class InputDiscovery
         if (maximumFiles is <= 0 or > 10_000) throw new ArgumentOutOfRangeException(nameof(maximumFiles));
         var found = new HashSet<string>(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
         var warnings = new List<string>();
-        var pending = new Stack<string>(inputs.Reverse());
+        var selectedPaths = inputs.Take(ArchiveSourceResolver.MaximumDiscoveredPaths + 1).ToArray();
+        if (selectedPaths.Length > ArchiveSourceResolver.MaximumDiscoveredPaths)
+            throw new UnpackFailureException(UnpackError.BudgetExceeded, "输入发现超过项数上限，请缩小范围。", true);
+        var explicitFiles = selectedPaths.Where(p => !Directory.Exists(p)).Select(Path.GetFullPath).ToHashSet(found.Comparer);
+        var pending = new Stack<string>(selectedPaths.Reverse());
         var visited = new HashSet<string>(found.Comparer);
         var inspected = 0;
         while (pending.TryPop(out var path))
@@ -25,7 +32,8 @@ public static class InputDiscovery
             {
                 var full = Path.GetFullPath(path);
                 if (!visited.Add(full)) continue;
-                if (!string.IsNullOrWhiteSpace(excludedDirectory) &&
+                // 输出排除只约束目录扫描；显式选择已成功父目录内的卷，是合法的新任务来源。
+                if (!explicitFiles.Contains(full) && !string.IsNullOrWhiteSpace(excludedDirectory) &&
                     (full.Equals(Path.GetFullPath(excludedDirectory), PathPolicy.Comparison) || PathPolicy.IsWithin(excludedDirectory, full))) continue;
                 PathPolicy.EnsureNoLinks(full);
                 if (Directory.Exists(full))
@@ -37,10 +45,9 @@ public static class InputDiscovery
                         pending.Push(child);
                     }
                 }
-                else if (File.Exists(full) && (ArchiveProbe.HasKnownExtension(full) ||
+                else if ((File.Exists(full) || ArchiveSourceResolver.IsSplitPath(full)) && (ArchiveSourceResolver.IsSplitPath(full) || ArchiveProbe.HasKnownExtension(full) ||
                     await ArchiveProbe.DetectAsync(full, cancellationToken).ConfigureAwait(false) != ArchiveKind.Unknown))
                 {
-                    if (found.Count >= maximumFiles) { warnings.Add($"最多添加 {maximumFiles} 个压缩包，其余输入未加入。"); break; }
                     found.Add(full);
                 }
                 else if (warnings.Count < 100) warnings.Add($"未识别为压缩包：{full}");
@@ -48,6 +55,9 @@ public static class InputDiscovery
             catch (Exception e) when (e is IOException or UnauthorizedAccessException or UnpackFailureException or ArgumentException)
             { if (warnings.Count < 100) warnings.Add($"无法扫描：{path}"); }
         }
-        return new DiscoveryResult(Array.AsReadOnly(found.Order(StringComparer.OrdinalIgnoreCase).ToArray()), Array.AsReadOnly(warnings.Take(100).ToArray()));
+        var sources = ArchiveSourceResolver.ResolveInputs(found.Order(StringComparer.OrdinalIgnoreCase), new UnpackLimits(), cancellationToken);
+        if (sources.Count > maximumFiles) warnings.Add($"最多添加 {maximumFiles} 个逻辑压缩包，其余输入未加入。");
+        var selected = Array.AsReadOnly(sources.Take(maximumFiles).ToArray());
+        return new DiscoveryResult(Array.AsReadOnly(selected.Select(s => s.PrimaryPath).ToArray()), Array.AsReadOnly(warnings.Take(100).ToArray())) { Sources = selected };
     }
 }

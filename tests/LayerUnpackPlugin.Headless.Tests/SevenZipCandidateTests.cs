@@ -8,14 +8,14 @@ using Xunit;
 
 namespace LayerUnpackPlugin.Headless.Tests;
 
-/// <summary>独立候选评估，不接入产品写入器。0.50.4 真实混合条目样本未通过回读和 libarchive 互操作，
+/// <summary>独立候选评估，不接入产品写入器。G0015 修复空条目误报加密后本引擎可回读，但 libarchive 互操作仍需独立验证，
 /// 记录可复现输入，防止未来仅看到上游 Writer API 就把 7z 加入可创建菜单。</summary>
 public sealed class SevenZipCandidateTests
 {
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public async Task 锁定版本混合条目样本验证失败因此7z创建保持关闭(bool compressHeader)
+    public async Task 修复空条目读取后候选可回读但7z创建仍保持关闭(bool compressHeader)
     {
         using var w = new TestWorkspace(); var path = w.FilePath("candidate.7z");
         await using (var output = File.Create(path))
@@ -30,7 +30,7 @@ public sealed class SevenZipCandidateTests
             await writer.WriteDirectoryAsync("资料/空目录", null, TestContext.Current.CancellationToken);
         }
         var check = await new ArchiveCheckService().CheckAsync(new(path, temporaryDirectory: w.Output), cancellationToken: TestContext.Current.CancellationToken);
-        Assert.Equal(ArchiveCheckState.Failed, check.State); Assert.Empty(check.Evidence);
+        Assert.Equal(ArchiveCheckState.Completed, check.State); Assert.NotEmpty(check.Evidence);
         Assert.DoesNotContain(ArchiveCapabilities.Creation, c => c.Format == PackFormat.SevenZip);
         var input = PackTests.Source(w, "a.txt");
         await Assert.ThrowsAsync<PackValidationException>(() => new PackService().PrepareAsync(new([input], w.FilePath("out.7z"), options: new() { Format = PackFormat.SevenZip }), cancellationToken: TestContext.Current.CancellationToken));

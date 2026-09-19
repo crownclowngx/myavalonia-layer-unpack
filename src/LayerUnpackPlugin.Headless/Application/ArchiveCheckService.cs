@@ -40,11 +40,9 @@ public sealed class ArchiveCheckService(IArchiveExtractor extractor, IArchiveBro
             await Task.Run(async () =>
             {
                 var token = timeout.Token; token.ThrowIfCancellationRequested();
-                PathPolicy.EnsureNoLinks(request.SourcePath);
-                await using var source = new FileStream(request.SourcePath, FileMode.Open, FileAccess.Read, FileShare.Read, 131072, true);
-                if (source.Length > request.Limits.MaxInputBytes)
-                    throw new UnpackFailureException(UnpackError.BudgetExceeded, "输入文件超过单包读取上限。", true);
-                var modified = File.GetLastWriteTimeUtc(request.SourcePath);
+                var logicalSource = ArchiveSourceResolver.ResolveInputs([request.SourcePath], request.Limits, token).Single();
+                await using var source = await ArchiveSourceReader.OpenAsync(logicalSource, request.Limits, token).ConfigureAwait(false);
+                var fingerprint = await source.FingerprintAsync(token).ConfigureAwait(false);
                 if (request.Scope == ArchiveCheckScope.DirectoryOnly)
                 {
                     var limits = new BrowseLimits { Extraction = request.Limits, MaxRows = request.Limits.MaxEntries };
@@ -62,7 +60,7 @@ public sealed class ArchiveCheckService(IArchiveExtractor extractor, IArchiveBro
                     try
                     {
                         temporary = new OutputTransaction(request.TemporaryDirectory ?? Path.GetTempPath());
-                        decoded = await extractor.ExtractAsync(request.SourcePath, temporary.StagingDirectory, password,
+                        decoded = await extractor.ExtractAsync(logicalSource, temporary.StagingDirectory, password,
                             request.NameEncoding, budget, _ => progress?.Report(new(budget.Entries, budget.Bytes, budget.Attempts)), token).ConfigureAwait(false);
                     }
                     catch (UnpackFailureException e) when (e.Code == UnpackError.PasswordRequiredOrInvalid)
@@ -72,8 +70,7 @@ public sealed class ArchiveCheckService(IArchiveExtractor extractor, IArchiveBro
                     { decoded = null; throw new UnpackFailureException(UnpackError.OutputError, "检查临时内容未能清理，已停止后续尝试。"); }
                     if (retry) continue;
                     token.ThrowIfCancellationRequested();
-                    if (source.Length != new FileInfo(request.SourcePath).Length || modified != File.GetLastWriteTimeUtc(request.SourcePath))
-                        throw new UnpackFailureException(UnpackError.InputChanged, "检查期间来源发生变化，请重新检查。");
+                    await source.VerifyAsync(fingerprint, token).ConfigureAwait(false);
                     format = decoded!.Format; files = decoded.RelativeFiles.Count; error = null;
                     state = decoded.Warning is not null || decoded.CheckLimitations.Count > 0 || (files > 0 && decoded.Evidence.Count == 0)
                         ? ArchiveCheckState.CompletedWithLimitations : ArchiveCheckState.Completed;

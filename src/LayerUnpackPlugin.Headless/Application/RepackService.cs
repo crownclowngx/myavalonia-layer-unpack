@@ -38,7 +38,8 @@ public sealed class RepackService(IArchiveExtractor extractor, CommittedPackPlan
             throw new PackValidationException("普通格式转换保留全部结构；使用整理规则时请显式选择展开整理模式。");
         var output = OrganizationFiles.Absolute(request.OutputDirectory);
         if (File.Exists(output)) throw new PackValidationException("目标位置必须是目录。");
-        var sources = request.Sources.Select(OrganizationFiles.Absolute).Distinct(OrganizationFiles.Comparer).ToArray();
+        var logicalSources = ArchiveSourceResolver.ResolveInputs(request.Sources.Select(OrganizationFiles.Absolute), request.Limits.Unpack, cancellationToken);
+        var sources = logicalSources.Select(s => s.PrimaryPath).ToArray();
         if (sources.Length == 0 || sources.Length > request.Limits.Unpack.MaxArchives || sources.Length > request.Limits.Pack.MaxInputs)
             throw new PackValidationException("请添加来源，且来源数量不能超过整项任务上限。");
         var passwords = (sourcePasswords ?? []).ToArray();
@@ -62,7 +63,7 @@ public sealed class RepackService(IArchiveExtractor extractor, CommittedPackPlan
                 workspace = new OutputTransaction(output);
                 var unpackRequest = new UnpackRequest([source], workspace.StagingDirectory,
                     request.Mode == ConversionMode.FormatOnly ? 1 : request.MaxDepth, passwords, request.Limits.Unpack, request.LegacyNameEncoding);
-                await using var session = new UnpackSession(unpackRequest, extractor, unpackBudget, request.Mode != ConversionMode.FormatOnly);
+                await using var session = new UnpackSession(unpackRequest, extractor, unpackBudget, request.Mode != ConversionMode.FormatOnly, [logicalSources[index]]);
                 var unpacked = await session.ExecuteAsync(new Relay<UnpackProgress>(_ => Report(RepackPhase.Reading)), timeout.Token).ConfigureAwait(false);
                 stopped |= unpacked.RetryBlocked;
                 timeout.Token.ThrowIfCancellationRequested();

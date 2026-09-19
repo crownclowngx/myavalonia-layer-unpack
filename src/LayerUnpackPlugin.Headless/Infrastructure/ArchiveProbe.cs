@@ -48,6 +48,7 @@ public static class ArchiveProbe
     public static string OutputName(string source)
     {
         var name = Path.GetFileName(source);
+        if (Application.ArchiveSourceResolver.IsSplitPath(source)) name = Path.GetFileNameWithoutExtension(name);
         foreach (var ending in new[] { ".tar.gz", ".tar.bz2", ".tar.xz" })
             if (name.EndsWith(ending, StringComparison.OrdinalIgnoreCase)) return name[..^ending.Length];
         return Path.GetFileNameWithoutExtension(name);

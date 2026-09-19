@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Security.Cryptography;
 using LayerUnpackPlugin.Headless.Contracts;
 using LayerUnpackPlugin.Headless.Domain;
 using LayerUnpackPlugin.Headless.Infrastructure;
@@ -41,7 +40,7 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
     private readonly object _disposeLock = new();
     private Task? _disposeTask;
 
-    internal UnpackSession(UnpackRequest request, IArchiveExtractor extractor, ExecutionBudget? sharedBudget = null, bool discoverChildren = true)
+    internal UnpackSession(UnpackRequest request, IArchiveExtractor extractor, ExecutionBudget? sharedBudget = null, bool discoverChildren = true, IReadOnlyList<ArchiveSource>? frozenSources = null)
     {
         ArgumentNullException.ThrowIfNull(request);
         _extractor = extractor;
@@ -55,13 +54,15 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
         _outputDirectory = ValidateAbsolutePath(request.OutputDirectory, "OutputDirectory");
         if (File.Exists(_outputDirectory)) throw new UnpackValidationException("OutputDirectory", "输出位置必须是目录。");
         PathPolicy.EnsureNoLinks(_outputDirectory);
-        var paths = request.Inputs.Select(p => ValidateAbsolutePath(p, "Inputs"))
-            .Distinct(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal).ToArray();
-        if (paths.Length == 0 || paths.Length > request.Limits.MaxArchives)
-            throw new UnpackValidationException("Inputs", "至少添加一个压缩包，且输入数量不得超过批次节点预算。");
+        var sources = frozenSources ?? request.InputSnapshot ?? ArchiveSourceResolver.ResolveInputs(request.Inputs, request.Limits);
+        if (request.InputSnapshot is not null && !request.Inputs.Select(p => ValidateAbsolutePath(p, "Inputs"))
+            .SequenceEqual(request.InputSnapshot.Select(s => s.PrimaryPath), ArchiveSourceResolver.Comparer))
+            throw new UnpackValidationException("Inputs", "来源快照与输入清单不一致，请重新添加输入。");
+        if (sources.Count == 0 || sources.Count > request.Limits.MaxArchives)
+            throw new UnpackValidationException("Inputs", "至少添加一个逻辑压缩包，且数量不得超过批次节点预算。");
         _passwords.Add(request.Passwords);
         _budget = sharedBudget ?? new ExecutionBudget(request.Limits);
-        foreach (var path in paths) AddNode(path, null, 1);
+        foreach (var source in sources) AddNode(source, null, 1);
         _snapshot = BuildSnapshot(BatchState.Ready);
     }
 
@@ -112,10 +113,23 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
             var cancelled = false;
             try
             {
-                foreach (var node in selected)
+                // 每轮只取最浅层；本层所有解码终态后才发现孩子。重试第 2、4 层时，
+                // 新产生的第 3 层仍会先执行，而不会被简单 FIFO 排在既有第 4 层后面。
+                var pending = selected.ToList();
+                var retrySet = retryIds?.ToHashSet() ?? [];
+                while (pending.Count > 0)
                 {
-                    linked.Token.ThrowIfCancellationRequested();
-                    await ExecuteNodeAsync(node, retryIds is not null, operationId, progress, linked.Token).ConfigureAwait(false);
+                    var depth = pending.Min(n => n.Depth);
+                    var layer = pending.Where(n => n.Depth == depth).ToArray();
+                    pending.RemoveAll(n => n.Depth == depth);
+                    foreach (var node in layer)
+                    {
+                        linked.Token.ThrowIfCancellationRequested();
+                        await ExecuteNodeAsync(node, retrySet.Contains(node.Id), operationId, progress, linked.Token).ConfigureAwait(false);
+                    }
+                    if (!_discoverChildren) continue;
+                    foreach (var node in layer.Where(n => n.State == NodeState.Extracted))
+                        pending.AddRange(await DiscoverChildrenAsync(node, operationId, progress, linked.Token).ConfigureAwait(false));
                 }
             }
             catch (OperationCanceledException) when (linked.IsCancellationRequested) { cancelled = true; }
@@ -142,12 +156,8 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
         var token = timeout.Token;
         try
         {
-            PathPolicy.EnsureNoLinks(node.Source);
-            // Windows 下持有只共享读的源句柄，覆盖摘要验证及所有候选尝试，避免检查后被另一个写入者替换。
-            await using var sourceLock = new FileStream(node.Source, FileMode.Open, FileAccess.Read, FileShare.Read, 131072, true);
-            if (sourceLock.Length > _budget.Limits.MaxInputBytes)
-                throw new UnpackFailureException(UnpackError.BudgetExceeded, "输入文件超过读取预算。", true);
-            var fingerprint = Convert.ToHexString(await SHA256.HashDataAsync(sourceLock, token).ConfigureAwait(false));
+            await using var sourceLock = await ArchiveSourceReader.OpenAsync(node.LogicalSource, _budget.Limits, token).ConfigureAwait(false);
+            var fingerprint = await sourceLock.FingerprintAsync(token).ConfigureAwait(false);
             if (retry && node.Fingerprint is not null && node.Fingerprint != fingerprint)
                 throw new UnpackFailureException(UnpackError.InputChanged, "源压缩包自上次执行后发生变化，请创建新批次。");
             node.Fingerprint = fingerprint;
@@ -164,7 +174,7 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
                 {
                     node.State = NodeState.Extracting;
                     Publish(BatchState.Running, operationId, progress);
-                    extracted = await _extractor.ExtractAsync(node.Source, transaction.StagingDirectory, password, _legacyNameEncoding, _budget, bytes =>
+                    extracted = await _extractor.ExtractAsync(node.LogicalSource, transaction.StagingDirectory, password, _legacyNameEncoding, _budget, bytes =>
                     {
                         node.Bytes += bytes;
                         if (lastNotification.ElapsedMilliseconds >= 100)
@@ -172,6 +182,7 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
                     }, token).ConfigureAwait(false);
                     var manifest = await CommittedManifest.CaptureAsync(transaction.StagingDirectory, _budget.Limits.MaxEntries, token).ConfigureAwait(false);
                     token.ThrowIfCancellationRequested();
+                    await sourceLock.VerifyAsync(fingerprint, token).ConfigureAwait(false);
                     node.Output = transaction.Commit(ArchiveProbe.OutputName(node.Source), token);
                     node.Entries = manifest;
                     node.Format = extracted.Format;
@@ -193,33 +204,9 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
                 throw lastFailure ?? new UnpackFailureException(UnpackError.PasswordRequiredOrInvalid, "没有可用密码或加密内容已损坏。");
             Publish(BatchState.Running, operationId, progress);
 
-            // 普通格式转换不探测内嵌归档，避免将一个应保留的文件变成递归节点或消耗发现预算。
-            if (!_discoverChildren) return;
-            // 父包已经提交，后续任何子包失败都不能改变父包自身成功的事实。
-            var children = new List<Node>();
-            foreach (var relative in extracted!.RelativeFiles.Order(StringComparer.OrdinalIgnoreCase))
-            {
-                token.ThrowIfCancellationRequested();
-                var childPath = PathPolicy.EntryPath(node.Output!, relative, false);
-                var kind = await ArchiveProbe.DetectAsync(childPath, token).ConfigureAwait(false);
-                if (kind != ArchiveKind.Unknown || ArchiveProbe.HasKnownExtension(childPath))
-                    children.Add(AddNode(childPath, node.Id, node.Depth + 1));
-            }
-            // 当前包的超时不占用后代预算：每个子包另建自己的超时令牌，批次关闭仍传递给所有后代。
-            foreach (var child in children)
-                await ExecuteNodeAsync(child, false, operationId, progress, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception e)
         {
-            if (node.State == NodeState.Extracted)
-            {
-                // 已提交的父节点保留成功事实并附带发现诊断，不制造指向自身的假子包或开放重试。
-                if (e is OperationCanceledException && cancellationToken.IsCancellationRequested) throw;
-                if (e is UnpackFailureException stop && stop.StopBatch) { node.Error = Diagnostic(stop); throw; }
-                node.Error = e is UnpackFailureException known ? Diagnostic(known) :
-                    new UnpackDiagnostic(UnpackError.InputUnavailable, "解压已提交，但后续发现未完成。");
-                return;
-            }
             if (cancellationToken.IsCancellationRequested)
             { node.State = NodeState.Cancelled; throw new OperationCanceledException(cancellationToken); }
             node.State = NodeState.Failed;
@@ -237,7 +224,41 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
         finally { Publish(BatchState.Running, operationId, progress); }
     }
 
-    private Node AddNode(string source, Guid? parentId, int depth)
+    /// <summary>只读取父提交清单，不扫描历史输出目录；超时属于发现阶段，不继承已结束的解码超时。</summary>
+    private async Task<IReadOnlyList<Node>> DiscoverChildrenAsync(Node parent, Guid operationId, IProgress<UnpackProgress>? progress, CancellationToken cancellationToken)
+    {
+        var children = new List<Node>();
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(_budget.Limits.ArchiveTimeout);
+        var token = timeout.Token;
+        try
+        {
+            var paths = new List<string>();
+            foreach (var entry in parent.Entries!.Where(e => !e.IsDirectory).OrderBy(e => e.RelativePath, StringComparer.OrdinalIgnoreCase))
+            {
+                token.ThrowIfCancellationRequested();
+                var path = PathPolicy.EntryPath(parent.Output!, entry.RelativePath, false);
+                PathPolicy.EnsureNoLinks(path);
+                if (ArchiveSourceResolver.IsSplitPath(path) || ArchiveProbe.HasKnownExtension(path) ||
+                    await ArchiveProbe.DetectAsync(path, token).ConfigureAwait(false) != ArchiveKind.Unknown) paths.Add(path);
+            }
+            foreach (var source in ArchiveSourceResolver.ResolveCommitted(paths, _budget.Limits, token))
+                children.Add(AddNode(source, parent.Id, parent.Depth + 1));
+        }
+        catch (Exception e)
+        {
+            // 父包已经完整提交，发现失败只能附加诊断，不能把它改成解码失败或制造假孩子。
+            parent.Error = e is UnpackFailureException failure ? Diagnostic(failure) :
+                new(e is OperationCanceledException && !cancellationToken.IsCancellationRequested ? UnpackError.Timeout : UnpackError.InputUnavailable,
+                    "解压已提交，但下一层发现未完成；已成功输出仍然保留。");
+            if (cancellationToken.IsCancellationRequested) throw new OperationCanceledException(cancellationToken);
+            if (e is UnpackFailureException { StopBatch: true }) throw;
+        }
+        finally { Publish(BatchState.Running, operationId, progress); }
+        return children;
+    }
+
+    private Node AddNode(ArchiveSource source, Guid? parentId, int depth)
     {
         _budget.AddArchive();
         var node = new Node(source, parentId, depth);
@@ -284,11 +305,12 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
         finally { _executionGate.Release(); }
     }
 
-    private sealed class Node(string source, Guid? parentId, int depth)
+    private sealed class Node(ArchiveSource source, Guid? parentId, int depth)
     {
         internal Guid Id { get; } = Guid.NewGuid();
         internal Guid? ParentId { get; } = parentId;
-        internal string Source { get; } = source;
+        internal ArchiveSource LogicalSource { get; } = source;
+        internal string Source => LogicalSource.PrimaryPath;
         internal int Depth { get; } = depth;
         internal NodeState State { get; set; } = NodeState.Queued;
         internal string? Format { get; set; }
@@ -301,6 +323,6 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
         internal IReadOnlyList<CommittedEntry>? Entries { get; set; }
         internal ArchiveNodeResult ToResult() => new(Id, ParentId, Source, Depth, State, Format, Output, Error,
             Array.AsReadOnly(CleanupWarnings.ToArray()), Bytes, Warning)
-        { CommittedEntries = Entries };
+        { CommittedEntries = Entries, SourceMembers = LogicalSource.Members, SourceDisplayName = LogicalSource.DisplayName, IsSplitSource = LogicalSource.IsSplit };
     }
 }

@@ -103,7 +103,8 @@ public sealed class OrganizationPlanner
             {
                 if (!seen.Add(id) || !nodes.TryGetValue(id, out var ancestor) || ancestor.State != NodeState.Extracted || ancestor.OutputDirectory is null ||
                     !PathPolicy.IsWithin(ancestor.OutputDirectory, source.OutputDirectory!) ||
-                    ancestor.CommittedEntries?.Any(e => !e.IsDirectory && OrganizationFiles.Comparer.Equals(OrganizationFiles.EntryPath(ancestor.OutputDirectory, e.RelativePath, false), source.SourcePath)) != true)
+                    (source.SourceMembers.Count > 0 ? source.SourceMembers : [source.SourcePath]).Any(member =>
+                        ancestor.CommittedEntries?.Any(e => !e.IsDirectory && OrganizationFiles.Comparer.Equals(OrganizationFiles.EntryPath(ancestor.OutputDirectory, e.RelativePath, false), member)) != true))
                     throw new OrganizationFailureException(OrganizationError.MissingManifest, "来源关系不完整，不能确定嵌套结果归属。");
                 source = ancestor;
             }

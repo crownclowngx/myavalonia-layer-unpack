@@ -1,0 +1,142 @@
+{
+  "generatedAt": "2026-09-19T09:19:38.4460934+08:00",
+  "tool": "7-Zip (r) 26.03 (x86), public domain",
+  "toolUrl": "https://www.7-zip.org/a/7zr.exe",
+  "toolSha256": "AD4C82FADCBDF93C03B4FC440F300509C7D60C5C2F4D183E35D9D70D6957037D",
+  "publicTestPassword": "volume-test",
+  "generation": "7zr a -t7z -v16k -mmt=1 -y [-m0=LZMA2|-m0=LZMA] [-ms=on|-ms=off] [-pvolume-test [-mhe=on]] <name>.7z 资料",
+  "expected": [
+    {
+      "path": "资料",
+      "directory": true,
+      "bytes": 0,
+      "sha256": ""
+    },
+    {
+      "path": "资料/空.txt",
+      "directory": false,
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "资料/空目录",
+      "directory": true,
+      "bytes": 0,
+      "sha256": ""
+    },
+    {
+      "path": "资料/说明.txt",
+      "directory": false,
+      "bytes": 54,
+      "sha256": "38E0A2CFF1845DE1A4304594E90287AB5747644B024F1F8D5FBDB32B0E42CD8A"
+    },
+    {
+      "path": "资料/data.bin",
+      "directory": false,
+      "bytes": 65539,
+      "sha256": "80D7FB8F6A14E738FD3AB13D77EE0224E37B19E2C880E0478BABEAFCF27AD352"
+    }
+  ],
+  "volumes": [
+    {
+      "name": "content-encrypted.7z.001",
+      "bytes": 16384,
+      "sha256": "88B9843B1330ED9C450CFDC9BA1ED63F9BF49ACCF9DD5C5059B409872154461D"
+    },
+    {
+      "name": "content-encrypted.7z.002",
+      "bytes": 16384,
+      "sha256": "CE468D4015F0E8C049B33E4D9CAD963C419E51E2455F9DE8552D846D3A677EC6"
+    },
+    {
+      "name": "content-encrypted.7z.003",
+      "bytes": 16384,
+      "sha256": "12EEEB5D59D57E697D82169021564D59954E0ADE0620D41AEF22A7D94E76E17C"
+    },
+    {
+      "name": "content-encrypted.7z.004",
+      "bytes": 16384,
+      "sha256": "A9F10622A3A29AA7CDA1E1A63B9A243F9DE9CAC1AA80D7E387E3D99B85C20B68"
+    },
+    {
+      "name": "content-encrypted.7z.005",
+      "bytes": 308,
+      "sha256": "C187B1A604D7138F4946BDB3933D55719A4990D6052764B290A502411C5507D7"
+    },
+    {
+      "name": "header-encrypted.7z.001",
+      "bytes": 16384,
+      "sha256": "67F1E74FB20DE0B07770CFF1454E1346A1D82BFFD04A71D92D5E7D7947E269CC"
+    },
+    {
+      "name": "header-encrypted.7z.002",
+      "bytes": 16384,
+      "sha256": "D256AFCA2999E6D2F49E3CA184C8D932CA74B9904430428487095065735D292B"
+    },
+    {
+      "name": "header-encrypted.7z.003",
+      "bytes": 16384,
+      "sha256": "5E9B4B0B8A1B430DE424D8D4E2BF42207355E2E4BC315B9CCDAC2EC5E5BC3B70"
+    },
+    {
+      "name": "header-encrypted.7z.004",
+      "bytes": 16384,
+      "sha256": "FEBE78D2914135545E0941F0B3C5C7E6D436EFE34F2F3191C06977F6916ADDF5"
+    },
+    {
+      "name": "header-encrypted.7z.005",
+      "bytes": 1264,
+      "sha256": "C42A443B6475DFFCB0D6C3183605516AE6A523434AD85D5DD2D665FD3BA63990"
+    },
+    {
+      "name": "plain.7z.001",
+      "bytes": 16384,
+      "sha256": "5AAC0098E9002772CA0D97B020300CB3CE331AAC95972AC49C821D6B9490F7F8"
+    },
+    {
+      "name": "plain.7z.002",
+      "bytes": 16384,
+      "sha256": "6119D278F9ECC9F206E4CF80AA2740D68638E144CAA4CF99C5D23393C96DD3E5"
+    },
+    {
+      "name": "plain.7z.003",
+      "bytes": 16384,
+      "sha256": "33E24CB73C9E7684E1CB854EDC5079FDD2315D669693B9AF71E0CD30D838E651"
+    },
+    {
+      "name": "plain.7z.004",
+      "bytes": 16384,
+      "sha256": "23CB4F8324E1220769D13499C9E32CE6D12F086085E1637AE34768676A616CB9"
+    },
+    {
+      "name": "plain.7z.005",
+      "bytes": 280,
+      "sha256": "CBBFCD6CA4BAC3D53A7DD34CCFC5533DF43DC5875A81A7DE36E5D4EB2118DFEC"
+    },
+    {
+      "name": "solid.7z.001",
+      "bytes": 16384,
+      "sha256": "3FDFBA408F970B5CA4B39EE1410BDAF46064B77E4E7DB54E0AB4BF81D308A1A5"
+    },
+    {
+      "name": "solid.7z.002",
+      "bytes": 16384,
+      "sha256": "6119D278F9ECC9F206E4CF80AA2740D68638E144CAA4CF99C5D23393C96DD3E5"
+    },
+    {
+      "name": "solid.7z.003",
+      "bytes": 16384,
+      "sha256": "EB999C5EF07C55279EC5AD002C7B62E3F9DECB0C6E4564186B0D20DFE88BBC8A"
+    },
+    {
+      "name": "solid.7z.004",
+      "bytes": 16384,
+      "sha256": "23CB4F8324E1220769D13499C9E32CE6D12F086085E1637AE34768676A616CB9"
+    },
+    {
+      "name": "solid.7z.005",
+      "bytes": 279,
+      "sha256": "46005CCFFF45A4F44FF3CC6EB9CFF2F076E385EBDF6BD81CA3D1CF5616DE422F"
+    }
+  ]
+}

@@ -125,7 +125,7 @@ public sealed class ArchiveCheckSafetyTests
     }
     private sealed class Stub(Func<string, string, string?, LegacyNameEncoding, ExecutionBudget, Action<long>, CancellationToken, Task<ExtractedArchive>> run) : IArchiveExtractor
     {
-        public Task<ExtractedArchive> ExtractAsync(string source, string destination, string? password, LegacyNameEncoding legacyNameEncoding, ExecutionBudget budget, Action<long> progress, CancellationToken cancellationToken)
-            => run(source, destination, password, legacyNameEncoding, budget, progress, cancellationToken);
+        public Task<ExtractedArchive> ExtractAsync(ArchiveSource logicalSource, string destination, string? password, LegacyNameEncoding legacyNameEncoding, ExecutionBudget budget, Action<long> progress, CancellationToken cancellationToken)
+            => run(logicalSource.PrimaryPath, destination, password, legacyNameEncoding, budget, progress, cancellationToken);
     }
 }

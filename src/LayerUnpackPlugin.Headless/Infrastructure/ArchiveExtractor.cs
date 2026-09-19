@@ -17,9 +17,16 @@ namespace LayerUnpackPlugin.Headless.Infrastructure;
 /// <summary>按已验证的格式选择解码器，只解一个逻辑包。逐条目检查路径、链接和大小，绝不调用自动落盘 API。</summary>
 public sealed class ArchiveExtractor : IArchiveExtractor
 {
-    public async Task<ExtractedArchive> ExtractAsync(string source, string destination, string? password, LegacyNameEncoding legacyNameEncoding,
+    /// <summary>保留单路径便利入口，但所有调用都经过同一分卷解析规则。</summary>
+    public Task<ExtractedArchive> ExtractAsync(string source, string destination, string? password, LegacyNameEncoding legacyNameEncoding,
+        ExecutionBudget budget, Action<long> progress, CancellationToken cancellationToken) =>
+        ExtractAsync(ArchiveSourceResolver.ResolveInputs([source], budget.Limits, cancellationToken).Single(), destination,
+            password, legacyNameEncoding, budget, progress, cancellationToken);
+
+    public async Task<ExtractedArchive> ExtractAsync(ArchiveSource logicalSource, string destination, string? password, LegacyNameEncoding legacyNameEncoding,
         ExecutionBudget budget, Action<long> progress, CancellationToken cancellationToken)
     {
+        var source = logicalSource.PrimaryPath;
         var encrypted = false;
         var possibleSplit = false;
         try
@@ -27,10 +34,11 @@ public sealed class ArchiveExtractor : IArchiveExtractor
             cancellationToken.ThrowIfCancellationRequested();
             PathPolicy.EnsureNoLinks(source);
             PathPolicy.EnsureNoLinks(destination);
-            if (new FileInfo(source).Length > budget.Limits.MaxInputBytes)
-                throw new UnpackFailureException(UnpackError.BudgetExceeded, "输入文件超过单包读取上限。", true);
-            var kind = await ArchiveProbe.DetectAsync(source, cancellationToken).ConfigureAwait(false);
-            possibleSplit = kind == ArchiveKind.SevenZip && Path.GetExtension(source) is { Length: 4 } extension && extension[1..].All(char.IsDigit);
+            await using var lease = await ArchiveSourceReader.OpenAsync(logicalSource, budget.Limits, cancellationToken).ConfigureAwait(false);
+            var kind = await lease.ProbeAsync(cancellationToken).ConfigureAwait(false);
+            possibleSplit = logicalSource.IsSplit || (kind == ArchiveKind.SevenZip && Path.GetExtension(source) is { Length: 4 } extension && extension[1..].All(char.IsDigit));
+            if (logicalSource.IsSplit && kind != ArchiveKind.SevenZip)
+                throw new UnpackFailureException(UnpackError.UnsupportedFormat, "标准 .7z 数字卷的逻辑签名不是 7z，不能按其他格式解码。");
             if (kind == ArchiveKind.Unknown)
                 throw new UnpackFailureException(UnpackError.UnsupportedFormat, "无法识别此格式，或压缩包头已损坏。");
             if (kind == ArchiveKind.Zip)
@@ -40,8 +48,8 @@ public sealed class ArchiveExtractor : IArchiveExtractor
             if (kind == ArchiveKind.Tar)
                 return await ExtractTarAsync(source, destination, budget, progress, cancellationToken).ConfigureAwait(false);
 
-            // 使用单一外部文件流，禁止引擎通过文件名自动发现并打开额外卷。
-            await using var input = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, 131072, true);
+            // 只交付已审计的有序流；解码器拿不到目录发现权限，也不拥有底层句柄。
+            var input = lease.Streams[0];
             var isRar5 = false;
             if (kind == ArchiveKind.Rar) { input.Position = 6; isRar5 = input.ReadByte() == 1; input.Position = 0; }
             var options = new ReaderOptions
@@ -51,7 +59,7 @@ public sealed class ArchiveExtractor : IArchiveExtractor
                 LookForHeader = false,
                 ArchiveEncoding = new ArchiveEncoding { Default = new UTF8Encoding(false, true) }
             };
-            await using var reader = await EntryCursor.CreateAsync(input, options, kind, cancellationToken).ConfigureAwait(false);
+            await using var reader = await EntryCursor.CreateAsync(lease.Streams, options, kind, cancellationToken).ConfigureAwait(false);
             var files = new List<string>();
             var crcFiles = 0; var lengthFiles = 0;
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -62,9 +70,12 @@ public sealed class ArchiveExtractor : IArchiveExtractor
                     cancellationToken.ThrowIfCancellationRequested();
                     budget.AddEntry();
                     var entry = reader.Entry;
-                    encrypted |= entry.IsEncrypted;
+                    // SharpCompress 0.50.4 的 7z 空文件没有 Folder，但可空 FindIndex != -1 会误报加密。
+                    // 空正文不需要密码；加密头仍由打开容器时验证，有正文的条目仍严格检查密码与 CRC。
+                    var entryEncrypted = entry.IsEncrypted && !(kind == ArchiveKind.SevenZip && entry.Size == 0);
+                    encrypted |= entryEncrypted;
                     if (entry.IsSplitAfter || entry.VolumeIndexFirst != entry.VolumeIndexLast || entry is IArchiveEntry { IsComplete: false })
-                        throw new UnpackFailureException(UnpackError.MissingVolume, "首版不支持分卷包，请提供完整的单文件压缩包。");
+                        throw new UnpackFailureException(UnpackError.MissingVolume, "此格式的多卷结构尚不支持，或所需卷不完整。");
                     // TAR 没有实现 Attrib；RAR5 的重定向也不会出现在 LinkTarget 中，必须检查专用属性。
                     if (entry.LinkTarget is not null || entry is RarEntry { IsRedir: true } ||
                         (kind != ArchiveKind.Tar && ArchiveEntryPolicy.Unsupported(entry.Attrib, entry.IsDirectory)))
@@ -73,7 +84,7 @@ public sealed class ArchiveExtractor : IArchiveExtractor
                     if (target.Equals(Path.GetFullPath(destination), PathPolicy.Comparison) && entry.IsDirectory) continue;
                     if (!seen.Add(target)) throw new UnpackFailureException(UnpackError.OutputError, "压缩包包含重复或大小写冲突的路径。");
                     if (entry.IsDirectory) { Directory.CreateDirectory(target); continue; }
-                    if (entry.IsEncrypted && password is null) PasswordFailure();
+                    if (entryEncrypted && password is null) PasswordFailure();
                     if (entry.Size > budget.Limits.MaxFileBytes)
                         throw new UnpackFailureException(UnpackError.BudgetExceeded, "条目声明的大小超过单文件预算。", true);
                     Directory.CreateDirectory(Path.GetDirectoryName(target)!);
@@ -84,12 +95,12 @@ public sealed class ArchiveExtractor : IArchiveExtractor
                     {
                         var copied = await StreamCopy.CopyAsync(entryStream, output, budget, progress, cancellationToken).ConfigureAwait(false);
                         if ((entry.Size > 0 && copied.Length != entry.Size) ||
-                            (!(isRar5 && entry.IsEncrypted) && copied.Crc != (uint)entry.Crc))
+                            (!(isRar5 && entryEncrypted) && copied.Crc != (uint)entry.Crc))
                         {
-                            if (entry.IsEncrypted) PasswordFailure();
+                            if (entryEncrypted) PasswordFailure();
                             throw new UnpackFailureException(UnpackError.CorruptArchive, "条目长度或校验和不匹配，文件可能损坏。");
                         }
-                        if (!(isRar5 && entry.IsEncrypted)) crcFiles++;
+                        if (!(isRar5 && entryEncrypted)) crcFiles++;
                         if (entry.Size > 0) lengthFiles++;
                     }
                     catch
@@ -231,11 +242,11 @@ public sealed class ArchiveExtractor : IArchiveExtractor
         private EntryCursor(IAsyncReader reader, IAsyncArchive? archive = null) { _reader = reader; _archive = archive; }
         public IEntry Entry => _reader!.Entry;
 
-        public static async Task<EntryCursor> CreateAsync(Stream input, ReaderOptions options, ArchiveKind kind, CancellationToken token)
+        public static async Task<EntryCursor> CreateAsync(IReadOnlyList<Stream> inputs, ReaderOptions options, ArchiveKind kind, CancellationToken token)
         {
             if (kind != ArchiveKind.SevenZip)
-                return new EntryCursor(await ReaderFactory.OpenAsyncReader(input, options, token).ConfigureAwait(false));
-            var archive = await ArchiveFactory.OpenAsyncArchive(input, options, token).ConfigureAwait(false);
+                return new EntryCursor(await ReaderFactory.OpenAsyncReader(inputs[0], options, token).ConfigureAwait(false));
+            var archive = await SharpCompress.Archives.SevenZip.SevenZipArchive.OpenAsyncArchive(inputs, options, token).ConfigureAwait(false);
             try { return new EntryCursor(await archive.ExtractAllEntriesAsync().ConfigureAwait(false), archive); }
             catch { await archive.DisposeAsync().ConfigureAwait(false); throw; }
         }

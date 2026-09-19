@@ -12,6 +12,8 @@ public sealed record UnpackLimits
     public long MaxInputBytes { get; init; } = 4L * 1024 * 1024 * 1024;
     public int MaxEntries { get; init; } = 100_000;
     public int MaxArchives { get; init; } = 1_000;
+    /// <summary>按逻辑组限制物理卷数，防止大量小卷耗尽句柄；输入字节仍按所有卷之和计量。</summary>
+    public int MaxVolumesPerArchive { get; init; } = 256;
     public int MaxAttempts { get; init; } = 2_048;
     public TimeSpan ArchiveTimeout { get; init; } = TimeSpan.FromMinutes(5);
 
@@ -20,7 +22,7 @@ public sealed record UnpackLimits
         const long maximum = 1024L * 1024 * 1024 * 1024;
         if (MaxTotalBytes is <= 0 or > maximum || MaxFileBytes is <= 0 or > maximum ||
             MaxInputBytes is <= 0 or > maximum || MaxFileBytes > MaxTotalBytes ||
-            MaxEntries is <= 0 or > 1_000_000 || MaxArchives is <= 0 or > 10_000 ||
+            MaxEntries is <= 0 or > 1_000_000 || MaxArchives is <= 0 or > 10_000 || MaxVolumesPerArchive is <= 0 or > 1024 ||
             MaxAttempts is <= 0 or > 100_000 || ArchiveTimeout < TimeSpan.FromMilliseconds(10) ||
             ArchiveTimeout > TimeSpan.FromHours(1))
             throw new UnpackValidationException("Limits", "资源预算必须为有效的有限值，且单文件上限不能超过批次上限。");
@@ -32,7 +34,7 @@ public sealed record UnpackLimits
 public sealed class UnpackRequest
 {
     public UnpackRequest(IEnumerable<string> inputs, string outputDirectory, int maxDepth = 1,
-        IEnumerable<string>? passwords = null, UnpackLimits? limits = null, LegacyNameEncoding legacyNameEncoding = LegacyNameEncoding.Gb18030)
+        IEnumerable<string>? passwords = null, UnpackLimits? limits = null, LegacyNameEncoding legacyNameEncoding = LegacyNameEncoding.Gb18030, IEnumerable<ArchiveSource>? inputSnapshot = null)
     {
         ArgumentNullException.ThrowIfNull(inputs);
         Inputs = Array.AsReadOnly(inputs.ToArray());
@@ -41,9 +43,12 @@ public sealed class UnpackRequest
         Passwords = Array.AsReadOnly((passwords ?? []).ToArray());
         Limits = limits ?? new UnpackLimits();
         LegacyNameEncoding = legacyNameEncoding;
+        InputSnapshot = inputSnapshot is null ? null : Array.AsReadOnly(inputSnapshot.ToArray());
     }
 
     public IReadOnlyList<string> Inputs { get; }
+    /// <summary>可选的已展示来源快照，开始执行时只校验不补卷；不提供时由会话在创建时冻结。</summary>
+    public IReadOnlyList<ArchiveSource>? InputSnapshot { get; }
     public string OutputDirectory { get; }
     public int MaxDepth { get; }
     [JsonIgnore] public IReadOnlyList<string> Passwords { get; }
@@ -60,7 +65,7 @@ public enum UnpackError
 {
     PasswordRequiredOrInvalid, CorruptArchive, UnsupportedFormat, UnsupportedEncryption,
     MissingVolume, UnsafePath, BudgetExceeded, InputChanged, InputUnavailable, OutputError, Timeout, InvalidNameEncoding, UnexpectedError,
-    MissingVolumeOrCorruptArchive
+    MissingVolumeOrCorruptArchive, InvalidVolumeSet
 }
 
 /// <summary>仅包含经过归一化的诊断；不保留引擎异常对象，避免密码通过异常链泄漏。</summary>
@@ -76,10 +81,14 @@ public sealed record ArchiveNodeResult(Guid Id, Guid? ParentId, string SourcePat
     /// <summary>本节点提交时捕获的完整条目清单，路径相对 OutputDirectory；不包含后来展开的子归档内容。
     /// null 表示旧调用方未提供清单，不能据输出目录推测。空集合表示已确认的空归档。</summary>
     public IReadOnlyList<CommittedEntry>? CommittedEntries { get; init; }
+    /// <summary>逻辑来源的冻结成员，仅用于展示和显式重新识别；不凭结果重新扫描补全旧快照。</summary>
+    public IReadOnlyList<string> SourceMembers { get; init; } = [];
+    public string? SourceDisplayName { get; init; }
+    public bool IsSplitSource { get; init; }
     /// <summary>重试保持原输入、编码和预算，只适用于补密或访问条件恢复；跨层和 UI 共用同一判断。</summary>
     public bool CanRetry => State == NodeState.Failed && CleanupWarnings.Count == 0 &&
         Error?.Code is not (UnpackError.UnsafePath or UnpackError.InputChanged or UnpackError.BudgetExceeded or
-            UnpackError.InvalidNameEncoding or UnpackError.UnsupportedFormat or UnpackError.UnsupportedEncryption or UnpackError.MissingVolume or UnpackError.MissingVolumeOrCorruptArchive);
+            UnpackError.InvalidNameEncoding or UnpackError.UnsupportedFormat or UnpackError.UnsupportedEncryption or UnpackError.MissingVolume or UnpackError.MissingVolumeOrCorruptArchive or UnpackError.InvalidVolumeSet);
 }
 
 /// <summary>已提交普通条目的身份与内容凭据。目录也保留，用于空目录和精确包装层判断。

@@ -28,7 +28,7 @@ public static class ArchiveCapabilities
         new ArchiveReadCapability("ZIP", true, true, true, true, "ZipCrypto、WinZip AES；名称可见",
             "长度；普通/ZipCrypto CRC；AES 认证", "单卷；旧名称需显式编码；拒绝链接、危险及冲突路径；ZIP64 大目录已测，大于 4 GiB 正文未实测"),
         new ArchiveReadCapability("7z", true, false, true, false, "已测 LZMA/LZMA2 AES 与加密头",
-            "长度与条目 CRC", "已测固实读取；不支持分卷；不保留链接和完整元数据"),
+            "长度与条目 CRC", "已测固实读取及同目录标准 .7z.001 数字分卷；不保留链接和完整元数据；分卷创建未开放"),
         new ArchiveReadCapability("RAR4 / RAR5", true, false, true, false, "已测内容与头部加密",
             "长度与 CRC；RAR5 加密 MAC 未验证", "已测固实读取；不支持分卷与创建；拒绝重定向条目"),
         new ArchiveReadCapability("TAR", true, false, true, false, "无密码",

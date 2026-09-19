@@ -75,10 +75,10 @@ public sealed class ArchiveCheckTests
     [Theory]
     [InlineData("Rar5.multi.part01.rar", UnpackError.MissingVolume)]
     [InlineData("7Zip.BZip2.split.001", UnpackError.MissingVolumeOrCorruptArchive)]
-    public async Task 缺卷诊断不宣称支持拼接(string fixture, UnpackError code)
+    public async Task 未支持多卷格式保留诊断与明确的下一步(string fixture, UnpackError code)
     {
         using var w = new TestWorkspace(); var result = await Check(w, w.CopyFixture(fixture));
-        Assert.Equal(code, result.Error?.Code); Assert.Contains("不能拼接", result.Error!.NextStep);
+        Assert.Equal(code, result.Error?.Code); Assert.Contains("原工具", result.Error!.NextStep);
         Assert.Empty(result.Evidence); Assert.Empty(Directory.GetFileSystemEntries(w.Output));
     }
 
