@@ -45,7 +45,7 @@
         "type": "Direct",
         "requested": "[1.0.0, 1.0.0]",
         "resolved": "1.0.0",
-        "contentHash": "rtWjoJAzYlOnOHFmBSyp3wGsfrX1gjvuVCvXU4IdbcPO5GDEowyoHjpnuhN/4zq2vE+aVR0l4yz9DCpJ3ZDg5w==",
+        "contentHash": "L1JKn+MbFcs1VkE3QmhLlZhPTAA01PGIkl6mPB+5dPdkF8XL13Ud1AhiMhdCs9uyXdg1Q25a1jG+dSk/Wp+7uw==",
         "dependencies": {
           "MyAvaloniaManagement.PluginSdk": "3.2.0"
         }
