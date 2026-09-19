@@ -9,6 +9,7 @@
     <PackageReference Include="MyAvaloniaManagement.PluginSdk" />
     <PackageReference Include="MyAvaloniaManagement.PluginSdk.UI" />
     <PackageReference Include="MyAvaloniaManagement.PluginSdk.Workflow" />
+    <PackageReference Include="MyAvaloniaManagement.Icons" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="SharpCompress" />
     <PackageReference Include="SharpZipLib" />

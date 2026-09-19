@@ -10,6 +10,25 @@ public sealed class LayeredSchedulingTests
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
     [Fact]
+    public async Task 层间等长同时间替换续卷仍被父提交摘要拒绝()
+    {
+        using var w = new TestWorkspace(); var parts = SplitTestData.CopyParts(w);
+        var outer = w.Zip("outer.zip", parts.Select(p => (Path.GetFileName(p), File.ReadAllBytes(p))).ToArray());
+        var changed = false;
+        await using var session = new UnpackService().CreateSession(new([outer], w.Output, 2));
+        var result = await session.ExecuteAsync(new Callback(p =>
+        {
+            var parent = p.Snapshot.Nodes[0];
+            if (changed || parent.State != NodeState.Extracted) return;
+            changed = true;
+            var path = Path.Combine(parent.OutputDirectory!, Path.GetFileName(parts[1])); var time = File.GetLastWriteTimeUtc(path);
+            var bytes = File.ReadAllBytes(path); bytes[10] ^= 1; File.WriteAllBytes(path, bytes); File.SetLastWriteTimeUtc(path, time);
+        }), Token);
+        Assert.Equal(NodeState.Extracted, result.Nodes[0].State);
+        Assert.Equal(UnpackError.InputChanged, result.Nodes[1].Error?.Code); Assert.Equal(1, result.AttemptCount);
+    }
+
+    [Fact]
     public async Task 多根多分支严格等本层全部结束再进入下一层()
     {
         using var w = new TestWorkspace();

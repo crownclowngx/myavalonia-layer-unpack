@@ -24,6 +24,8 @@
     <Compile Include="../LayerUnpackPlugin.Headless.Tests/TestWorkspace.cs" Link="Support/TestWorkspace.cs" />
     <Compile Include="../LayerUnpackPlugin.Headless.Tests/DelegatingExtractor.cs" Link="Support/DelegatingExtractor.cs" />
     <None Include="../LayerUnpackPlugin.Headless.Tests/Fixtures/Zip.deflate.pkware.zip" Link="Fixtures/Zip.deflate.pkware.zip" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="../LayerUnpackPlugin.Headless.Tests/SplitTestData.cs" Link="Support/SplitTestData.cs" />
+    <None Include="../LayerUnpackPlugin.Headless.Tests/Fixtures/G0015/**/*" Link="Fixtures/G0015/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

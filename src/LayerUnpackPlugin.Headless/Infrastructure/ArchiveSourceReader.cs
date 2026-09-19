@@ -26,6 +26,8 @@ internal sealed class ArchiveSourceReader : IAsyncDisposable
         try
         {
             token.ThrowIfCancellationRequested();
+            if (source.Members.Count > limits.MaxVolumesPerArchive)
+                throw new UnpackFailureException(UnpackError.BudgetExceeded, "分卷数量超过本次执行上限。", true);
             ArchiveSourceResolver.VerifyMembers(source, limits, token);
             if (source.Error is { } error)
                 throw new UnpackFailureException(error.Code, error.Message, error.Code == UnpackError.BudgetExceeded);
@@ -47,7 +49,7 @@ internal sealed class ArchiveSourceReader : IAsyncDisposable
         catch { await owner.DisposeAsync().ConfigureAwait(false); throw; }
     }
 
-    public async Task<string> FingerprintAsync(CancellationToken token)
+    public async Task<string> FingerprintAsync(CancellationToken token, IReadOnlyDictionary<string, CommittedEntry>? committed = null)
     {
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         for (var i = 0; i < _files.Count; i++)
@@ -56,7 +58,12 @@ internal sealed class ArchiveSourceReader : IAsyncDisposable
             var file = _files[i]; file.Position = 0;
             // 路径和序号也属于快照；同内容换名、增删卷不能冒充同一个来源。
             hash.AppendData(Encoding.UTF8.GetBytes(i + "\0" + _source.Members[i] + "\0" + _metadata[i].Length + "\0" + _metadata[i].Modified.Ticks + "\0"));
-            hash.AppendData(await SHA256.HashDataAsync(file, token).ConfigureAwait(false));
+            var contentHash = await SHA256.HashDataAsync(file, token).ConfigureAwait(false);
+            // 内层第一次执行也有可信基线：父事务提交时已经计算过摘要。BFS 等待期间即使
+            // 同名文件被等长、同时间替换，也不能用“首次读取”重新认可为本次父包产物。
+            if (committed is not null && (!committed.TryGetValue(_source.Members[i], out var entry) ||
+                entry.IsDirectory || entry.Length != file.Length || entry.Sha256 != Convert.ToHexString(contentHash))) Changed();
+            hash.AppendData(contentHash);
             file.Position = 0;
         }
         return Convert.ToHexString(hash.GetHashAndReset());

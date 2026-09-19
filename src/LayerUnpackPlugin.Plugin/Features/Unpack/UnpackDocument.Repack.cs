@@ -13,7 +13,7 @@ public sealed partial class UnpackDocument
     private readonly IRepackService _repackService;
     [ObservableProperty] private RepackDocument? _repackTask;
     [ObservableProperty] private bool _showRepackTask;
-    public bool ShowMainTask => !ShowOrganizationTask && !ShowRepackTask && !ShowCheckTask;
+    public bool ShowMainTask => !ShowOrganizationTask && !ShowRepackTask && !ShowCheckTask && !ShowRediscoveredTask;
     private bool CanConvert() => CanEdit && Inputs.Count > 0;
     private bool CanPackResults() => CanEdit && CurrentResult?.Succeeded > 0;
     private bool CanReturnFromRepack() => !IsClosed && RepackTask?.IsBusy != true;

@@ -61,6 +61,12 @@
           "Microsoft.TestPlatform.TestHost": "18.8.1"
         }
       },
+      "MyAvaloniaManagement.Icons": {
+        "type": "Direct",
+        "requested": "[1.0.0, 1.0.0]",
+        "resolved": "1.0.0",
+        "contentHash": "xukaLXsQ0bGxKyJV2jr56+Tf3b1uX7uGTqAAJEcVo10lkyA1Nxpu7/11MPbYuur2hrZTnVY2NBsZOL6VtYMQ8g=="
+      },
       "MyAvaloniaManagement.PluginSdk": {
         "type": "Direct",
         "requested": "[3.4.0, 3.4.0]",

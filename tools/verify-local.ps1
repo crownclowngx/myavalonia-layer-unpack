@@ -96,10 +96,12 @@ try {
         $checks.Add([pscustomobject]@{ name = 'docs'; exitCode = $docsExitCode; seconds = $docsWatch.Elapsed.TotalSeconds; command = './tools/check-docs.ps1' })
     }
     $diffWatch = [Diagnostics.Stopwatch]::StartNew()
-    & git diff --check 2>&1 | Tee-Object -FilePath (Join-Path $evidenceDirectory 'diff-check.log')
+    # 仓库索引保存 LF，Windows 格式化工具可能写 CRLF。仅本命令按 Git 标准归一化换行，
+    # 保留对真实行尾空格、Tab 和冲突标记的检查，不更改用户的全局 Git 配置。
+    & git -c core.autocrlf=input -c core.safecrlf=false diff --check 2>&1 | Tee-Object -FilePath (Join-Path $evidenceDirectory 'diff-check.log')
     $diffExitCode = $LASTEXITCODE
     $diffWatch.Stop()
-    $checks.Add([pscustomobject]@{ name = 'diff-check'; exitCode = $diffExitCode; seconds = $diffWatch.Elapsed.TotalSeconds; command = 'git diff --check' })
+    $checks.Add([pscustomobject]@{ name = 'diff-check'; exitCode = $diffExitCode; seconds = $diffWatch.Elapsed.TotalSeconds; command = 'git -c core.autocrlf=input -c core.safecrlf=false diff --check' })
     if ($diffExitCode -ne 0) { throw "差异空白检查未通过，退出码 $diffExitCode。" }
     Write-Output '本地门禁全部通过。发布门禁本轮未执行。'
 }

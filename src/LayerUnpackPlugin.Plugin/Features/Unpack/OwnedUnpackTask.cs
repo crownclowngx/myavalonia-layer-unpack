@@ -1,10 +1,9 @@
-using LayerUnpackPlugin.Features.Unpack;
 using LayerUnpackPlugin.Headless.Application;
 using MyAvaloniaManagement.PluginSdk;
 
-namespace LayerUnpackPlugin.Features.Browse;
+namespace LayerUnpackPlugin.Features.Unpack;
 
-/// <summary>浏览页转入原解压页时使用的显式所有权容器。只传来源与输出位置，不传密码、选择或已执行状态。</summary>
+/// <summary>浏览全部解压和分卷重新识别入口使用的显式所有权容器。只传来源与输出位置，不传密码、选择或已执行状态。</summary>
 /// <remarks>SDK 3.3 未提供携带任意路径的新建 Document 导航端口，因此在当前页承载真实 UnpackView/Document。
 /// 此任务有独立 ClosingToken；浏览页关闭会排空它，返回浏览只切换显示，不偷偷取消已开始的解压。</remarks>
 internal sealed class OwnedUnpackTask : IDocumentLifetime, IAsyncDisposable

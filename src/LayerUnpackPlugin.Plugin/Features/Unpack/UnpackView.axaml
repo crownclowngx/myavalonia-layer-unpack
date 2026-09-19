@@ -2,6 +2,12 @@
  xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
  xmlns:check="using:LayerUnpackPlugin.Features.Check" xmlns:vm="using:LayerUnpackPlugin.Features.Unpack" xmlns:organize="using:LayerUnpackPlugin.Features.Organize" xmlns:repack="using:LayerUnpackPlugin.Features.Repack" x:DataType="vm:UnpackDocument" DragDrop.AllowDrop="True">
  <Grid>
+ <Grid IsVisible="{Binding ShowRediscoveredTask}" RowDefinitions="Auto,*">
+  <Button Content="返回原解压结果" Command="{Binding ReturnFromRediscoveryCommand}" Margin="20,10,20,0" />
+  <ContentControl Grid.Row="1" Content="{Binding RediscoveredTask}">
+   <ContentControl.DataTemplates><DataTemplate DataType="{x:Type vm:UnpackDocument}" x:DataType="vm:UnpackDocument"><vm:UnpackView /></DataTemplate></ContentControl.DataTemplates>
+  </ContentControl>
+ </Grid>
  <Grid IsVisible="{Binding ShowRepackTask}" RowDefinitions="Auto,*">
   <Button Content="返回解压任务" Command="{Binding ReturnFromRepackCommand}" Margin="20,10,20,0" />
   <repack:RepackView Grid.Row="1" DataContext="{Binding RepackTask}" />
@@ -55,7 +61,11 @@
        <TextBlock Text="{Binding SelectedNode.Source}" FontSize="12" Opacity="0.65" TextWrapping="Wrap" />
        <TextBlock Text="{Binding SelectedNode.Details}" TextWrapping="Wrap" />
        <TextBlock Text="{Binding SelectedNode.OutputPath}" Opacity="0.65" TextWrapping="Wrap" />
+       <Expander Header="查看分卷清单" IsVisible="{Binding SelectedNode.IsSplit}" HorizontalAlignment="Stretch">
+        <TextBlock Text="{Binding SelectedNode.MemberDetails}" TextWrapping="Wrap" />
+       </Expander>
        <WrapPanel>
+        <Button Name="RediscoverButton" Content="重新识别此组…" IsVisible="{Binding SelectedNode.CanRediscover}" Command="{Binding RediscoverGroupCommand}" Margin="0,0,8,6" />
         <Button Content="补充密码" IsVisible="{Binding SelectedNode.NeedsPassword}" IsEnabled="{Binding CanEdit}" Click="RevealPasswords" Margin="0,0,8,6" />
         <Button Content="重试所选失败项" IsVisible="{Binding SelectedNode.CanRetry}" Command="{Binding RetryCommand}" Margin="0,0,8,6" />
         <Button Content="调整选项并开始新批次" IsVisible="{Binding SelectedNode.RequiresNewBatch}" Click="RevealOptions" IsEnabled="{Binding CanEdit}" Margin="0,0,8,6" />
@@ -88,9 +98,12 @@
       <StackPanel Spacing="8" IsEnabled="{Binding CanEdit}">
        <ListBox Name="InputList" ItemsSource="{Binding Inputs}" MaxHeight="170">
         <ListBox.ItemTemplate><DataTemplate x:DataType="vm:InputItem">
+         <StackPanel>
          <CheckBox IsChecked="{Binding IsSelected}" HorizontalAlignment="Stretch" ToolTip.Tip="{Binding Path}">
           <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
          </CheckBox>
+         <Expander Header="分卷详情" IsVisible="{Binding IsSplit}"><TextBlock Text="{Binding MemberDetails}" TextWrapping="Wrap" /></Expander>
+         </StackPanel>
         </DataTemplate></ListBox.ItemTemplate>
        </ListBox>
        <Button Content="移除所选" Command="{Binding RemoveSelectedCommand}" />

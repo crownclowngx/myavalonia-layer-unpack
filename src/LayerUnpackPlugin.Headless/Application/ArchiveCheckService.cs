@@ -54,7 +54,9 @@ public sealed class ArchiveCheckService(IArchiveExtractor extractor, IArchiveBro
                 budget.AddArchive();
                 foreach (var password in passwords.Attempts())
                 {
-                    token.ThrowIfCancellationRequested(); budget.AddAttempt();
+                    token.ThrowIfCancellationRequested();
+                    if (budget.Attempts > 0) await source.VerifyAsync(fingerprint, token).ConfigureAwait(false);
+                    budget.AddAttempt();
                     OutputTransaction? temporary = null;
                     var retry = false;
                     try

@@ -88,6 +88,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
     {
         CheckArchiveCommand.NotifyCanExecuteChanged(); ReturnFromCheckCommand.NotifyCanExecuteChanged();
         StartCommand.NotifyCanExecuteChanged(); CancelCommand.NotifyCanExecuteChanged();
+        RediscoverGroupCommand.NotifyCanExecuteChanged(); ReturnFromRediscoveryCommand.NotifyCanExecuteChanged();
         RetryCommand.NotifyCanExecuteChanged(); ClearCommand.NotifyCanExecuteChanged();
         RemoveSelectedCommand.NotifyCanExecuteChanged();
         ShowPasswordEntryCommand.NotifyCanExecuteChanged(); PrepareNewBatchCommand.NotifyCanExecuteChanged();
@@ -114,12 +115,12 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
             var found = await discovery;
             if (IsClosed) return;
             Inputs.Clear();
-            foreach (var path in found.Files) Inputs.Add(new InputItem(path));
+            foreach (var source in found.Sources) Inputs.Add(new InputItem(source.PrimaryPath, source));
             UpdateOutputSuggestion();
             Message = found.Warnings.Count == 0 ? $"已添加 {Inputs.Count} 个压缩包。" : string.Join(Environment.NewLine, found.Warnings.Take(5));
         }
         catch (OperationCanceledException) { if (!IsClosed) Message = "已取消输入扫描。"; }
-        catch (Exception e) when (e is ArgumentException or IOException or UnauthorizedAccessException)
+        catch (Exception e) when (e is ArgumentException or IOException or UnauthorizedAccessException or UnpackFailureException)
         { if (!IsClosed) Message = "无法读取输入，请检查路径和访问权限。"; }
         finally
         {
@@ -148,13 +149,19 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
             if (!retry)
             {
                 var request = new UnpackRequest(Inputs.Select(i => i.Path), OutputDirectory, MaxDepth, passwords,
-                    legacyNameEncoding: SelectedNameEncoding.Encoding);
+                    legacyNameEncoding: SelectedNameEncoding.Encoding,
+                    inputSnapshot: Inputs.All(i => i.Snapshot is not null) ? Inputs.Select(i => i.Snapshot!) : null);
                 // 新参数先验证，成功创建下一会话后才释放旧会话；错误参数不会丢掉用户正在检查的结果。
-                var next = _service.CreateSession(request);
+                var preparing = Task.Run(() => _service.CreateSession(request), operation.Token);
+                _backgroundWork = preparing;
+                var next = await preparing;
+                if (IsClosed) { await next.DisposeAsync(); return; }
                 await ResetOrganizationAsync();
                 if (_session is not null) await _session.DisposeAsync();
                 _session = next;
                 _batchOutputDirectory = request.OutputDirectory;
+                _batchMaxDepth = request.MaxDepth;
+                _batchEncoding = request.LegacyNameEncoding;
                 Roots.Clear(); Issues.Clear(); _nodeIndex.Clear(); SelectedNode = null; PasswordText = "";
                 ResultOutputPath = null; CurrentItemText = "";
                 NotifyPresentation();
@@ -247,6 +254,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
     {
         if (!CanEdit) return;
         await ResetOrganizationAsync();
+        await ResetRediscoveryAsync();
         if (_session is not null) await _session.DisposeAsync();
         _session = null;
         Inputs.Clear(); Roots.Clear(); Issues.Clear(); _nodeIndex.Clear(); SelectedNode = null;
@@ -269,6 +277,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
     {
         _closed = true; ++_generation; _closing.Cancel();
         PasswordText = ""; _hostClosing.Dispose();
+        if (_rediscoveredTask is not null) await _rediscoveredTask.DisposeAsync().ConfigureAwait(false);
         if (CheckTask is not null) await CheckTask.DisposeAsync().ConfigureAwait(false);
         if (OrganizationTask is not null) await OrganizationTask.DisposeAsync().ConfigureAwait(false);
         if (RepackTask is not null) await RepackTask.DisposeAsync().ConfigureAwait(false);
@@ -284,10 +293,14 @@ public sealed record NameEncodingOption(LegacyNameEncoding Encoding, string Labe
     public override string ToString() => Label;
 }
 
-public sealed partial class InputItem(string path) : ObservableObject
+public sealed partial class InputItem(string path, ArchiveSource? snapshot = null) : ObservableObject
 {
     public string Path { get; } = path;
-    public string Name { get; } = System.IO.Path.GetFileName(path);
+    public ArchiveSource? Snapshot { get; } = snapshot;
+    public string Name { get; } = snapshot?.IsSplit == true ? $"{snapshot.DisplayName} · {snapshot.Members.Count} 卷" : System.IO.Path.GetFileName(path);
+    public bool IsSplit => Snapshot?.IsSplit == true;
+    public string MemberDetails => Snapshot is null ? Path : string.Join(Environment.NewLine, Snapshot.Members) +
+        (Snapshot.Error is null ? "" : Environment.NewLine + Snapshot.Error.Message);
     [ObservableProperty] private bool _isSelected;
 }
 
@@ -303,10 +316,14 @@ public sealed partial class ArchiveNodeViewModel(Guid id) : ObservableObject
     [ObservableProperty] private string? _outputPath;
     [ObservableProperty] private bool _canRetry;
     [ObservableProperty] private UnpackError? _errorCode;
+    [ObservableProperty] private bool _canRediscover;
+    [ObservableProperty] private string _memberDetails = "";
+    [ObservableProperty] private bool _isSplit;
     public bool HasOutput => OutputPath is not null;
     public bool NeedsPassword => ErrorCode == UnpackError.PasswordRequiredOrInvalid;
-    public bool RequiresNewBatch => ErrorCode is UnpackError.InvalidNameEncoding or UnpackError.InputChanged
-        or UnpackError.UnsupportedFormat or UnpackError.UnsupportedEncryption or UnpackError.MissingVolume or UnpackError.MissingVolumeOrCorruptArchive or UnpackError.BudgetExceeded;
+    public bool RequiresNewBatch => !CanRediscover && ErrorCode is (UnpackError.InvalidNameEncoding or UnpackError.InputChanged
+        or UnpackError.UnsupportedFormat or UnpackError.UnsupportedEncryption or UnpackError.MissingVolume or UnpackError.MissingVolumeOrCorruptArchive or UnpackError.InvalidVolumeSet or UnpackError.BudgetExceeded);
+    partial void OnCanRediscoverChanged(bool value) => OnPropertyChanged(nameof(RequiresNewBatch));
     partial void OnOutputPathChanged(string? value) => OnPropertyChanged(nameof(HasOutput));
     partial void OnErrorCodeChanged(UnpackError? value)
     {
@@ -315,7 +332,7 @@ public sealed partial class ArchiveNodeViewModel(Guid id) : ObservableObject
 
     internal void Apply(ArchiveNodeResult node)
     {
-        Name = System.IO.Path.GetFileName(node.SourcePath); Source = node.SourcePath; OutputPath = node.OutputDirectory;
+        Name = node.IsSplitSource ? $"{node.SourceDisplayName} · {node.SourceMembers.Count} 卷" : System.IO.Path.GetFileName(node.SourcePath); Source = node.SourcePath; OutputPath = node.OutputDirectory;
         Status = node.State switch
         {
             NodeState.Queued => "排队",
@@ -329,6 +346,9 @@ public sealed partial class ArchiveNodeViewModel(Guid id) : ObservableObject
         };
         // 可重试性完全服从 Headless；界面仅据错误类型提供补密或新批次的导航入口。
         CanRetry = node.CanRetry; ErrorCode = node.Error?.Code;
+        IsSplit = node.IsSplitSource;
+        MemberDetails = string.Join(Environment.NewLine, node.SourceMembers);
+        CanRediscover = node.IsSplitSource && node.State is NodeState.Failed or NodeState.DepthLimit && node.CleanupWarnings.Count == 0;
         Details = $"第 {node.Depth} 层 · {node.Format ?? "尚未识别"}\n{Status}\n{node.Error?.Message ?? ""}" +
             (node.Error is null ? "" : "\n" + node.Error.NextStep) +
             (node.Warning is null ? "" : "\n" + node.Warning) +

@@ -157,7 +157,7 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
         try
         {
             await using var sourceLock = await ArchiveSourceReader.OpenAsync(node.LogicalSource, _budget.Limits, token).ConfigureAwait(false);
-            var fingerprint = await sourceLock.FingerprintAsync(token).ConfigureAwait(false);
+            var fingerprint = await sourceLock.FingerprintAsync(token, node.ExpectedEntries).ConfigureAwait(false);
             if (retry && node.Fingerprint is not null && node.Fingerprint != fingerprint)
                 throw new UnpackFailureException(UnpackError.InputChanged, "源压缩包自上次执行后发生变化，请创建新批次。");
             node.Fingerprint = fingerprint;
@@ -168,6 +168,7 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
             foreach (var password in _passwords.Attempts())
             {
                 token.ThrowIfCancellationRequested();
+                if (lastFailure is not null) await sourceLock.VerifyAsync(fingerprint, token).ConfigureAwait(false);
                 _budget.AddAttempt();
                 var transaction = new OutputTransaction(parentOutput);
                 try
@@ -242,8 +243,14 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
                 if (ArchiveSourceResolver.IsSplitPath(path) || ArchiveProbe.HasKnownExtension(path) ||
                     await ArchiveProbe.DetectAsync(path, token).ConfigureAwait(false) != ArchiveKind.Unknown) paths.Add(path);
             }
+            var committed = parent.Entries!.Where(e => !e.IsDirectory).ToDictionary(
+                e => PathPolicy.EntryPath(parent.Output!, e.RelativePath, false), ArchiveSourceResolver.Comparer);
             foreach (var source in ArchiveSourceResolver.ResolveCommitted(paths, _budget.Limits, token))
-                children.Add(AddNode(source, parent.Id, parent.Depth + 1));
+            {
+                var child = AddNode(source, parent.Id, parent.Depth + 1);
+                child.ExpectedEntries = source.Members.ToDictionary(p => p, p => committed[p], ArchiveSourceResolver.Comparer);
+                children.Add(child);
+            }
         }
         catch (Exception e)
         {
@@ -317,6 +324,7 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
         internal string? Warning { get; set; }
         internal string? Output { get; set; }
         internal string? Fingerprint { get; set; }
+        internal IReadOnlyDictionary<string, CommittedEntry>? ExpectedEntries { get; set; }
         internal UnpackDiagnostic? Error { get; set; }
         internal List<string> CleanupWarnings { get; } = [];
         internal long Bytes { get; set; }

@@ -27,6 +27,24 @@ public sealed class WorkflowActionTests
         Assert.True(new WorkflowSchemaValidator().ValidateInstance(descriptor.OutputSchema, output, WorkflowSchemaProfile.MaximumOutputBytes).IsValid, output.GetRawText());
 
     [Theory]
+    [InlineData("plain", false, "completed")]
+    [InlineData("plain", true, "failed")]
+    [InlineData("header-encrypted", false, "failed")]
+    public async Task 分卷无密码工作流整组去重且保持既有输出结构(string variant, bool missing, string expectedState)
+    {
+        using var w = new TestWorkspace(); var parts = SplitTestData.CopyParts(w, variant);
+        if (missing) File.Delete(parts[2]);
+        var inputs = parts.Where(File.Exists).Reverse().Concat(parts.Where(File.Exists));
+        var result = await new UnpackWorkflowAction(new UnpackService()).InvokeAsync(UnpackArgs(inputs, w.Output), Context(), Token);
+        Valid(result, ArchiveWorkflowActions.Unpack);
+        Assert.Equal(expectedState, result.GetProperty("state").GetString());
+        Assert.Equal(1, result.GetProperty("items").GetArrayLength());
+        Assert.DoesNotContain("SourceMembers", result.GetRawText()); Assert.DoesNotContain("volume-test", result.GetRawText());
+        if (expectedState == "completed") SplitTestData.AssertContents(Assert.Single(Outputs(result)));
+        else Assert.Empty(Outputs(result));
+    }
+
+    [Theory]
     [InlineData("zip", "standard")]
     [InlineData("zip", "store")]
     [InlineData("tar", "standard")]

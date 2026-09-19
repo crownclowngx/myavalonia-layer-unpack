@@ -69,9 +69,19 @@ public sealed class SplitResourceTests
         var evidence = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../artifacts/G0015/resources")); Directory.CreateDirectory(evidence);
         await File.WriteAllTextAsync(Path.Combine(evidence, $"load-cancel-{cancelDuringWrite}.json"), JsonSerializer.Serialize(new
         {
-            date = DateTime.UtcNow, sourceVolumes = parts.Length, sourceBytes = parts.Sum(p => new FileInfo(p).Length), result.TotalWrittenBytes,
-            milliseconds = watch.Elapsed.TotalMilliseconds, cancelledAt, cancellationDrainMilliseconds = cancelledAt is null ? (double?)null : watch.Elapsed.TotalMilliseconds - cancelledAt,
-            beforeMemory, peakMemory, afterMemory = process.PrivateMemorySize64, beforeHandles, peakHandles, afterHandles = process.HandleCount,
+            date = DateTime.UtcNow,
+            sourceVolumes = parts.Length,
+            sourceBytes = parts.Sum(p => new FileInfo(p).Length),
+            result.TotalWrittenBytes,
+            milliseconds = watch.Elapsed.TotalMilliseconds,
+            cancelledAt,
+            cancellationDrainMilliseconds = cancelledAt is null ? (double?)null : watch.Elapsed.TotalMilliseconds - cancelledAt,
+            beforeMemory,
+            peakMemory,
+            afterMemory = process.PrivateMemorySize64,
+            beforeHandles,
+            peakHandles,
+            afterHandles = process.HandleCount,
             note = "进程私有内存/句柄每 5ms 采样，可能漏掉瞬时峰值；合成重复数据压缩率高，未覆盖 GiB 级随机内容"
         }, new JsonSerializerOptions { WriteIndented = true }), token);
     }

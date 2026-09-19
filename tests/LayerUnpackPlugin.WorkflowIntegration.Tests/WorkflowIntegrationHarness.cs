@@ -113,8 +113,9 @@ internal sealed class WorkflowIntegrationHarness : IAsyncDisposable
     {
         protected override Assembly? Load(AssemblyName name)
         {
+            // Icons 与解码库同属插件私有资产；本地 ALC 回归也必须各自加载，不能误向默认宿主域索取。
             if (name.Name!.StartsWith("LayerUnpackPlugin", StringComparison.Ordinal) || name.Name.StartsWith("FractalArtPlugin", StringComparison.Ordinal) ||
-                name.Name.StartsWith("WorkflowStudio", StringComparison.Ordinal) || name.Name is "SharpCompress" or "ICSharpCode.SharpZipLib")
+                name.Name.StartsWith("WorkflowStudio", StringComparison.Ordinal) || name.Name is "SharpCompress" or "ICSharpCode.SharpZipLib" or "MyAvaloniaManagement.Icons")
             {
                 var privatePath = Path.Combine(Path.GetDirectoryName(path)!, name.Name + ".dll");
                 if (!File.Exists(privatePath)) privatePath = Path.Combine(AppContext.BaseDirectory, name.Name + ".dll");

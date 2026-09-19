@@ -10,6 +10,64 @@ public sealed class SplitSafetyTests
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
     [Fact]
+    public async Task 已有预览不能绕过执行时更严格的卷数预算()
+    {
+        using var w = new TestWorkspace(); var parts = SplitTestData.CopyParts(w);
+        var preview = ArchiveSourceResolver.ResolveInputs(parts, new(), Token);
+        await using var session = new UnpackService().CreateSession(new([preview[0].PrimaryPath], w.Output,
+            limits: new() { MaxVolumesPerArchive = 4 }, inputSnapshot: preview));
+        var result = await session.ExecuteAsync(cancellationToken: Token);
+        Assert.Equal(UnpackError.BudgetExceeded, result.Nodes[0].Error?.Code); Assert.Equal(0, result.AttemptCount);
+    }
+
+    [Fact]
+    public void 发现项上限与卷数配置上限都不能溢出或截断后继续()
+    {
+        using var w = new TestWorkspace();
+        var error = Assert.Throws<UnpackFailureException>(() => ArchiveSourceResolver.ResolveInputs(
+            Enumerable.Repeat(w.FilePath("a.7z.001"), ArchiveSourceResolver.MaximumDiscoveredPaths + 1), new(), Token));
+        Assert.Equal(UnpackError.BudgetExceeded, error.Code);
+        foreach (var count in new[] { 0, 1025, int.MaxValue })
+            Assert.Throws<UnpackValidationException>(() => new UnpackLimits { MaxVolumesPerArchive = count }.Validate());
+        new UnpackLimits { MaxVolumesPerArchive = 1024 }.Validate();
+    }
+
+    [Theory]
+    [InlineData(ConversionMode.FormatOnly, 5)]
+    [InlineData(ConversionMode.ExpandAndOrganize, 8)]
+    public async Task 普通转换保留原卷字节而展开转换包含解出的文件(ConversionMode mode, int expectedFiles)
+    {
+        using var w = new TestWorkspace(); var parts = SplitTestData.CopyParts(w);
+        var outer = w.Zip("outer.zip", parts.Select(p => (Path.GetFileName(p), File.ReadAllBytes(p))).ToArray());
+        var result = await new RepackService().ConvertAsync(new([outer], w.Output, mode), cancellationToken: Token);
+        var group = Assert.Single(result.Groups); Assert.Equal(RepackState.Completed, group.State);
+        using var archive = System.IO.Compression.ZipFile.OpenRead(group.OutputPath!);
+        Assert.Equal(expectedFiles, archive.Entries.Count(e => !e.FullName.EndsWith('/')));
+        foreach (var part in parts)
+        {
+            var entry = Assert.Single(archive.Entries, e => e.FullName.EndsWith(Path.GetFileName(part), StringComparison.Ordinal));
+            using var stream = entry.Open(); using var data = new MemoryStream(); await stream.CopyToAsync(data, Token);
+            Assert.Equal(File.ReadAllBytes(part), data.ToArray());
+        }
+    }
+
+    [Fact]
+    public async Task 两组不同密码互不污染且失败组可补密恢复()
+    {
+        using var w = new TestWorkspace(); var first = SplitTestData.CopyParts(w, "content-encrypted");
+        var single = w.CopyFixture("7Zip.LZMA.Aes.7z"); var bytes = File.ReadAllBytes(single); var parts = new List<string>();
+        for (var i = 0; i < bytes.Length; i += 1024)
+        {
+            var path = w.FilePath($"other.7z.{parts.Count + 1:D3}"); File.WriteAllBytes(path, bytes.AsSpan(i, Math.Min(1024, bytes.Length - i)).ToArray()); parts.Add(path);
+        }
+        await using var session = new UnpackService().CreateSession(new([first[1], parts[0]], w.Output, passwords: ["volume-test"]));
+        var initial = await session.ExecuteAsync(cancellationToken: Token); Assert.Equal(1, initial.Succeeded); Assert.Equal(1, initial.Failed);
+        var failed = initial.Nodes.Single(n => n.CanRetry);
+        var final = await session.RetryAsync([failed.Id], ["testpassword"], cancellationToken: Token); Assert.Equal(2, final.Succeeded);
+        Assert.Equal(initial.Nodes[0].OutputDirectory, final.Nodes[0].OutputDirectory);
+    }
+
+    [Fact]
     public async Task 真实解码写出时取消不提交且全部卷可再次独占打开()
     {
         using var w = new TestWorkspace(); var parts = SplitTestData.CopyParts(w);
