@@ -1,6 +1,6 @@
 # 压缩包工作台 · Archive Workbench
 
-> V6.1 图标同步升级：插件 `1.0.1`，Core/UI SDK `3.4.0`，Build `1.1.3`。
+> 当前构建基线：插件 `1.0.1`，Core/UI SDK `3.4.2`，Build `3.4.2`。
 > 图标映射、兼容边界与验证命令见 [专用说明](docs/plan-history/v6.1-plugin-icons.md)。
 
 MyAvaloniaManagement 的压缩包工作台。提供独立 Headless 类库，以及“解压任务”“压缩任务”“浏览任务”三个临时 Document。解压支持指定深度和当前批次候选密码共享；压缩支持默认合成一个 ZIP，或按顶层来源分别打包，按需排除、调整压缩偏好和设置 AES-256 密码；浏览支持先查看 ZIP，再提取所需文件或目录。
