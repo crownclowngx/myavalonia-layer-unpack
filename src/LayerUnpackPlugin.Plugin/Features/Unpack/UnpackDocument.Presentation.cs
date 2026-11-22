@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LayerUnpackPlugin.Headless.Application;
 using LayerUnpackPlugin.Headless.Contracts;
 
 namespace LayerUnpackPlugin.Features.Unpack;
@@ -23,6 +24,9 @@ public sealed partial class UnpackDocument
     [ObservableProperty] private bool _isScanning;
     [ObservableProperty] private bool _isCancelling;
     [ObservableProperty] private string _currentItemText = "";
+    [ObservableProperty] private string _workProgressText = "";
+    [ObservableProperty] private double _workProgressValue;
+    [ObservableProperty] private bool _workProgressIndeterminate = true;
     [ObservableProperty] private string? _resultOutputPath;
 
     /// <summary>问题列表与完整结果树共用稳定节点。折叠树时，失败和校验／清理提示仍然可见。</summary>
@@ -39,7 +43,9 @@ public sealed partial class UnpackDocument
         : string.IsNullOrEmpty(OutputDirectory) ? "请选择输出位置；多个来源不会自动推测共同目录。"
         : "建议输出到输入旁的“解压结果”；可以修改，每个包独立输出。";
 
-    public string StatusTitle => IsCancelling ? "正在取消" : IsScanning ? "正在扫描输入" : IsBusy ? "正在解压"
+    public string StatusTitle => IsCancelling ? "正在取消" : IsScanning ? "正在扫描输入"
+        : IsBusy ? CollectionPhase ?? "正在解压"
+        : CollectionResult?.State == CollectionState.Paused ? "文件收集待继续"
         : CurrentResult?.State switch
         {
             BatchState.Completed => "处理完成",
@@ -144,9 +150,18 @@ public sealed partial class UnpackDocument
 
         var current = result.Nodes.FirstOrDefault(n => n.State is NodeState.Extracting or NodeState.Probing);
         CurrentItemText = current is null ? "" : $"当前：{Path.GetFileName(current.SourcePath)} · 第 {current.Depth} 层";
+        var finished = result.Nodes.Count(n => n.State is not (NodeState.Queued or NodeState.Probing or NodeState.Extracting));
+        WorkProgressText = $"已处理 {finished}/{result.Nodes.Count} 个已发现项目 · 累计写出 {FormatBytes(result.TotalWrittenBytes)}";
+        WorkProgressIndeterminate = result.Nodes.Count == 0 ||
+            (result.State == BatchState.Running && (finished == 0 || finished == result.Nodes.Count));
+        WorkProgressValue = result.Nodes.Count == 0 ? 0 : 100.0 * finished / result.Nodes.Count;
         var outputs = result.Nodes.Where(n => n.ParentId is null && n.OutputDirectory is not null).ToArray();
         // 输出框可为下一批修改；打开结果必须锚定真正执行过的批次，不能跳到尚未生成内容的新位置。
-        ResultOutputPath = outputs.Length switch { 0 => null, 1 => outputs[0].OutputDirectory, _ => _batchOutputDirectory };
+        ResultOutputPath = CollectionResult?.OutputDirectory ??
+            (outputs.Length switch { 0 => null, 1 => outputs[0].OutputDirectory, _ => _batchOutputDirectory });
         NotifyPresentation();
     }
+
+    private static string FormatBytes(long bytes) => bytes >= 1_048_576 ? $"{bytes / 1_048_576.0:N1} MiB" :
+        bytes >= 1024 ? $"{bytes / 1024.0:N1} KiB" : $"{bytes:N0} B";
 }

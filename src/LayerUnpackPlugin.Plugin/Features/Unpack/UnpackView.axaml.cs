@@ -17,6 +17,16 @@ public sealed partial class UnpackView : UserControl
         AddHandler(DragDrop.DropEvent, Drop);
     }
     private UnpackDocument? Document => DataContext as UnpackDocument;
+    private void ArrangeTaskOptions(object? sender, SizeChangedEventArgs e)
+    {
+        if (sender is not Grid grid || grid.Children.Count != 2) return;
+        var sideBySide = e.NewSize.Width >= 700;
+        Grid.SetColumnSpan(grid.Children[0], sideBySide ? 1 : 2);
+        var collection = grid.Children[1];
+        Grid.SetColumnSpan(collection, sideBySide ? 1 : 2);
+        Grid.SetColumn(collection, sideBySide ? 1 : 0);
+        Grid.SetRow(collection, sideBySide ? 0 : 1);
+    }
 
     private async void PickFiles(object? sender, RoutedEventArgs e) => await WithPickerAsync(async (provider, document) =>
     {
@@ -32,6 +42,11 @@ public sealed partial class UnpackView : UserControl
     {
         var folders = await provider.OpenFolderPickerAsync(new FolderPickerOpenOptions { Title = "选择解压输出目录", AllowMultiple = false });
         if (CanApplyPicker(document) && folders.FirstOrDefault()?.TryGetLocalPath() is string path) document.ChooseOutputDirectory(path);
+    });
+    private async void PickCollectionParent(object? sender, RoutedEventArgs e) => await WithPickerAsync(async (provider, document) =>
+    {
+        var folders = await provider.OpenFolderPickerAsync(new FolderPickerOpenOptions { Title = "选择「结果」文件夹的上一级目录", AllowMultiple = false });
+        if (CanApplyPicker(document) && folders.FirstOrDefault()?.TryGetLocalPath() is string path) document.CollectionParent = path;
     });
     // 选择器返回时页面可能已经关闭或重新绑定。结果只能回到发起选择的同一可编辑 Document。
     private bool CanApplyPicker(UnpackDocument document) => ReferenceEquals(Document, document) && document.CanEdit;
@@ -73,6 +88,15 @@ public sealed partial class UnpackView : UserControl
         {
             if (!CanApplyPicker(document)) return;
             PasswordEditor.BringIntoView(); PasswordEditor.Focus();
+        }, DispatcherPriority.Loaded);
+    }
+    private void RevealPasswordManager(object? sender, RoutedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (Document is not { CanEdit: true, IsPasswordManagerOpen: true }) return;
+            PasswordManager.BringIntoView();
+            PasswordHintEditor.Focus();
         }, DispatcherPriority.Loaded);
     }
     private void RevealOptions(object? sender, RoutedEventArgs e)

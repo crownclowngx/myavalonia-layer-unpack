@@ -23,7 +23,7 @@ public sealed partial class BrowseDocument
                 var close = _unpackTask.DisposeAsync().AsTask(); _background = close; await close;
             }
             if (IsClosed) return;
-            _unpackTask = new(_unpackService, _closing.Token); OnPropertyChanged(nameof(UnpackTask));
+            _unpackTask = new(_unpackService, _closing.Token, _passwordStore, _archiveRecycler); OnPropertyChanged(nameof(UnpackTask));
             await _unpackTask.Document.InitializeAsync(new NewDocumentActivation("全部解压"), _closing.Token);
             _unpackTask.Document.MaxDepth = 1;
             if (!string.IsNullOrWhiteSpace(output)) _unpackTask.Document.ChooseOutputDirectory(output);

@@ -186,6 +186,7 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
                     await sourceLock.VerifyAsync(fingerprint, token).ConfigureAwait(false);
                     node.Output = transaction.Commit(ArchiveProbe.OutputName(node.Source), token);
                     node.Entries = manifest;
+                    if (node.ParentId is null) node.SourceSignatures = sourceLock.MemberSignatures;
                     node.Format = extracted.Format;
                     node.Warning = extracted.Warning;
                     node.State = NodeState.Extracted;
@@ -329,8 +330,10 @@ public sealed class UnpackSession : IAsyncDisposable, IDisposable
         internal List<string> CleanupWarnings { get; } = [];
         internal long Bytes { get; set; }
         internal IReadOnlyList<CommittedEntry>? Entries { get; set; }
+        internal IReadOnlyList<CommittedEntry> SourceSignatures { get; set; } = [];
         internal ArchiveNodeResult ToResult() => new(Id, ParentId, Source, Depth, State, Format, Output, Error,
             Array.AsReadOnly(CleanupWarnings.ToArray()), Bytes, Warning)
-        { CommittedEntries = Entries, SourceMembers = LogicalSource.Members, SourceDisplayName = LogicalSource.DisplayName, IsSplitSource = LogicalSource.IsSplit };
+        { CommittedEntries = Entries, SourceMembers = LogicalSource.Members, SourceDisplayName = LogicalSource.DisplayName,
+            IsSplitSource = LogicalSource.IsSplit, SourceSignatures = SourceSignatures };
     }
 }

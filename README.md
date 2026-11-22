@@ -13,16 +13,18 @@ dotnet run --project src/LayerUnpackPlugin.Standalone -c Debug
 ```
 
 - **深度**：默认一层；开启“继续解压内部压缩包”初次使用总层数 2，可调至 16。顶层为 1，普通目录不计层，`.tar.gz` 等组合归档计一层。
-- **解压密码**：一行一个，最多 64 个；保留大小写和空格，成功候选在本批次内优先使用。可以补密并重试可恢复失败项。
+- **解压密码**：临时密码一行一个，和已选常用密码一起最多 64 个；保留大小写和空格，成功候选在本批次内优先使用。Windows 上可在任务的「密码管理」保存提示关键词和由当前用户保护的常用密码，并为新任务设定默认项。可以补密并重试可恢复失败项。
 - **解压输出**：同目录输入建议输出到旁边的“解压结果”；多来源需选择，手动设置不被自动覆盖。每包独立目录、同名编号，保留源包，取消清理未提交内容。
 - **解压格式**：ZIP、7z、RAR4/5、UTF-8 TAR、GZip/BZip2/XZ；具体变体和限制以[当前支持矩阵](docs/refactoring/G0015/format-support-matrix.md)为准。RAR5 加密内容存在校验限制，结果节点会显示提示。
-- **状态**：注册两个无密码 Workflow Provider；没有 Dock Tool、全局命令、Gateway、历史数据库或密码持久化。
+- **状态**：注册两个无密码 Workflow Provider；没有 Dock Tool、全局命令、Gateway 或任务历史数据库。常用密码由解压 Document 显式读取。
 - **浏览**：单卷 ZIP/ZIP64 目录、200 行分页和路径搜索，目录勾选包含全部后代，搜索不改变选择；重复名称按条目身份区分。提取默认一层、保留相对路径，原包变化须重新加载，密码每次明确输入。完整源摘要读取计入预算，其他格式使用“全部解压…”进入原解压页。见[浏览契约](docs/refactoring/G0010/browsing-contract.md)和[独立能力矩阵](docs/refactoring/G0010/format-support-matrix.md)。
 - **压缩**：默认普通 ZIP、标准压缩、UTF-8；更多选项支持分别打包、有限排除、四级偏好和 AES-256。先审阅清单，每组独立暂存和不覆盖提交；失败仅重试允许恢复的组，未完成项可新任务。见[批次契约](docs/refactoring/G0009/batch-creation-contract.md)与[创建矩阵](docs/refactoring/G0009/encryption-and-compression-matrix.md)。加密不隐藏名称，接收方工具须支持此加密 ZIP。
 
 阅读[快速开始](docs/README.md)、[产品文档](docs/product-shape-and-implementation-plan.md)、[V1 执行清单](docs/v1-execution-plan.md)和[阶段档案](docs/refactoring/README.md)。
 
 解压成功后点击“整理结果”，核对新目录位置，按需展开选择 PDF、图片或去包装层，然后“生成预览”→“开始整理”→“打开整理目录”。默认全部文件、不压平，类型按扩展名筛选，原包与原解压内容保留。来源变化或目标被占用需重新检查与预览；详情见[整理契约](docs/refactoring/G0011/organization-contract.md)。
+
+在解压任务勾选「移动指定文件到『结果』」，已计划的各层解压成功后自动收集选定后缀。默认把视频和文档平铺到解压目录下新建的「结果」，同名自动编号，可更换上级目录。移动先核验并提交目标，再移除原位置文件，目标磁盘需要暂存空间。勾选清理才移除该批符合条件的剩余产物，Windows 上可另选回收原包。无匹配或有未展开归档的来源保留，失败或取消可在原任务查看并继续待处理步骤。底部始终显示当前阶段、已知项目进度和正在处理的文件。
 
 解压输入处点击“转换为 ZIP…”：默认保留内部包字节，每来源一个新 ZIP；按需显式选择展开层数和整理规则。解压或整理结果处点击“打包结果”，检查提交清单后开始，可合成或分别。来源与目标密码独立，目标默认不加密；每个 ZIP 回读核对后独立提交，来源校验限制保留。见[转换契约](docs/refactoring/G0012/conversion-contract.md)和[保留矩阵](docs/refactoring/G0012/preservation-matrix.md)。
 

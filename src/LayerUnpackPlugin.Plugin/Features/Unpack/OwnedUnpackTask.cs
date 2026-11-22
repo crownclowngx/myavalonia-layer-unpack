@@ -13,10 +13,11 @@ internal sealed class OwnedUnpackTask : IDocumentLifetime, IAsyncDisposable
     public UnpackDocument Document { get; }
     public CancellationToken ClosingToken => _closing.Token;
     public bool IsClosing => _disposed || _closing.IsCancellationRequested;
-    public OwnedUnpackTask(IUnpackService service, CancellationToken parentClosing)
+    public OwnedUnpackTask(IUnpackService service, CancellationToken parentClosing,
+        ISavedPasswordStore? passwordStore, IArchiveRecycler? archiveRecycler)
     {
         _closing = CancellationTokenSource.CreateLinkedTokenSource(parentClosing);
-        Document = new(service, this);
+        Document = new(service, this, passwordStore: passwordStore, archiveRecycler: archiveRecycler);
     }
     public async ValueTask DisposeAsync()
     {

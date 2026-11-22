@@ -33,7 +33,7 @@ public sealed partial class UnpackDocument
         {
             await ResetRediscoveryAsync();
             if (IsClosed) return;
-            _rediscoveredTask = new(_service, _closing.Token);
+            _rediscoveredTask = new(_service, _closing.Token, _passwordStore, _archiveRecycler);
             var document = _rediscoveredTask.Document;
             document.PropertyChanged += RediscoveredChanged;
             OnPropertyChanged(nameof(RediscoveredTask));

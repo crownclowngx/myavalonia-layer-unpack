@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using LayerUnpackPlugin.Headless.Application;
 using LayerUnpackPlugin.Headless.Infrastructure;
+using LayerUnpackPlugin.Features.Unpack;
 
 namespace LayerUnpackPlugin.Plugin;
 
@@ -21,6 +22,10 @@ public static class LayerUnpackPluginServices
         services.AddSingleton<OrganizationPlanner>();
         services.AddSingleton<IOrganizationCopier, OrganizationCopier>();
         services.AddScoped<IOrganizationService, OrganizationService>();
+        services.AddSingleton<IArchiveRecycler, WindowsArchiveRecycler>();
+        services.AddSingleton<ISavedPasswordStore>(_ => new SavedPasswordStore(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "MyAvaloniaManagement", "LayerUnpack", "saved-passwords.json")));
         services.AddSingleton<CommittedPackPlanner>();
         services.AddScoped<IRepackWriter, RepackWriter>();
         services.AddScoped<IRepackService, RepackService>();

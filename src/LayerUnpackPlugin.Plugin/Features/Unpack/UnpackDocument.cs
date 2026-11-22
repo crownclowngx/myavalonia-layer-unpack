@@ -27,7 +27,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
 
     [ObservableProperty] private string _outputDirectory = "";
     [ObservableProperty] private int _maxDepth = 1;
-    [ObservableProperty] private string _passwordText = "";
+    [ObservableProperty][property: System.Text.Json.Serialization.JsonIgnore] private string _passwordText = "";
     [ObservableProperty] private string _message = "添加压缩包，选择输出位置后开始。";
     [ObservableProperty] private string _summary = "尚未开始";
     [ObservableProperty] private bool _isBusy;
@@ -50,12 +50,16 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
     public event EventHandler? PresentationChanged;
     public UnpackResult? CurrentResult => _session?.Snapshot;
 
-    public UnpackDocument(IUnpackService service, IDocumentLifetime lifetime, IOrganizationService? organizationService = null, IRepackService? repackService = null, IArchiveCheckService? checkService = null)
+    public UnpackDocument(IUnpackService service, IDocumentLifetime lifetime, IOrganizationService? organizationService = null,
+        IRepackService? repackService = null, IArchiveCheckService? checkService = null,
+        ISavedPasswordStore? passwordStore = null, IArchiveRecycler? archiveRecycler = null)
     {
         _service = service;
         _checkService = checkService ?? new ArchiveCheckService();
         _organizationService = organizationService ?? new OrganizationService();
         _repackService = repackService ?? new RepackService();
+        _passwordStore = passwordStore;
+        _archiveRecycler = archiveRecycler;
         _lifetime = lifetime;
         _hostClosing = lifetime.ClosingToken.Register(() => _closing.Cancel());
         Inputs.CollectionChanged += (_, _) => { NotifyPresentation(); NotifyCommands(); };
@@ -68,6 +72,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
         _closing.Token.ThrowIfCancellationRequested();
         if (activation is not NewDocumentActivation) throw new NotSupportedException("解压任务不保存或恢复历史内容。");
         if (!string.IsNullOrWhiteSpace(activation.Title)) _presentation = new DocumentPresentationState(activation.Title);
+        RefreshPasswords(selectDefault: true);
         PresentationChanged?.Invoke(this, EventArgs.Empty);
         return ValueTask.CompletedTask;
     }
@@ -77,6 +82,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
     {
         if (!_updatingSuggestion) _outputChosen = true;
         OnPropertyChanged(nameof(OutputHint));
+        OnPropertyChanged(nameof(CollectionDestination));
         NotifyCommands();
     }
     partial void OnSelectedNodeChanged(ArchiveNodeViewModel? value) { OnPropertyChanged(nameof(HasSelectedNode)); NotifyCommands(); }
@@ -94,6 +100,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
         ShowPasswordEntryCommand.NotifyCanExecuteChanged(); PrepareNewBatchCommand.NotifyCanExecuteChanged();
         OrganizeCommand.NotifyCanExecuteChanged(); ReturnToUnpackCommand.NotifyCanExecuteChanged();
         ConvertToZipCommand.NotifyCanExecuteChanged(); PackResultsCommand.NotifyCanExecuteChanged(); ReturnFromRepackCommand.NotifyCanExecuteChanged();
+        ResumeCollectionCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>文件选择、拖放与目录扫描共用同一入口，关闭后的扫描结果不能再写入界面。</summary>
@@ -103,6 +110,8 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
         IsScanning = true;
         IsCancelling = false;
         CurrentItemText = "";
+        WorkProgressText = "";
+        WorkProgressIndeterminate = true;
         IsBusy = true;
         using var operation = CancellationTokenSource.CreateLinkedTokenSource(_closing.Token);
         _operation = operation;
@@ -138,16 +147,20 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
     {
         if (!CanEdit) return;
         IsCancelling = false;
+        WorkProgressText = "";
+        WorkProgressIndeterminate = true;
         IsBusy = true;
         var generation = ++_generation;
         using var operation = CancellationTokenSource.CreateLinkedTokenSource(_closing.Token);
         _operation = operation;
         try
         {
-            var passwords = PasswordPool.ParseLines(PasswordText);
+            var passwords = ResolveBatchPasswords();
+            ClosePasswordManager();
             if (retry) await ResetOrganizationAsync();
             if (!retry)
             {
+                var collectionOptions = ReadCollectionOptions();
                 var request = new UnpackRequest(Inputs.Select(i => i.Path), OutputDirectory, MaxDepth, passwords,
                     legacyNameEncoding: SelectedNameEncoding.Encoding,
                     inputSnapshot: Inputs.All(i => i.Snapshot is not null) ? Inputs.Select(i => i.Snapshot!) : null);
@@ -159,11 +172,13 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
                 await ResetOrganizationAsync();
                 if (_session is not null) await _session.DisposeAsync();
                 _session = next;
+                ResetCollection();
+                _batchCollectionOptions = collectionOptions;
                 _batchOutputDirectory = request.OutputDirectory;
                 _batchMaxDepth = request.MaxDepth;
                 _batchEncoding = request.LegacyNameEncoding;
                 Roots.Clear(); Issues.Clear(); _nodeIndex.Clear(); SelectedNode = null; PasswordText = "";
-                ResultOutputPath = null; CurrentItemText = "";
+                ResultOutputPath = null; CurrentItemText = ""; WorkProgressText = "";
                 NotifyPresentation();
             }
             var session = _session ?? throw new InvalidOperationException("没有当前批次。");
@@ -188,6 +203,13 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
                 BatchState.Cancelled => "已取消，已成功提交的文件仍可使用。",
                 _ => "处理未完成，请查看节点原因。"
             };
+            if (result.State == BatchState.Completed && _batchCollectionOptions is { } options)
+            {
+                _collector = new(result, options, _archiveRecycler);
+                await RunCollectionAsync(operation);
+            }
+            else if (result.State == BatchState.PartialFailure && _batchCollectionOptions is not null)
+                Message += " 本批全部解压成功后才会收集文件并清理。";
         }
         catch (UnpackValidationException e)
         {
@@ -202,6 +224,8 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
             }) + "：" + e.Message;
         }
         catch (OperationCanceledException) { if (!IsClosed) Message = "已取消。"; }
+        catch (OrganizationFailureException e) { if (!IsClosed) Message = e.Message; }
+        catch (ArgumentException e) { if (!IsClosed) Message = e.Message; }
         catch (InvalidOperationException e) { if (!IsClosed) Message = e.Message; }
         catch (Exception) { if (!IsClosed) Message = "执行失败，请检查输入、输出目录和当前任务状态。"; }
         finally
@@ -257,11 +281,16 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
         await ResetRediscoveryAsync();
         if (_session is not null) await _session.DisposeAsync();
         _session = null;
+        ResetCollection();
+        CollectFiles = false; CollectVideos = true; CollectDocuments = true; CollectImages = false;
+        CollectExtensions = ""; CollectionParent = ""; CleanupLeftovers = false; RecycleSourceArchives = false;
+        ClosePasswordManager();
+        RefreshPasswords(selectDefault: true);
         Inputs.Clear(); Roots.Clear(); Issues.Clear(); _nodeIndex.Clear(); SelectedNode = null;
         PasswordText = ""; OutputDirectory = ""; MaxDepth = 1;
         _outputChosen = false; _recursiveDepth = 2; _batchOutputDirectory = null;
         OnPropertyChanged(nameof(RecursiveDepth));
-        ResultOutputPath = null; CurrentItemText = "";
+        ResultOutputPath = null; CurrentItemText = ""; WorkProgressText = "";
         InputsExpanded = false; PasswordsExpanded = false; OptionsExpanded = false; ResultsExpanded = false;
         SelectedNameEncoding = NameEncodings[0];
         Message = "当前批次已清空。"; Summary = "尚未开始";
@@ -276,7 +305,7 @@ public sealed partial class UnpackDocument : ObservableObject, IPluginDocument, 
     private async Task CloseCoreAsync()
     {
         _closed = true; ++_generation; _closing.Cancel();
-        PasswordText = ""; _hostClosing.Dispose();
+        PasswordText = ""; PasswordDraft = ""; _hostClosing.Dispose();
         if (_rediscoveredTask is not null) await _rediscoveredTask.DisposeAsync().ConfigureAwait(false);
         if (CheckTask is not null) await CheckTask.DisposeAsync().ConfigureAwait(false);
         if (OrganizationTask is not null) await OrganizationTask.DisposeAsync().ConfigureAwait(false);

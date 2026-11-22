@@ -14,6 +14,8 @@ public sealed partial class BrowseDocument : ObservableObject, IPluginDocument, 
 {
     private readonly IArchiveBrowseService _service;
     private readonly IUnpackService _unpackService;
+    private readonly ISavedPasswordStore? _passwordStore;
+    private readonly IArchiveRecycler? _archiveRecycler;
     private readonly IDocumentLifetime _lifetime;
     private readonly CancellationTokenSource _closing = new();
     private readonly CancellationTokenRegistration _hostClosing;
@@ -64,10 +66,12 @@ public sealed partial class BrowseDocument : ObservableObject, IPluginDocument, 
     public DocumentPresentationState Presentation => _presentation;
     public event EventHandler? PresentationChanged;
 
-    public BrowseDocument(IArchiveBrowseService service, IUnpackService unpackService, IDocumentLifetime lifetime, IArchiveCheckService? checkService = null)
+    public BrowseDocument(IArchiveBrowseService service, IUnpackService unpackService, IDocumentLifetime lifetime,
+        IArchiveCheckService? checkService = null, ISavedPasswordStore? passwordStore = null, IArchiveRecycler? archiveRecycler = null)
     {
         _service = service; _unpackService = unpackService; _lifetime = lifetime;
         _checkService = checkService ?? new ArchiveCheckService();
+        _passwordStore = passwordStore; _archiveRecycler = archiveRecycler;
         _hostClosing = lifetime.ClosingToken.Register(() => _closing.Cancel());
     }
     public ValueTask InitializeAsync(DocumentActivation activation, CancellationToken cancellationToken)

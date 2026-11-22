@@ -18,12 +18,38 @@
  </Grid>
  <!-- 单列内容独立滚动，底部主要操作不随长路径、问题列表和展开选项滚出窗口。 -->
  <Grid IsVisible="{Binding ShowMainTask}" Margin="20" RowDefinitions="Auto,*,Auto" RowSpacing="14" MaxWidth="940" HorizontalAlignment="Stretch">
-  <StackPanel Spacing="3">
+  <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
    <TextBlock Text="解压任务" FontSize="25" FontWeight="SemiBold" />
-   <TextBlock Text="放入压缩包，解出你需要的文件。" Opacity="0.65" />
-  </StackPanel>
+   <Button Grid.Column="1" Name="PasswordManagerButton" Content="密码管理" Command="{Binding TogglePasswordManagerCommand}"
+           Click="RevealPasswordManager" IsVisible="{Binding HasPasswordStore}" IsEnabled="{Binding CanEdit}" />
+  </Grid>
   <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
    <StackPanel Spacing="14">
+    <Border Name="PasswordManager" IsVisible="{Binding IsPasswordManagerOpen}" IsEnabled="{Binding CanEdit}" BorderBrush="#44888888" BorderThickness="1" CornerRadius="8" Padding="12">
+     <StackPanel Spacing="8">
+      <TextBlock Text="常用密码" FontWeight="SemiBold" />
+      <ScrollViewer MaxHeight="135" HorizontalScrollBarVisibility="Disabled">
+       <ItemsControl ItemsSource="{Binding ManagedPasswords}">
+        <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:SavedPassword">
+         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6" Margin="0,0,0,4">
+          <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip.Tip="{Binding Hint}" />
+          <Button Grid.Column="1" Content="编辑" Command="{Binding $parent[UserControl].((vm:UnpackDocument)DataContext).EditSavedPasswordCommand}" CommandParameter="{Binding}" />
+          <Button Grid.Column="2" Content="移除" Command="{Binding $parent[UserControl].((vm:UnpackDocument)DataContext).RemoveSavedPasswordCommand}" CommandParameter="{Binding}" />
+         </Grid>
+        </DataTemplate></ItemsControl.ItemTemplate>
+       </ItemsControl>
+      </ScrollViewer>
+      <TextBox Name="PasswordHintEditor" Text="{Binding PasswordHint}" PlaceholderText="提示关键词，例如课程资料" MaxLength="60" AutomationProperties.Name="提示关键词" />
+      <TextBox Name="SavedPasswordEditor" Text="{Binding PasswordDraft}" PasswordChar="●" PlaceholderText="解压密码" MaxLength="1024" AutomationProperties.Name="要保存的解压密码" />
+      <CheckBox Content="设为新任务默认密码" IsChecked="{Binding MakeDefaultPassword}" />
+      <WrapPanel>
+       <Button Content="{Binding PasswordSaveLabel}" Command="{Binding SavePasswordCommand}" Classes="accent" Margin="0,0,8,4" />
+       <Button Content="取消编辑" Command="{Binding ResetPasswordEditorCommand}" IsVisible="{Binding EditingSavedPassword}" Margin="0,0,8,4" />
+       <Button Content="关闭" Command="{Binding TogglePasswordManagerCommand}" Margin="0,0,0,4" />
+      </WrapPanel>
+      <TextBlock Text="{Binding PasswordStoreMessage}" TextWrapping="Wrap" />
+     </StackPanel>
+    </Border>
     <Border Name="EmptyState" IsVisible="{Binding IsEmpty}" BorderBrush="#44888888" BorderThickness="1" CornerRadius="10" Padding="24">
      <StackPanel Spacing="12" HorizontalAlignment="Center">
       <TextBlock Text="拖入压缩包" FontSize="23" FontWeight="SemiBold" HorizontalAlignment="Center" />
@@ -38,8 +64,14 @@
     <StackPanel IsVisible="{Binding HasResults}" Spacing="10">
      <TextBlock Text="处理结果" FontSize="18" FontWeight="SemiBold" />
      <TextBlock Name="ResultSummary" Text="{Binding Summary}" TextWrapping="Wrap" />
-     <Button Name="OrganizeButton" Content="整理结果" Command="{Binding OrganizeCommand}" />
-     <Button Name="PackResultsButton" Content="打包结果" Command="{Binding PackResultsCommand}" />
+     <WrapPanel>
+      <Button Name="OrganizeButton" Content="整理结果" Command="{Binding OrganizeCommand}" Margin="0,0,8,4" />
+      <Button Name="PackResultsButton" Content="打包结果" Command="{Binding PackResultsCommand}" Margin="0,0,0,4" />
+     </WrapPanel>
+     <StackPanel IsVisible="{Binding HasCollectionResult}" Spacing="4">
+      <TextBlock Name="CollectionSummaryText" Text="{Binding CollectionSummary}" TextWrapping="Wrap" />
+      <TextBlock IsVisible="{Binding HasCollectedOutput}" Text="{Binding CollectionResult.OutputDirectory}" Opacity="0.72" TextWrapping="Wrap" />
+     </StackPanel>
      <StackPanel IsVisible="{Binding HasIssues}" Spacing="6">
       <TextBlock Text="需要查看的项目" FontWeight="SemiBold" />
       <ScrollViewer MaxHeight="180" HorizontalScrollBarVisibility="Disabled">
@@ -85,8 +117,6 @@
      </Expander>
     </StackPanel>
     <StackPanel IsVisible="{Binding !IsEmpty}" Spacing="12">
-     <Button Content="检查压缩包…" Command="{Binding CheckArchiveCommand}" />
-     <Button Name="ConvertButton" Content="转换为 ZIP…" Command="{Binding ConvertToZipCommand}" />
      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
       <TextBlock Text="{Binding InputSummary}" VerticalAlignment="Center" FontWeight="SemiBold" />
       <WrapPanel Grid.Column="1" IsEnabled="{Binding CanEdit}">
@@ -109,6 +139,8 @@
        <Button Content="移除所选" Command="{Binding RemoveSelectedCommand}" />
       </StackPanel>
      </Expander>
+     <Grid Name="TaskOptionsGrid" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="12" SizeChanged="ArrangeTaskOptions">
+     <StackPanel Name="ExtractionOptions" Grid.ColumnSpan="2" Spacing="9">
      <StackPanel Spacing="6" IsEnabled="{Binding CanEdit}">
       <TextBlock Text="输出位置" FontWeight="SemiBold" />
       <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
@@ -127,12 +159,52 @@
        <TextBlock Text="包含最外层，最多 16 层；普通目录不计层，TAR.GZ 等组合包计一层。" FontSize="12" Opacity="0.65" TextWrapping="Wrap" />
       </StackPanel>
      </StackPanel>
-     <Expander Name="PasswordsExpander" Header="密码（可选）" IsExpanded="{Binding PasswordsExpanded}" HorizontalAlignment="Stretch" IsEnabled="{Binding CanEdit}">
+     <StackPanel IsVisible="{Binding HasPasswordStore}" IsEnabled="{Binding CanEdit}" Spacing="6">
+      <TextBlock Text="本批密码" FontWeight="SemiBold" />
+      <ComboBox Name="SavedPasswordPicker" ItemsSource="{Binding PasswordChoices}" SelectedItem="{Binding SelectedSavedPassword}" HorizontalAlignment="Stretch" AutomationProperties.Name="本批常用密码" />
+     </StackPanel>
+     <Expander Name="PasswordsExpander" Header="临时输入密码" IsExpanded="{Binding PasswordsExpanded}" HorizontalAlignment="Stretch" IsEnabled="{Binding CanEdit}">
       <StackPanel Spacing="6">
        <TextBox Name="PasswordEditor" Text="{Binding PasswordText}" AcceptsReturn="True" MinHeight="72" MaxHeight="130" PlaceholderText="一行一个候选密码，最多 64 个。" />
        <TextBlock Text="此处为明文编辑，保留大小写和首尾空格；候选仅在当前批次内共享，开始后清空输入框。" FontSize="12" Opacity="0.65" TextWrapping="Wrap" />
       </StackPanel>
      </Expander>
+     </StackPanel>
+     <Border Name="CollectionOptions" Grid.Row="1" Grid.ColumnSpan="2" BorderBrush="#44888888" BorderThickness="1" CornerRadius="8" Padding="12" IsEnabled="{Binding CanEdit}" VerticalAlignment="Top">
+      <StackPanel Spacing="8">
+       <TextBlock Text="解压后" FontWeight="SemiBold" />
+       <CheckBox Name="CollectFilesToggle" Content="移动指定文件到「结果」" IsChecked="{Binding CollectFiles}" />
+       <StackPanel Name="CollectionSettings" Spacing="8" IsVisible="{Binding CollectFiles}">
+        <WrapPanel>
+         <CheckBox Content="视频" IsChecked="{Binding CollectVideos}" Margin="0,0,12,0" />
+         <CheckBox Content="文档" IsChecked="{Binding CollectDocuments}" Margin="0,0,12,0" />
+         <CheckBox Content="图片" IsChecked="{Binding CollectImages}" />
+        </WrapPanel>
+        <TextBox Text="{Binding CollectExtensions}" PlaceholderText="其他后缀，例如 .srt, .epub" AutomationProperties.Name="其他文件后缀" />
+        <TextBlock Text="{Binding CollectionDestination}" TextWrapping="Wrap" Opacity="0.78" />
+        <Expander Header="更改结果位置" HorizontalAlignment="Stretch">
+         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+          <TextBox Text="{Binding CollectionParent}" PlaceholderText="留空时使用解压目录" AutomationProperties.Name="结果文件夹的上一级目录" />
+          <Button Grid.Column="1" Content="选择…" Click="PickCollectionParent" />
+         </Grid>
+        </Expander>
+        <CheckBox IsChecked="{Binding CleanupLeftovers}">
+         <TextBlock Text="移动完成后清理剩余解压内容" TextWrapping="Wrap" />
+        </CheckBox>
+        <StackPanel IsVisible="{Binding CleanupLeftovers}" Spacing="3" Margin="18,0,0,0">
+         <CheckBox IsVisible="{Binding CanRecycleSourceArchives}" IsChecked="{Binding RecycleSourceArchives}">
+          <TextBlock Text="也将本次输入的原始压缩包移到回收站" TextWrapping="Wrap" />
+         </CheckBox>
+         <TextBlock Text="只清理本批已成功收集的来源，保留未展开完和无匹配的来源。" TextWrapping="Wrap" FontSize="12" Opacity="0.7" />
+        </StackPanel>
+       </StackPanel>
+      </StackPanel>
+     </Border>
+     </Grid>
+     <WrapPanel>
+      <Button Content="检查压缩包…" Command="{Binding CheckArchiveCommand}" Margin="0,0,8,4" />
+      <Button Name="ConvertButton" Content="转换为 ZIP…" Command="{Binding ConvertToZipCommand}" Margin="0,0,0,4" />
+     </WrapPanel>
      <Expander Name="OptionsExpander" Header="更多选项" IsExpanded="{Binding OptionsExpanded}" HorizontalAlignment="Stretch" IsEnabled="{Binding CanEdit}">
       <StackPanel Spacing="8">
        <TextBlock Text="旧 ZIP 文件名编码" />
@@ -146,11 +218,15 @@
    </StackPanel>
   </ScrollViewer>
   <StackPanel Grid.Row="2" Spacing="8">
-   <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" Height="3" />
    <TextBlock Text="{Binding StatusTitle}" FontWeight="SemiBold" />
-   <TextBlock Text="{Binding CurrentItemText}" IsVisible="{Binding IsBusy}" TextTrimming="CharacterEllipsis" />
+   <StackPanel IsVisible="{Binding IsBusy}" Spacing="4">
+    <ProgressBar Name="TaskProgressBar" IsIndeterminate="{Binding WorkProgressIndeterminate}" Value="{Binding WorkProgressValue}" Height="5" AutomationProperties.Name="当前阶段进度" />
+    <TextBlock Name="TaskProgressText" Text="{Binding WorkProgressText}" TextWrapping="Wrap" />
+    <TextBlock Text="{Binding CurrentItemText}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding CurrentItemText}" />
+   </StackPanel>
    <WrapPanel>
     <Button Name="OpenResultButton" Content="打开结果" Classes="accent" IsVisible="{Binding CanOpenResult}" Click="OpenBatchOutput" Margin="0,0,8,4" />
+    <Button Name="ResumeCollectionButton" Content="继续收集与清理" Command="{Binding ResumeCollectionCommand}" IsVisible="{Binding HasPendingCollection}" Margin="0,0,8,4" />
     <Button Name="StartButton" Content="{Binding StartLabel}" Command="{Binding StartCommand}" Classes.accent="{Binding !CanOpenResult}" IsVisible="{Binding !IsBusy}" Margin="0,0,8,4" />
     <Button Name="CancelButton" Content="取消" Command="{Binding CancelCommand}" IsVisible="{Binding IsBusy}" Margin="0,0,8,4" />
     <Button Content="清空批次" Command="{Binding ClearCommand}" IsVisible="{Binding !IsEmpty}" Margin="0,0,0,4" />

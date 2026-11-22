@@ -31,7 +31,7 @@ public sealed partial class UnpackDocument
     private async Task PackResultsAsync()
     {
         if (!CanPackResults()) return;
-        var input = CurrentResult!;
+        var input = ResultForOutputTools();
         await ResetRepackAsync();
         if (IsClosed) return;
         RepackTask = new(_repackService, input, _batchOutputDirectory ?? OutputDirectory, _closing.Token);

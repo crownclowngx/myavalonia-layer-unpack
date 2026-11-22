@@ -87,7 +87,7 @@ public sealed class OrganizationPlanner
         { var diagnostic = OrganizationFiles.Diagnostic(e); throw new OrganizationFailureException(diagnostic.Code, diagnostic.Message); }
     }
 
-    private static IReadOnlyList<OrganizationInput> Collect(UnpackResult result, OrganizationLimits limits, CancellationToken token)
+    internal static IReadOnlyList<OrganizationInput> Collect(UnpackResult result, OrganizationLimits limits, CancellationToken token)
     {
         var nodes = result.Nodes.ToDictionary(n => n.Id);
         var collected = new Dictionary<string, OrganizationInput>(OrganizationFiles.Comparer);
@@ -151,7 +151,7 @@ public sealed class OrganizationPlanner
         return current;
     }
 
-    private static string Allocate(string name, bool directory, HashSet<string> used)
+    internal static string Allocate(string name, bool directory, HashSet<string> used)
     {
         var extension = directory ? "" : Path.GetExtension(name);
         var stem = directory ? name : Path.GetFileNameWithoutExtension(name);

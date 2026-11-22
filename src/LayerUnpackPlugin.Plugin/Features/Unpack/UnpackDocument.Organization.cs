@@ -13,7 +13,7 @@ public sealed partial class UnpackDocument
     private readonly IOrganizationService _organizationService;
     [ObservableProperty] private OrganizationDocument? _organizationTask;
     [ObservableProperty] private bool _showOrganizationTask;
-    private bool CanOrganize() => CanEdit && CurrentResult?.Succeeded > 0;
+    private bool CanOrganize() => CanEdit && !HasPendingCollection && CurrentResult?.Succeeded > 0;
     private bool CanReturnToUnpack() => !IsClosed && OrganizationTask?.IsBusy != true && OrganizationTask?.RepackTask?.IsBusy != true;
     partial void OnShowOrganizationTaskChanged(bool value) { OnPropertyChanged(nameof(CanEdit)); OnPropertyChanged(nameof(ShowMainTask)); NotifyCommands(); }
 
@@ -23,7 +23,7 @@ public sealed partial class UnpackDocument
         if (!CanOrganize()) return;
         if (OrganizationTask is null)
         {
-            OrganizationTask = new(_organizationService, CurrentResult!, _batchOutputDirectory ?? OutputDirectory, _closing.Token, _repackService);
+            OrganizationTask = new(_organizationService, ResultForOutputTools(), _batchOutputDirectory ?? OutputDirectory, _closing.Token, _repackService);
             OrganizationTask.PropertyChanged += OrganizationChanged;
         }
         ShowOrganizationTask = true;

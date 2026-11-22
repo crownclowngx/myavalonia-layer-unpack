@@ -85,6 +85,7 @@ public sealed record ArchiveNodeResult(Guid Id, Guid? ParentId, string SourcePat
     public IReadOnlyList<string> SourceMembers { get; init; } = [];
     public string? SourceDisplayName { get; init; }
     public bool IsSplitSource { get; init; }
+    internal IReadOnlyList<CommittedEntry> SourceSignatures { get; init; } = [];
     /// <summary>重试保持原输入、编码和预算，只适用于补密或访问条件恢复；跨层和 UI 共用同一判断。</summary>
     public bool CanRetry => State == NodeState.Failed && CleanupWarnings.Count == 0 &&
         Error?.Code is not (UnpackError.UnsafePath or UnpackError.InputChanged or UnpackError.BudgetExceeded or

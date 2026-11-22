@@ -17,6 +17,7 @@ internal sealed class ArchiveSourceReader : IAsyncDisposable
     private readonly List<FileStream> _files = [];
     private readonly List<(long Length, DateTime Modified)> _metadata = [];
     public IReadOnlyList<Stream> Streams { get; private set; } = [];
+    internal IReadOnlyList<CommittedEntry> MemberSignatures { get; private set; } = [];
 
     private ArchiveSourceReader(ArchiveSource source, UnpackLimits limits) { _source = source; _limits = limits; }
 
@@ -52,6 +53,7 @@ internal sealed class ArchiveSourceReader : IAsyncDisposable
     public async Task<string> FingerprintAsync(CancellationToken token, IReadOnlyDictionary<string, CommittedEntry>? committed = null)
     {
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        var signatures = new CommittedEntry[_files.Count];
         for (var i = 0; i < _files.Count; i++)
         {
             token.ThrowIfCancellationRequested();
@@ -59,13 +61,17 @@ internal sealed class ArchiveSourceReader : IAsyncDisposable
             // 路径和序号也属于快照；同内容换名、增删卷不能冒充同一个来源。
             hash.AppendData(Encoding.UTF8.GetBytes(i + "\0" + _source.Members[i] + "\0" + _metadata[i].Length + "\0" + _metadata[i].Modified.Ticks + "\0"));
             var contentHash = await SHA256.HashDataAsync(file, token).ConfigureAwait(false);
+            var hex = Convert.ToHexString(contentHash);
+            signatures[i] = new(Path.GetFileName(_source.Members[i]), false, file.Length, _metadata[i].Modified,
+                File.GetCreationTimeUtc(_source.Members[i]), hex);
             // 内层第一次执行也有可信基线：父事务提交时已经计算过摘要。BFS 等待期间即使
             // 同名文件被等长、同时间替换，也不能用“首次读取”重新认可为本次父包产物。
             if (committed is not null && (!committed.TryGetValue(_source.Members[i], out var entry) ||
-                entry.IsDirectory || entry.Length != file.Length || entry.Sha256 != Convert.ToHexString(contentHash))) Changed();
+                entry.IsDirectory || entry.Length != file.Length || entry.Sha256 != hex)) Changed();
             hash.AppendData(contentHash);
             file.Position = 0;
         }
+        MemberSignatures = Array.AsReadOnly(signatures);
         return Convert.ToHexString(hash.GetHashAndReset());
     }
 
